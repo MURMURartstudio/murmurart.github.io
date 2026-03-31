@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MURMUR ART - 學員作品成長平台</title>
     <style>
-        /* 原有样式保持不变，新增以下样式 */
-        
         /* 批量操作栏 */
         .batch-actions {
             display: flex;
@@ -240,10 +238,96 @@
             gap: 10px;
             margin-bottom: 10px;
         }
-    </style>
-    <!-- 原有样式继续保留 -->
-    <style>
-        /* 原有完整样式代码... */
+        
+        /* 密码验证弹窗样式 */
+        .password-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 99999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .password-content {
+            background: white;
+            width: 90%;
+            max-width: 450px;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 50px rgba(135, 154, 203, 0.5);
+            animation: modalPop 0.5s ease-out forwards;
+            text-align: center;
+        }
+        
+        .password-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e8edff;
+            border-radius: 8px;
+            font-size: 16px;
+            margin: 10px 0;
+            text-align: center;
+        }
+        
+        .password-input:focus {
+            outline: none;
+            border-color: #879acb;
+        }
+        
+        .edit-mode-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 999;
+            display: none;
+        }
+        
+        /* 删除按钮样式 */
+        .delete-btn {
+            padding: 5px 10px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+        
+        .delete-btn:hover {
+            background: #c82333;
+        }
+
+        /* 隐藏的老师登录按钮 */
+        .teacher-login-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 16px;
+            height: 16px;
+            background: transparent;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            opacity: 0.15;
+            z-index: 98;
+        }
+        .teacher-login-btn:hover {
+            opacity: 0.4;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -273,7 +357,7 @@
             padding: 20px 0;
         }
 
-        /* 導航欄 */
+        /* 导航栏 */
         .navbar {
             background-color: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(10px);
@@ -290,7 +374,7 @@
             align-items: center;
         }
 
-        /* Logo樣式 */
+        /* Logo样式 */
         .logo-container {
             display: flex;
             align-items: center;
@@ -330,7 +414,7 @@
             position: absolute;
             bottom: -5px;
             left: 0;
-            width: 0;
+            width: 0%;
             height: 2px;
             background: #879acb;
             transition: width 0.3s ease;
@@ -345,7 +429,7 @@
             font-weight: bold;
         }
 
-        /* 創意旋轉畫廊 */
+        /* 创意旋转画廊 */
         .art-gallery {
             position: relative;
             width: 100%;
@@ -358,7 +442,7 @@
             border-radius: 20px;
         }
 
-        /* 裝飾粒子 */
+        /* 装饰粒子 */
         .particle {
             position: absolute;
             width: 6px;
@@ -376,7 +460,7 @@
             75% { transform: translate(-15px, -5px) scale(1.1); }
         }
 
-        /* 中間大頭照 */
+        /* 中间大头照 */
         .center-avatar {
             width: 200px;
             height: 200px;
@@ -396,7 +480,7 @@
             50% { transform: scale(1.05); box-shadow: 0 0 40px rgba(135, 154, 203, 0.8), inset 0 0 15px rgba(255, 255, 255, 0.9); }
         }
 
-        /* 旋轉作品容器 */
+        /* 旋转作品容器 */
         .rotate-container {
             width: 450px;
             height: 450px;
@@ -427,7 +511,7 @@
             cursor: pointer;
         }
 
-        /* 單作品專用樣式 */
+        /* 单作品专用样式 */
         .single-art-card {
             width: 280px;
             height: 280px;
@@ -444,7 +528,7 @@
             75% { transform: translateY(-10px) rotate(-1deg); }
         }
 
-        /* 藝術裝飾元素 */
+        /* 艺术装饰元素 */
         .art-decoration {
             position: absolute;
             font-size: 40px;
@@ -498,7 +582,7 @@
             transform: translateY(0);
         }
 
-        /* 無作品時的樣式 */
+        /* 无作品时的样式 */
         .empty-gallery {
             width: 100%;
             height: 100%;
@@ -529,7 +613,7 @@
         .float-item:nth-child(4) { top: 80%; left: 80%; animation-delay: 1.5s; }
         .float-item:nth-child(5) { top: 30%; left: 60%; animation-delay: 2s; }
 
-        /* 標題樣式 */
+        /* 标题样式 */
         .gallery-title {
             text-align: center;
             font-size: 32px;
@@ -544,7 +628,7 @@
             50% { transform: translateY(-8px); }
         }
 
-        /* 作品詳情彈窗 */
+        /* 作品详情弹窗 */
         .work-modal {
             position: fixed;
             top: 0;
@@ -617,7 +701,7 @@
             position: relative;
         }
 
-        /* 滑動切換按鈕 */
+        /* 滑动切换按钮 */
         .modal-nav-btn {
             position: absolute;
             width: 50px;
@@ -707,7 +791,7 @@
             font-size: 12px;
         }
 
-        /* 回到頂部按鈕 */
+        /* 回到顶部按钮 */
         .back-to-top {
             position: fixed;
             bottom: 30px;
@@ -732,7 +816,7 @@
             transform: translateY(-5px);
         }
 
-        /* 提示訊息 */
+        /* 提示讯息 */
         .toast-message {
             position: fixed;
             bottom: 90px;
@@ -751,7 +835,7 @@
             100% { opacity: 1; transform: translateY(0); }
         }
 
-        /* ========== 課程進度模塊樣式 ========== */
+        /* 课程进度模块样式 */
         .course-progress {
             display: none;
             padding: 40px 0;
@@ -773,7 +857,7 @@
             font-size: 16px;
         }
 
-        /* 課程概況卡片 */
+        /* 课程概况卡片 */
         .course-overview {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -813,7 +897,7 @@
             color: #666;
         }
 
-        /* 課程進度條 */
+        /* 课程进度条 */
         .progress-bar-container {
             background: #e8edff;
             border-radius: 20px;
@@ -829,7 +913,7 @@
             transition: width 0.5s ease;
         }
 
-        /* 課程記錄表格 */
+        /* 课程记录表格 */
         .course-table {
             width: 100%;
             border-collapse: collapse;
@@ -876,7 +960,7 @@
             color: #dc3545;
         }
 
-        /* 編輯按鈕樣式 */
+        /* 编辑按钮样式 */
         .edit-btn {
             padding: 5px 10px;
             background: #879acb;
@@ -892,7 +976,7 @@
             background: #6a80b8;
         }
         
-        /* 新增課程按鈕 */
+        /* 新增课程按钮 */
         .add-course-btn {
             margin-bottom: 20px;
             padding: 10px 20px;
@@ -910,7 +994,7 @@
             transform: translateY(-2px);
         }
 
-        /* 課程編輯彈窗樣式 */
+        /* 课程编辑弹窗样式 */
         .edit-modal {
             position: fixed;
             top: 0;
@@ -994,7 +1078,28 @@
             background: #d4def7;
         }
 
-        /* 響應式調整 */
+        /* 学生选择器 */
+        .student-selector {
+            margin: 10px 0 20px;
+            padding: 8px 12px;
+            border: 2px solid #e8edff;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #879acb;
+            background: white;
+            cursor: pointer;
+        }
+
+        /* 图片预览 */
+        .course-img-preview {
+            max-width: 100px;
+            max-height: 100px;
+            border-radius: 8px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* 响应式调整 */
         @media (max-width: 768px) {
             .art-gallery { height: 550px; }
             .rotate-container { width: 350px; height: 350px; }
@@ -1006,7 +1111,7 @@
             .work-title { font-size: 24px; }
             .modal-nav-btn { width: 40px; height: 40px; font-size: 18px; }
             
-            /* 課程表格響應式 */
+            /* 课程表格响应式 */
             .course-table { font-size: 14px; }
             .course-table th, .course-table td { padding: 10px 8px; }
         }
@@ -1014,7 +1119,32 @@
 </head>
 <body>
 
-<!-- 導航欄 - 移除了繪本DIY和訂製商城 -->
+<!-- 老师隐藏登录按钮：右下角极小圆点 -->
+<button class="teacher-login-btn" onclick="openPasswordModal()" title="老师编辑入口"></button>
+
+<div class="edit-mode-indicator" id="editModeIndicator">✏️ 编辑模式已开启</div>
+
+<!-- 家长登录弹窗 -->
+<div class="password-modal" id="parentLoginModal">
+    <div class="password-content">
+        <h2 style="color: #879acb; margin-bottom: 10px;">👨‍👩‍👧‍👦 家长登录</h2>
+        <p style="color: #666; margin-bottom: 20px;">请输入学生信息查看作品</p>
+        <input type="text" id="parentStudentName" class="password-input" placeholder="学生姓名" required>
+        <input type="text" id="parentPhone" class="password-input" placeholder="联络电话" required>
+        <button class="form-btn btn-save" onclick="parentLogin()" style="width: 100%; margin-top:10px">登录查看</button>
+        <button class="form-btn btn-cancel" onclick="closeParentLogin()" style="width: 100%; margin-top:10px">取消</button>
+    </div>
+</div>
+
+<div class="password-modal" id="teacherModal">
+    <div class="password-content">
+        <h2 style="color: #879acb; margin-bottom: 10px;">🔒 选择身份</h2>
+        <p style="color: #666; margin-bottom: 20px;">请选择登录身份</p>
+        <button class="form-btn btn-save" onclick="loginAsTeacher()" style="width: 100%; margin-bottom:10px">我是老师（编辑）</button>
+        <button class="form-btn btn-cancel" onclick="openParentLogin()" style="width: 100%">我是家长（查看）</button>
+    </div>
+</div>
+
 <div class="navbar">
     <div class="container nav-wrap">
         <div class="logo-container">
@@ -1024,17 +1154,18 @@
         </div>
         <div class="nav-menu">
             <a href="#" class="active" onclick="showSection('gallery')">我的作品</a>
-            <a href="#" onclick="showSection('course')">課程進度</a>
-            <a href="#">登出</a>
+            <a href="#" onclick="showSection('course')">课程进度</a>
+            <a href="#" onclick="logoutEditMode()">登出</a>
         </div>
     </div>
 </div>
 
-<!-- 作品畫廊區域 -->
 <div class="container" id="gallerySection">
-    <h2 class="gallery-title" id="galleryTitle">🎨 小明 的專屬創意畫廊</h2>
+    <h2 class="gallery-title" id="galleryTitle">🎨 请登录查看学生作品</h2>
     <div id="artGallery" class="art-gallery">
-        <!-- 動態生成裝飾粒子 -->
+        <img src="https://picsum.photos/200/200" class="center-avatar" alt="学生大头照">
+        <div class="rotate-container" id="rotateContainer">
+        </div>
         <script>
             for (let i = 0; i < 20; i++) {
                 const particle = document.createElement('div');
@@ -1049,31 +1180,36 @@
     </div>
 </div>
 
-<!-- 課程進度區域 - 優化版本 -->
 <div class="container course-progress" id="courseSection">
     <div class="course-header">
-        <h2 class="course-title">📋 課程進度管理</h2>
-        <p class="course-subtitle">查看課程完成情況和上課記錄</p>
+        <h2 class="course-title">📋 课程进度管理</h2>
+        <p class="course-subtitle">查看课程完成情况和上课记录</p>
     </div>
     
-    <!-- 課程概況 -->
+    <!-- 学生切换器（老师专用） -->
+    <select class="student-selector" id="studentSelector" style="display:none;" onchange="switchStudent(this.value)">
+        <option value="student1">小明</option>
+        <option value="student2">小华</option>
+        <option value="student3">小美</option>
+    </select>
+
     <div class="course-overview">
         <div class="overview-card">
             <div class="overview-icon">📚</div>
             <div class="overview-number" id="totalCourses">0</div>
-            <div class="overview-label">總課程數</div>
+            <div class="overview-label">总课程数</div>
         </div>
         
         <div class="overview-card">
             <div class="overview-icon">✅</div>
             <div class="overview-number" id="completedCourses">0</div>
-            <div class="overview-label">已完成課程</div>
+            <div class="overview-label">已完成课程</div>
         </div>
         
         <div class="overview-card">
             <div class="overview-icon">🔄</div>
             <div class="overview-number" id="remainingCourses">0</div>
-            <div class="overview-label">剩餘課程數</div>
+            <div class="overview-label">剩余课程数</div>
         </div>
         
         <div class="overview-card">
@@ -1086,56 +1222,55 @@
         </div>
     </div>
     
-    <!-- 新增課程按鈕組 -->
-    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-        <button class="add-course-btn" onclick="openAddCourseModal()">➕ 新增單一課程</button>
-        <button class="add-course-btn" style="background: #6a80b8;" onclick="openBatchAddModal()">📚 批量添加課程</button>
+    <div style="display: flex; gap: 10px; margin-bottom: 20px; display: none;" id="editButtonsGroup">
+        <button class="add-course-btn" onclick="openAddCourseModal()">➕ 新增单一课程</button>
+        <button class="add-course-btn" style="background: #6a80b8;" onclick="openBatchAddModal()">📚 批量添加课程</button>
+        <button class="add-course-btn" style="background: #28a745;" onclick="openAddWorkModal()">🎨 新增学生作品</button>
     </div>
     
-    <!-- 批量操作欄 -->
-    <div class="batch-actions">
+    <div class="batch-actions" id="batchActionsBar" style="display: none;">
         <div class="batch-left">
             <div class="batch-select-all">
                 <input type="checkbox" id="selectAll" class="row-checkbox" onclick="toggleSelectAll()">
-                <label for="selectAll">全選</label>
+                <label for="selectAll">全选</label>
             </div>
-            <button class="batch-btn" onclick="batchUpdateStatus('completed')">標記為已完成</button>
-            <button class="batch-btn" onclick="batchUpdateStatus('pending')">標記為未完成</button>
-            <button class="batch-btn" onclick="batchUpdateLeaveStatus()">標記為請假</button>
-            <button class="batch-btn secondary" onclick="clearSelection()">取消選擇</button>
+            <button class="batch-btn" onclick="batchUpdateStatus('completed')">标记为已完成</button>
+            <button class="batch-btn" onclick="batchUpdateStatus('pending')">标记为未完成</button>
+            <button class="batch-btn" onclick="batchUpdateLeaveStatus()">标记为请假</button>
+            <button class="batch-btn secondary" onclick="clearSelection()">取消选择</button>
+            <button class="batch-btn" style="background: #dc3545;" onclick="batchDeleteCourses()">🗑️ 批量删除</button>
         </div>
         <div class="search-container">
             <span class="search-icon">🔍</span>
-            <input type="text" class="search-input" id="courseSearch" placeholder="搜索課程日期/主題/備註..." oninput="searchCourses()">
+            <input type="text" class="search-input" id="courseSearch" placeholder="搜索课程日期/主题/备注..." oninput="searchCourses()">
         </div>
     </div>
     
-    <!-- 課程記錄表格 -->
     <table class="course-table">
         <thead>
             <tr>
-                <th style="width: 50px;">
+                <th style="width: 50px; display: none;" id="checkboxHeader">
                     <input type="checkbox" class="row-checkbox" id="headerCheckbox" onclick="toggleSelectAll()">
                 </th>
-                <th>課程日期</th>
-                <th>上課時間</th>
-                <th>課程主題</th>
-                <th>完成狀態</th>
-                <th>備註</th>
-                <th style="width: 120px;">操作</th>
+                <th>课程日期</th>
+                <th>上课时间</th>
+                <th>课程主题</th>
+                <th>作品</th>
+                <th>完成状态</th>
+                <th>备注</th>
+                <th style="width: 180px;">操作</th>
             </tr>
         </thead>
         <tbody id="courseTableBody">
-            <!-- 動態生成課程記錄 -->
         </tbody>
     </table>
 </div>
 
-<!-- 作品詳情彈窗 -->
+<!-- 作品弹窗 -->
 <div class="work-modal" id="workModal">
     <div class="modal-content">
         <div class="modal-header">
-            <h2 id="modalWorkTitle">作品詳情</h2>
+            <h2 id="modalWorkTitle">作品详情</h2>
             <div class="modal-close" onclick="closeWorkModal()">×</div>
         </div>
         <div class="modal-body">
@@ -1146,19 +1281,18 @@
                 <div style="position:absolute; bottom:20px; background:rgba(0,0,0,0.5); color:white; padding:5px 15px; border-radius:20px; font-size:14px;" id="workIndex">1/4</div>
             </div>
             <div class="modal-details">
-                <div class="work-title" id="modalWorkName">《作品名稱》</div>
+                <div class="work-title" id="modalWorkName">《作品名称》</div>
                 <div class="work-meta">
-                    <div><strong>創作日期：</strong><span id="modalWorkDate">2026.01.01</span></div>
-                    <div><strong>學員：</strong><span id="modalStudentName">小明</span></div>
+                    <div><strong>创作日期：</strong><span id="modalWorkDate">2026.01.01</span></div>
+                    <div><strong>学员：</strong><span id="modalStudentName">小明</span></div>
                 </div>
                 <div class="teacher-comment">
-                    <div class="comment-title">👩‍🏫 老師評價</div>
-                    <div class="comment-content" id="modalTeacherComment">
-                        這是一份非常棒的作品，色彩運用鮮豔大膽，能看出孩子的創造力和想象力！
-                    </div>
-                    <div class="skill-tags" id="modalSkillTags">
-                        <div class="skill-tag">色彩搭配</div>
-                        <div class="skill-tag">創意思維</div>
+                    <div class="comment-title">老师点评</div>
+                    <div class="comment-content" id="modalWorkComment">色彩运用非常棒！继续加油！</div>
+                    <div class="skill-tags" id="modalWorkTags">
+                        <span class="skill-tag">水彩</span>
+                        <span class="skill-tag">创意</span>
+                        <span class="skill-tag">色彩</span>
                     </div>
                 </div>
             </div>
@@ -1166,11 +1300,54 @@
     </div>
 </div>
 
-<!-- 課程編輯彈窗 -->
+<!-- 新增作品弹窗 -->
+<div class="edit-modal" id="addWorkModal">
+    <div class="edit-modal-content">
+        <div class="modal-header" style="margin: -30px -30px 20px -30px;">
+            <h2 style="font-size: 20px;">新增学生作品</h2>
+            <div class="modal-close" onclick="closeAddWorkModal()">×</div>
+        </div>
+        
+        <form id="addWorkForm">
+            <div class="form-group">
+                <label class="form-label">作品图片</label>
+                <input type="file" id="addWorkImg" class="form-control" accept="image/*" onchange="previewWorkImage(this)">
+                <img src="" id="addWorkPreview" class="course-img-preview">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">作品名称</label>
+                <input type="text" id="addWorkName" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">创作日期</label>
+                <input type="date" id="addWorkDate" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">老师点评</label>
+                <textarea id="addWorkComment" class="form-control" rows="3" required></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">技能标签（用逗号分隔）</label>
+                <input type="text" id="addWorkTags" class="form-control" placeholder="例如：水彩,创意,色彩">
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="form-btn btn-cancel" onclick="closeAddWorkModal()">取消</button>
+                <button type="button" class="form-btn btn-save" onclick="saveNewWork()">保存作品</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 课程编辑弹窗 -->
 <div class="edit-modal" id="editModal">
     <div class="edit-modal-content">
         <div class="modal-header" style="margin: -30px -30px 20px -30px;">
-            <h2 style="font-size: 20px;" id="editModalTitle">編輯課程記錄</h2>
+            <h2 style="font-size: 20px;" id="editModalTitle">编辑课程记录</h2>
             <div class="modal-close" onclick="closeEditModal()">×</div>
         </div>
         
@@ -1178,44 +1355,52 @@
             <input type="hidden" id="editCourseIndex">
             
             <div class="form-group">
-                <label class="form-label">課程日期</label>
+                <label class="form-label">课程日期</label>
                 <input type="date" id="editCourseDate" class="form-control">
             </div>
             
             <div class="form-group">
-                <label class="form-label">上課時間</label>
-                <input type="text" id="editCourseTime" class="form-control" placeholder="例如：10:00 - 11:30">
+                <label class="form-label">上课时间</label>
+                <input type="time" id="editCourseTimeStart" class="form-control" style="margin-bottom: 10px;" placeholder="开始时间">
+                <input type="time" id="editCourseTimeEnd" class="form-control" placeholder="结束时间">
+                <small style="color: #666; margin-top: 5px; display: block;">例如：10:00 至 11:30</small>
             </div>
             
             <div class="form-group">
-                <label class="form-label">課程主題</label>
+                <label class="form-label">课程主题（选填）</label>
                 <input type="text" id="editCourseTheme" class="form-control">
             </div>
             
             <div class="form-group">
-                <label class="form-label">完成狀態</label>
+                <label class="form-label">课程作品图片</label>
+                <input type="file" id="editCourseImg" class="form-control" accept="image/*" onchange="previewEditImage(this)">
+                <img src="" id="editImgPreview" class="course-img-preview">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">完成状态</label>
                 <select id="editCourseStatus" class="form-control" onchange="handleStatusChangeInEdit(this.value)">
                     <option value="completed">已完成</option>
                     <option value="pending">未完成</option>
-                    <option value="leave">請假</option>
+                    <option value="leave">请假</option>
                 </select>
             </div>
             
             <div class="form-group" id="leaveReasonGroup" style="display: none;">
-                <label class="form-label">請假原因</label>
+                <label class="form-label">请假原因</label>
                 <div class="reason-option">
                     <input type="radio" id="reason-valid" name="leaveReason" value="valid" checked>
-                    <label for="reason-valid">合理原因（可補課）</label>
+                    <label for="reason-valid">合理原因（可补课）</label>
                 </div>
                 <div class="reason-option">
                     <input type="radio" id="reason-invalid" name="leaveReason" value="invalid">
-                    <label for="reason-invalid">無理由/遲到（不補課）</label>
+                    <label for="reason-invalid">无理由/迟到（不补课）</label>
                 </div>
             </div>
             
             <div class="form-group">
-                <label class="form-label">備註</label>
-                <textarea id="editCourseNote" class="form-control" rows="4"></textarea>
+                <label class="form-label">备注</label>
+                <textarea id="editCourseNote" class="form-control" rows="2"></textarea>
             </div>
             
             <div class="form-actions">
@@ -1226,1727 +1411,746 @@
     </div>
 </div>
 
-<!-- 新增課程彈窗 -->
+<!-- 新增课程弹窗 -->
 <div class="edit-modal" id="addCourseModal">
     <div class="edit-modal-content">
         <div class="modal-header" style="margin: -30px -30px 20px -30px;">
-            <h2 style="font-size: 20px;">新增課程記錄</h2>
+            <h2 style="font-size: 20px;">新增课程记录</h2>
             <div class="modal-close" onclick="closeAddCourseModal()">×</div>
         </div>
         
         <form id="addCourseForm">
             <div class="form-group">
-                <label class="form-label">課程日期</label>
+                <label class="form-label">课程日期</label>
                 <input type="date" id="addCourseDate" class="form-control" required>
             </div>
             
             <div class="form-group">
-                <label class="form-label">上課時間</label>
-                <input type="text" id="addCourseTime" class="form-control" placeholder="例如：10:00 - 11:30" required>
+                <label class="form-label">上课时间</label>
+                <input type="time" id="addCourseTimeStart" class="form-control" style="margin-bottom: 10px;" required placeholder="开始时间">
+                <input type="time" id="addCourseTimeEnd" class="form-control" required placeholder="结束时间">
             </div>
             
             <div class="form-group">
-                <label class="form-label">課程主題</label>
-                <input type="text" id="addCourseTheme" class="form-control" required>
+                <label class="form-label">课程主题（选填）</label>
+                <input type="text" id="addCourseTheme" class="form-control">
             </div>
             
             <div class="form-group">
-                <label class="form-label">完成狀態</label>
+                <label class="form-label">课程作品图片</label>
+                <input type="file" id="addCourseImg" class="form-control" accept="image/*" onchange="previewAddImage(this)">
+                <img src="" id="addImgPreview" class="course-img-preview">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">完成状态</label>
                 <select id="addCourseStatus" class="form-control">
                     <option value="pending">未完成</option>
                     <option value="completed">已完成</option>
-                    <option value="leave">請假</option>
+                    <option value="leave">请假</option>
                 </select>
             </div>
             
             <div class="form-group">
-                <label class="form-label">備註</label>
-                <textarea id="addCourseNote" class="form-control" rows="4"></textarea>
+                <label class="form-label">备注</label>
+                <textarea id="addCourseNote" class="form-control" rows="2" placeholder="请输入备注（选填）"></textarea>
             </div>
             
             <div class="form-actions">
                 <button type="button" class="form-btn btn-cancel" onclick="closeAddCourseModal()">取消</button>
-                <button type="button" class="form-btn btn-save" onclick="saveNewCourse()">保存課程</button>
+                <button type="button" class="form-btn btn-save" onclick="addNewCourse()">保存课程</button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- 批量添加課程彈窗 -->
+<!-- 批量添加课程弹窗 -->
 <div class="batch-add-modal" id="batchAddModal">
     <div class="batch-add-content">
         <div class="modal-header" style="margin: -30px -30px 20px -30px;">
-            <h2 style="font-size: 20px;">批量添加課程</h2>
+            <h2 style="font-size: 20px;">批量添加课程</h2>
             <div class="modal-close" onclick="closeBatchAddModal()">×</div>
         </div>
         
         <form id="batchAddForm">
             <div class="form-group">
-                <label class="form-label">課程套餐</label>
-                <select id="coursePackage" class="form-control" onchange="updatePackageInfo()">
-                    <option value="">請選擇課程套餐</option>
-                    <option value="4">4節課套餐</option>
-                    <option value="12">12節課套餐</option>
-                    <option value="24">24節課套餐</option>
-                </select>
-                <div id="packageInfo" style="margin-top: 10px; color: #666; font-size: 14px;"></div>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">開始日期</label>
+                <label class="form-label">开始日期</label>
                 <input type="date" id="batchStartDate" class="form-control" required>
             </div>
             
             <div class="form-group">
-                <label class="form-label">上課時間</label>
-                <input type="text" id="batchCourseTime" class="form-control" placeholder="例如：10:00 - 11:30" required>
+                <label class="form-label">课程数量</label>
+                <select id="batchCourseCount" class="form-control" required>
+                    <option value="4">4 堂课（1个月）</option>
+                    <option value="12">12 堂课（3个月）</option>
+                    <option value="24">24 堂课（6个月）</option>
+                </select>
+                <small style="color:#666">自动按每周一节课计算日期</small>
             </div>
             
             <div class="form-group">
-                <label class="form-label">課程主題前綴</label>
-                <input type="text" id="batchCoursePrefix" class="form-control" placeholder="例如：基礎水彩課程" required>
+                <label class="form-label">上课时间</label>
+                <input type="time" id="batchTimeStart" class="form-control" style="margin-bottom: 10px;" required value="10:00">
+                <input type="time" id="batchTimeEnd" class="form-control" required value="11:15">
+                <small style="color:#666">默认一节课 1小时15分钟</small>
             </div>
             
             <div class="form-group">
-                <label class="form-label">每週上課日</label>
-                <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
-                    <label style="display: flex; align-items: center; gap: 5px;">
-                        <input type="checkbox" name="weekday" value="0" checked> 周日
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 5px;">
-                        <input type="checkbox" name="weekday" value="1"> 周一
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 5px;">
-                        <input type="checkbox" name="weekday" value="2"> 周二
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 5px;">
-                        <input type="checkbox" name="weekday" value="3"> 周三
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 5px;">
-                        <input type="checkbox" name="weekday" value="4"> 周四
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 5px;">
-                        <input type="checkbox" name="weekday" value="5"> 周五
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 5px;">
-                        <input type="checkbox" name="weekday" value="6" checked> 周六
-                    </label>
-                </div>
+                <label class="form-label">课程主题（选填）</label>
+                <input type="text" id="batchCourseTheme" class="form-control">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">完成状态</label>
+                <select id="batchCourseStatus" class="form-control">
+                    <option value="pending">未完成</option>
+                    <option value="completed">已完成</option>
+                </select>
             </div>
             
             <div class="form-actions">
                 <button type="button" class="form-btn btn-cancel" onclick="closeBatchAddModal()">取消</button>
-                <button type="button" class="form-btn btn-save" onclick="saveBatchCourses()">生成課程</button>
+                <button type="button" class="form-btn btn-save" onclick="batchAddCourses()">批量添加</button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- 補課彈窗 -->
 <div class="makeup-modal" id="makeupModal">
     <div class="makeup-content">
         <div class="modal-header" style="margin: -30px -30px 20px -30px;">
-            <h2 style="font-size: 20px;">選擇補課日期</h2>
+            <h2 style="font-size: 20px;">补课安排</h2>
             <div class="modal-close" onclick="closeMakeupModal()">×</div>
         </div>
         
-        <div id="makeupDateList">
-            <!-- 動態生成補課日期選項 -->
-        </div>
-        
-        <div class="form-actions" style="margin-top: 20px;">
-            <button type="button" class="form-btn btn-cancel" onclick="closeMakeupModal()">取消</button>
-            <button type="button" class="form-btn btn-save" onclick="confirmMakeupDate()">確認補課</button>
+        <div id="makeupContent">
+            <p style="margin-bottom: 20px; color: #666;">请选择补课方式：</p>
+            
+            <div class="makeup-option" onclick="selectMakeupOption(this, 'single')">
+                <h3 style="color: #879acb; margin-bottom: 5px;">单次补课</h3>
+                <p style="color: #666; font-size: 14px;">选择一个新的日期进行补课</p>
+            </div>
+            
+            <div class="makeup-option" onclick="selectMakeupOption(this, 'merge')">
+                <h3 style="color: #879acb; margin-bottom: 5px;">合并课程</h3>
+                <p style="color: #666; font-size: 14px;">将缺席课程合并到下一次课程中</p>
+            </div>
+            
+            <div class="form-group" id="makeupDateGroup" style="display: none; margin-top: 20px;">
+                <label class="form-label">补课日期</label>
+                <input type="date" id="makeupDate" class="form-control">
+            </div>
+            
+            <div class="form-actions" style="margin-top: 30px;">
+                <button type="button" class="form-btn btn-cancel" onclick="closeMakeupModal()">取消</button>
+                <button type="button" class="form-btn btn-save" onclick="confirmMakeup()">确认补课安排</button>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- 回到頂部按鈕 -->
-<div class="back-to-top" id="backToTop" onclick="scrollToTop()">↑</div>
-
-<!-- 提示訊息 -->
-<div class="toast-message" id="toastMessage"></div>
-
 <script>
-// 學生數據結構
-const students = [
-    {
-        name: "小明",
-        phone: "13800138000",
-        avatar: "https://picsum.photos/300/300?random=1",
-        works: [
-            { 
-                name: "《春天的小花》", 
-                date: "2026.03.01", 
-                img: "https://picsum.photos/500/500?random=1",
-                comment: "小明這幅《春天的小花》色彩運用非常生動，能看出他對春天的觀察很細緻，花瓣的層次感表現得很好，繼續保持對自然的好奇心！",
-                tags: ["色彩搭配", "觀察力", "層次感"],
-                growthNote: "第一次嘗試水彩暈染技法，雖然控制還不夠熟練，但已經能體現出花瓣的輕柔感，對色彩的敏感度有明顯提升。"
-            },
-            { 
-                name: "《小貓咪》", 
-                date: "2026.03.08", 
-                img: "https://picsum.photos/500/500?random=2",
-                comment: "這幅小貓咪的造型可愛又生動，線條流暢自然，尤其是貓咪的眼睛畫得很有神，能感受到小明對小動物的喜愛之情。",
-                tags: ["線條描繪", "動物造型", "情感表達"],
-                growthNote: "線條控制力進步明顯，從之前的抖動變得穩定，開始學會用眼神表達動物的情感，細節處理更加用心。"
-            },
-            { 
-                name: "《彩虹小馬》", 
-                date: "2026.03.15", 
-                img: "https://picsum.photos/500/500?random=3",
-                comment: "彩虹小馬的創作充滿了童趣和想象力，色彩過渡自然，背景的彩虹漸層處理得非常棒，展現了很好的色彩控制力。",
-                tags: ["創意思維", "色彩漸層", "童趣表達"],
-                growthNote: "開始有自己的創作想法，不再只是模仿範本，色彩漸層的技巧掌握得很好，畫面的整體性也有提升。"
-            },
-            { 
-                name: "《海底世界》", 
-                date: "2026.03.22", 
-                img: "https://picsum.photos/500/500?random=6",
-                comment: "海底世界的畫面豐富多彩，各種海洋生物的造型各異，空間感表現得很好，能看出小明對細節的用心處理。",
-                tags: ["空間構圖", "細節描繪", "豐富性"],
-                growthNote: "空間構圖能力大幅提升，畫面不再擁擠，學會了遠近層次的表現，細節描繪更加細膩，展現出很好的耐心。"
-            }
-        ],
-        courses: {
-            total: 12,
-            completed: 8,
-            remaining: 4,
-            records: [
-                {
-                    name: "基礎水彩課程 1",
-                    date: "2026.02.15",
-                    time: "10:00 - 11:30",
-                    theme: "水彩基礎握筆與調色",
-                    status: "completed",
-                    note: "第一次接觸水彩，表現積極"
-                },
-                {
-                    name: "基礎水彩課程 2",
-                    date: "2026.02.22",
-                    time: "10:00 - 11:30",
-                    theme: "色彩混合與暈染技巧",
-                    status: "completed",
-                    note: "對色彩敏感度不錯"
-                },
-                {
-                    name: "基礎水彩課程 3",
-                    date: "2026.02.29",
-                    time: "10:00 - 11:30",
-                    theme: "簡單花卉描繪",
-                    status: "completed",
-                    note: "花瓣描繪有進步"
-                },
-                {
-                    name: "創意繪畫課程 1",
-                    date: "2026.03.07",
-                    time: "14:00 - 15:30",
-                    theme: "動物造型基礎",
-                    status: "completed",
-                    note: "小貓咪畫得很生動"
-                },
-                {
-                    name: "創意繪畫課程 2",
-                    date: "2026.03.14",
-                    time: "14:00 - 15:30",
-                    theme: "色彩漸層應用",
-                    status: "completed",
-                    note: "彩虹漸層處理出色"
-                },
-                {
-                    name: "創意繪畫課程 3",
-                    date: "2026.03.21",
-                    time: "14:00 - 15:30",
-                    theme: "空間構圖技巧",
-                    status: "completed",
-                    note: "海底世界布局合理"
-                },
-                {
-                    name: "進階創作課程 1",
-                    date: "2026.03.28",
-                    time: "10:00 - 11:30",
-                    theme: "個人風格培養",
-                    status: "completed",
-                    note: "開始形成自己的風格"
-                },
-                {
-                    name: "進階創作課程 2",
-                    date: "2026.04.04",
-                    time: "10:00 - 11:30",
-                    theme: "故事性創作",
-                    status: "completed",
-                    note: "畫面開始有故事感"
-                },
-                {
-                    name: "進階創作課程 3",
-                    date: "2026.04.11",
-                    time: "10:00 - 11:30",
-                    theme: "複雜場景描繪",
-                    status: "pending",
-                    note: "未上課"
-                },
-                {
-                    name: "綜合創作課程 1",
-                    date: "2026.04.18",
-                    time: "14:00 - 15:30",
-                    theme: "四季主題創作",
-                    status: "pending",
-                    note: "未上課"
-                },
-                {
-                    name: "綜合創作課程 2",
-                    date: "2026.04.25",
-                    time: "14:00 - 15:30",
-                    theme: "夢幻場景創作",
-                    status: "pending",
-                    note: "未上課"
-                },
-                {
-                    name: "畢業創作指導",
-                    date: "2026.05.02",
-                    time: "10:00 - 12:00",
-                    theme: "畢業作品構思",
-                    status: "pending",
-                    note: "未上課"
-                }
+    // 学生完整资料（含家长验证信息）
+    let allStudentsData = {
+        student1: {
+            name: "小明",
+            phone: "0912345678",
+            avatar: "https://picsum.photos/200/200",
+            works: [
+                { img: "https://picsum.photos/300/300?1", name: "森林小屋", date: "2024-02-10", comment: "色彩层次很棒，空间感很好！", tags: "水彩,创意,构图" },
+                { img: "https://picsum.photos/300/300?2", name: "海底世界", date: "2024-02-17", comment: "想象力丰富，颜色搭配超好看！", tags: "创意,色彩,海洋" }
+            ],
+            courses: [
+                { date: '2024-01-10', time: '10:00 - 11:15', theme: '水彩基础入门', status: 'completed', note: '学习了基本的水彩晕染技巧', img: '' },
+                { date: '2024-01-17', time: '10:00 - 11:15', theme: '色彩搭配练习', status: 'completed', note: '练习了冷暖色调的搭配', img: '' },
+                { date: '2024-01-24', time: '10:00 - 11:15', theme: '动物造型绘画', status: 'pending', note: '', img: '' }
+            ]
+        },
+        student2: {
+            name: "小华",
+            phone: "0987654321",
+            avatar: "https://picsum.photos/200/200?1",
+            works: [
+                { img: "https://picsum.photos/300/300?3", name: "城市夜景", date: "2024-02-10", comment: "光影处理很棒，很有氛围感！", tags: "素描,光影,城市" }
+            ],
+            courses: [
+                { date: '2024-01-10', time: '14:00 - 15:15', theme: '素描入门', status: 'completed', note: '', img: '' },
+                { date: '2024-01-24', time: '14:00 - 15:15', theme: '线条练习', status: 'pending', note: '', img: '' }
+            ]
+        },
+        student3: {
+            name: "小美",
+            phone: "0922334455",
+            avatar: "https://picsum.photos/200/200?2",
+            works: [
+                { img: "https://picsum.photos/300/300?4", name: "彩虹花园", date: "2024-02-17", comment: "颜色非常明亮可爱，充满童趣！", tags: "彩笔,创意,花朵" }
+            ],
+            courses: [
+                { date: '2024-01-17', time: '13:00 - 14:15', theme: '彩笔创意', status: 'pending', note: '', img: '' }
             ]
         }
-    },
-    {
-        name: "小紅",
-        phone: "13900139000",
-        avatar: "https://picsum.photos/300/300?random=4",
-        works: [
-            { 
-                name: "《彩虹》", 
-                date: "2026.03.05", 
-                img: "https://picsum.photos/500/500?random=4",
-                comment: "小紅的彩虹色彩非常飽和，顏色的順序和比例都掌握得很好，能看出她對色彩理論有很好的理解和應用。",
-                tags: ["色彩理論", "比例控制", "飽和度"],
-                growthNote: "對色彩的敏感度很高，能準確辨識和調配各種顏色，比例控制能力優秀，展現出很好的數理感知。"
-            },
-            { 
-                name: "《小鳥》", 
-                date: "2026.03.12", 
-                img: "https://picsum.photos/500/500?random=5",
-                comment: "這只小鳥的動態捕捉得非常到位，翅膀的張開角度很自然，羽毛的質感表現得很好，是一幅很生動的作品。",
-                tags: ["動態捕捉", "質感表現", "生物造型"],
-                growthNote: "觀察能力很強，能捕捉到小鳥飛翔的瞬間動態，質感表現手法多樣，開始理解光影對物體的影響。"
-            }
-        ],
-        courses: {
-            total: 10,
-            completed: 5,
-            remaining: 5,
-            records: [
-                {
-                    name: "色彩基礎課程 1",
-                    date: "2026.02.20",
-                    time: "15:00 - 16:30",
-                    theme: "色彩認知與辨識",
-                    status: "completed",
-                    note: "色彩天賦突出"
-                },
-                {
-                    name: "色彩基礎課程 2",
-                    date: "2026.02.27",
-                    time: "15:00 - 16:30",
-                    theme: "色彩調配技巧",
-                    status: "completed",
-                    note: "調色精確度高"
-                },
-                {
-                    name: "創意繪畫課程 1",
-                    date: "2026.03.05",
-                    time: "10:00 - 11:30",
-                    theme: "彩虹創作",
-                    status: "completed",
-                    note: "作品被選為展示範例"
-                },
-                {
-                    name: "創意繪畫課程 2",
-                    date: "2026.03.12",
-                    time: "10:00 - 11:30",
-                    theme: "動物動態描繪",
-                    status: "completed",
-                    note: "小鳥畫作生動"
-                },
-                {
-                    name: "自然觀察課程 1",
-                    date: "2026.03.19",
-                    time: "14:00 - 15:30",
-                    theme: "戶外寫生基礎",
-                    status: "completed",
-                    note: "觀察細緻"
-                },
-                {
-                    name: "自然觀察課程 2",
-                    date: "2026.03.26",
-                    time: "14:00 - 15:30",
-                    theme: "植物描繪技巧",
-                    status: "pending",
-                    note: "未上課"
-                },
-                {
-                    name: "進階色彩課程 1",
-                    date: "2026.04.02",
-                    time: "15:00 - 16:30",
-                    theme: "色彩心理學",
-                    status: "pending",
-                    note: "未上課"
-                },
-                {
-                    name: "進階色彩課程 2",
-                    date: "2026.04.09",
-                    time: "15:00 - 16:30",
-                    theme: "高級配色技巧",
-                    status: "pending",
-                    note: "未上課"
-                },
-                {
-                    name: "綜合創作課程 1",
-                    date: "2026.04.16",
-                    time: "10:00 - 11:30",
-                    theme: "故事繪本創作",
-                    status: "pending",
-                    note: "未上課"
-                },
-                {
-                    name: "畢業創作指導",
-                    date: "2026.04.23",
-                    time: "14:00 - 16:00",
-                    theme: "畢業作品構思",
-                    status: "pending",
-                    note: "未上課"
-                }
-            ]
+    };
+
+    let currentStudentId = null;
+    let courses = [];
+    let isEditMode = false;
+    let isParentMode = false;
+    let selectedMakeupOption = '';
+    let currentEditIndex = -1;
+    let filteredCourses = [];
+    let originalCourses = [];
+    let currentWorkIndex = 0;
+    
+    window.onload = function() {
+        showSection('gallery');
+        openParentLogin();
+    };
+
+    // ==================== 家长登录功能 ====================
+    function openParentLogin() {
+        document.getElementById('parentLoginModal').style.display = 'flex';
+        document.getElementById('teacherModal').style.display = 'none';
+    }
+    
+    function closeParentLogin() {
+        document.getElementById('parentLoginModal').style.display = 'none';
+    }
+    
+    function parentLogin() {
+        const name = document.getElementById('parentStudentName').value.trim();
+        const phone = document.getElementById('parentPhone').value.trim();
+        
+        if(!name || !phone) {
+            showToast('❌ 请填写完整信息');
+            return;
         }
-    },
-    {
-        name: "王芊朗",
-        phone: "66823914",
-        avatar: "https://picsum.photos/300/300?random=7",
-        works: [
-            { 
-                name: "《我的小世界》", 
-                date: "2026.04.01", 
-                img: "https://picsum.photos/500/500?random=7",
-                comment: "芊朗的《我的小世界》充滿了個人風格，畫面布局合理，能看出她對自己生活空間的獨特理解和表達。",
-                tags: ["個人風格", "空間布局", "情感投射"],
-                growthNote: "畫面佈局有自己的想法，能將生活經歷融入創作中，情感表達真摯，展現出很好的空間思維能力。"
-            },
-            { 
-                name: "《彩色的天空》", 
-                date: "2026.04.08", 
-                img: "https://picsum.photos/500/500?random=8",
-                comment: "彩色的天空運用了大膽的色彩搭配，打破了傳統的天空色調，展現了芊朗豐富的想象力和創新精神。",
-                tags: ["創新思維", "大膽用色", "想象力"],
-                growthNote: "不再局限於現實色彩，開始大膽嘗試創意配色，想象力豐富，敢於突破傳統框架。"
+        
+        // 验证学生信息
+        let foundStudent = null;
+        for(let id in allStudentsData) {
+            if(allStudentsData[id].name === name && allStudentsData[id].phone === phone) {
+                foundStudent = id;
+                break;
             }
-        ],
-        courses: {
-            total: 8,
-            completed: 3,
-            remaining: 5,
-            records: [
-                {
-                    name: "創作基礎課程 1",
-                    date: "2026.03.20",
-                    time: "16:00 - 17:30",
-                    theme: "創意思維開發",
-                    status: "completed",
-                    note: "創意思維活躍"
-                },
-                {
-                    name: "創作基礎課程 2",
-                    date: "2026.03.27",
-                    time: "16:00 - 17:30",
-                    theme: "個人風格探索",
-                    status: "completed",
-                    note: "開始形成個人風格"
-                },
-                {
-                    name: "創新配色課程 1",
-                    date: "2026.04.03",
-                    time: "10:00 - 11:30",
-                    theme: "非傳統配色應用",
-                    status: "completed",
-                    note: "彩色天空作品獲表揚"
-                },
-                {
-                    name: "創新配色課程 2",
-                    date: "2026.04.10",
-                    time: "10:00 - 11:30",
-                    theme: "情感配色技巧",
-                    status: "pending",
-                    note: "未上課"
-                },
-                {
-                    name: "空間構圖課程 1",
-                    date: "2026.04.17",
-                    time: "16:00 - 17:30",
-                    theme: "畫面布局技巧",
-                    status: "pending",
-                    note: "未上課"
-                },
-                {
-                    name: "空間構圖課程 2",
-                    date: "2026.04.24",
-                    time: "16:00 - 17:30",
-                    theme: "立體空間表現",
-                    status: "pending",
-                    note: "未上課"
-                },
-                {
-                    name: "綜合創作課程 1",
-                    date: "2026.05.01",
-                    time: "14:00 - 15:30",
-                    theme: "主題創作指導",
-                    status: "pending",
-                    note: "未上課"
-                },
-                {
-                    name: "畢業創作指導",
-                    date: "2026.05.08",
-                    time: "14:00 - 16:00",
-                    theme: "畢業作品完善",
-                    status: "pending",
-                    note: "未上課"
-                }
-            ]
         }
-    },
-    {
-        name: "1",
-        phone: "1",
-        avatar: "https://picsum.photos/300/300?random=11",
-        works: [
-            { 
-                name: "《我的第一幅畫》", 
-                date: "2026.04.20", 
-                img: "https://picsum.photos/500/500?random=11",
-                comment: "這是一幅非常有紀念意義的作品，雖然是第一幅畫，但能看出認真的態度和對繪畫的熱愛，繼續加油！",
-                tags: ["入門創作", "認真態度", "熱愛"],
-                growthNote: "第一次拿畫筆創作，雖然技巧還很生疏，但態度認真，展現出對繪畫的濃厚興趣。"
-            }
-        ],
-        courses: {
-            total: 10,
-            completed: 1,
-            remaining: 9,
-            records: [
-                {
-                    name: "入門繪畫課程 1",
-                    date: "2026.04.20",
-                    time: "09:00 - 10:30",
-                    theme: "畫筆認識與基礎線條",
-                    status: "completed",
-                    note: "第一次畫畫，態度認真"
-                },
-                {
-                    name: "入門繪畫課程 2",
-                    date: "2026.04.27",
-                    time: "09:00 - 10:30",
-                    theme: "基礎形狀描繪",
-                    status: "pending",
-                    note: "未上課"
-                },
-                {
-                    name: "入門繪畫課程 3",
-                    date: "2026.05.04",
-                    time: "09:00 - 10:30",
-                    theme: "簡單色彩填色",
-                    status: "pending",
-                    note: "未上課"
-                },
-                {
-                    name: "基礎創作課程 1",
-                    date: "2026.05.11",
-                    time: "10:00 - 11:30",
-                    theme: "簡單圖案創作",
-                    status: "pending",
-                    note: "未上課"
-                },
-                {
-                    name: "基礎創作課程 2",
-                    date: "2026.05.18",
-                    time: "10:00 - 11:30",
-                    theme: "動物簡筆畫",
-                    status: "pending",
-                    note: "未上課"
-                },
-                {
-                    name: "基礎創作課程 3",
-                    date: "2026.05.25",
-                    time: "10:00 - 11:30",
-                    theme: "植物簡筆畫",
-                    status: "pending",
-                    note: "未上課"
-                },
-                {
-                    name: "色彩基礎課程 1",
-                    date: "2026.06.01",
-                    time: "14:00 - 15:30",
-                    theme: "基礎色彩認識",
-                    status: "pending",
-                    note: "未上課"
-                },
-                {
-                    name: "色彩基礎課程 2",
-                    date: "2026.06.08",
-                    time: "14:00 - 15:30",
-                    theme: "簡單配色技巧",
-                    status: "pending",
-                    note: "未上課"
-                },
-                {
-                    name: "創意繪畫課程 1",
-                    date: "2026.06.15",
-                    time: "10:00 - 11:30",
-                    theme: "想象力開發",
-                    status: "pending",
-                    note: "未上課"
-                },
-                {
-                    name: "畢業創作指導",
-                    date: "2026.06.22",
-                    time: "14:00 - 16:00",
-                    theme: "畢業作品構思",
-                    status: "pending",
-                    note: "未上課"
-                }
-            ]
+        
+        if(!foundStudent) {
+            showToast('❌ 学生信息不正确，请重新输入');
+            return;
+        }
+        
+        // 登录成功
+        currentStudentId = foundStudent;
+        isParentMode = true;
+        isEditMode = false;
+        closeParentLogin();
+        reloadStudentData();
+        renderGallery();
+        showToast(`✅ 欢迎，${allStudentsData[foundStudent].name} 的家长`);
+    }
+
+    // ==================== 老师功能 ====================
+    function openPasswordModal() {
+        document.getElementById('teacherModal').style.display = 'flex';
+        document.getElementById('parentLoginModal').style.display = 'none';
+    }
+
+    function loginAsTeacher() {
+        isEditMode = true;
+        isParentMode = false;
+        currentStudentId = "student1";
+        document.getElementById('teacherModal').style.display = 'none';
+        document.getElementById('editModeIndicator').style.display = 'flex';
+        document.getElementById('editButtonsGroup').style.display = 'flex';
+        document.getElementById('batchActionsBar').style.display = 'flex';
+        document.getElementById('checkboxHeader').style.display = 'block';
+        document.getElementById('studentSelector').style.display = 'block';
+        reloadStudentData();
+        renderGallery();
+        showToast('✅ 老师编辑模式已开启');
+    }
+    
+    function logoutEditMode() {
+        if (confirm('确定要登出吗？')) {
+            isEditMode = false;
+            isParentMode = false;
+            currentStudentId = null;
+            document.getElementById('editModeIndicator').style.display = 'none';
+            document.getElementById('editButtonsGroup').style.display = 'none';
+            document.getElementById('batchActionsBar').style.display = 'none';
+            document.getElementById('checkboxHeader').style.display = 'none';
+            document.getElementById('studentSelector').style.display = 'none';
+            document.getElementById('galleryTitle').innerText = "🎨 请登录查看学生作品";
+            showToast('🔒 已登出');
+            openParentLogin();
         }
     }
-];
 
-// 當前狀態變量
-let currentStudent = null;
-let currentWorkIndex = 0;
-let filteredCourses = [];
-let selectedCourseIndexes = [];
-let currentLeaveCourseIndex = -1;
-let selectedMakeupDate = '';
-
-// 頁面加載完成
-window.onload = function() {
-    renderGallery(students[0]);
-    renderCourseProgress(students[0]);
-    
-    // 監聽滾動事件
-    window.addEventListener('scroll', function() {
-        const backToTopBtn = document.getElementById('backToTop');
-        if (window.scrollY > 300) {
-            backToTopBtn.style.display = 'flex';
-        } else {
-            backToTopBtn.style.display = 'none';
-        }
-    });
-}
-
-// 切換顯示區域（作品/課程）
-function showSection(section) {
-    const gallerySection = document.getElementById('gallerySection');
-    const courseSection = document.getElementById('courseSection');
-    const navLinks = document.querySelectorAll('.nav-menu a');
-    
-    // 重置導航按鈕樣式
-    navLinks.forEach(link => link.classList.remove('active'));
-    
-    // 隱藏所有區域
-    gallerySection.style.display = 'none';
-    courseSection.style.display = 'none';
-    
-    // 顯示對應區域
-    if (section === 'gallery') {
-        gallerySection.style.display = 'block';
-        navLinks[0].classList.add('active');
-    } else if (section === 'course') {
-        courseSection.style.display = 'block';
-        navLinks[1].classList.add('active');
-        // 重置搜索和選擇狀態
-        document.getElementById('courseSearch').value = '';
-        selectedCourseIndexes = [];
-        document.getElementById('selectAll').checked = false;
+    function switchStudent(studentId) {
+        currentStudentId = studentId;
+        reloadStudentData();
+        renderGallery();
+        showToast(`✅ 已切换至学生：${allStudentsData[currentStudentId].name}`);
     }
-}
-
-// 渲染作品畫廊
-function renderGallery(student) {
-    currentStudent = student;
     
-    // 更新標題
-    document.getElementById("galleryTitle").textContent = `🎨 ${student.name} 的專屬創意畫廊`;
-    
-    const gallery = document.getElementById("artGallery");
-
-    // 添加中間大頭照
-    const avatar = document.createElement('img');
-    avatar.src = student.avatar;
-    avatar.alt = `${student.name} 的大頭照`;
-    avatar.className = 'center-avatar';
-    gallery.appendChild(avatar);
-
-    // 有作品時顯示畫廊
-    if (student.works && student.works.length > 0) {
-        // 單作品處理
-        if (student.works.length === 1) {
-            const work = student.works[0];
-            
-            // 創建單作品卡片
-            const artCard = document.createElement('div');
-            artCard.className = 'art-card single-art-card';
-            artCard.onclick = () => {
-                currentWorkIndex = 0;
-                openWorkModal(student, work);
-            };
-            
-            // 添加作品圖片
-            const artImg = document.createElement('img');
-            artImg.src = work.img;
-            artImg.alt = work.name;
-            artImg.className = 'art-img';
-            artCard.appendChild(artImg);
-            
-            // 添加作品資訊
-            const artInfo = document.createElement('div');
-            artInfo.className = 'art-info';
-            artInfo.innerHTML = `<div style="font-weight:bold;">${work.name}</div>
-                                <div style="font-size:11px;color:#666;">${work.date}</div>`;
-            artCard.appendChild(artInfo);
-            
-            gallery.appendChild(artCard);
-            
-            // 添加藝術裝飾元素
-            const decorations = ['🎨', '✏️', '🖌️', '🖼️', '✨', '🌟'];
-            decorations.forEach((icon, index) => {
-                const deco = document.createElement('div');
-                deco.className = 'art-decoration';
-                deco.textContent = icon;
-                deco.style.left = `${20 + index * 15}%`;
-                deco.style.top = `${20 + Math.random() * 60}%`;
-                deco.style.animationDelay = `${index * 1.5}s`;
-                gallery.appendChild(deco);
-            });
-            
-            // 添加鼓勵文字
-            const encouragement = document.createElement('div');
-            encouragement.style.position = 'absolute';
-            encouragement.style.zIndex = 10;
-            encouragement.style.fontSize = '18px';
-            encouragement.style.color = '#879acb';
-            encouragement.style.marginTop = '500px';
-            encouragement.style.textAlign = 'center';
-            encouragement.style.textShadow = '0 0 10px rgba(135, 154, 203, 0.3)';
-            encouragement.innerHTML = `🎉 這是${student.name}的第一幅創作！<br>繼續加油，創作更多精彩作品～`;
-            gallery.appendChild(encouragement);
-            
-        } else {
-            // 多作品環形展示
-            const rotateContainer = document.createElement('div');
-            rotateContainer.className = 'rotate-container';
-            gallery.appendChild(rotateContainer);
-
-            // 計算每個作品的旋轉角度
-            const angleStep = 360 / student.works.length;
-            
-            student.works.forEach((work, index) => {
-                const artCard = document.createElement('div');
-                artCard.className = 'art-card';
-                // 綁定點擊事件
-                artCard.onclick = () => {
-                    currentWorkIndex = index;
-                    openWorkModal(student, work);
-                };
-                
-                // 設置每個作品的位置
-                const angle = index * angleStep;
-                const radius = 200;
-                const x = Math.sin(angle * Math.PI / 180) * radius;
-                const y = -Math.cos(angle * Math.PI / 180) * radius;
-                
-                artCard.style.transform = `translate(${x}px, ${y}px)`;
-                
-                // 添加作品圖片
-                const artImg = document.createElement('img');
-                artImg.src = work.img;
-                artImg.alt = work.name;
-                artImg.className = 'art-img';
-                artCard.appendChild(artImg);
-                
-                // 添加作品資訊
-                const artInfo = document.createElement('div');
-                artInfo.className = 'art-info';
-                artInfo.innerHTML = `<div style="font-weight:bold;">${work.name}</div>
-                                    <div style="font-size:11px;color:#666;">${work.date}</div>`;
-                artCard.appendChild(artInfo);
-                
-                rotateContainer.appendChild(artCard);
-            });
-        }
-    } else {
-        // 無作品時顯示浮動特效
-        const emptyGallery = document.createElement('div');
-        emptyGallery.className = 'empty-gallery';
-        
-        // 添加5個浮動元素
-        for (let i = 0; i < 5; i++) {
-            const floatItem = document.createElement('div');
-            floatItem.className = 'float-item';
-            emptyGallery.appendChild(floatItem);
-        }
-        
-        gallery.appendChild(emptyGallery);
-        
-        // 添加提示文字
-        const emptyText = document.createElement('div');
-        emptyText.style.position = 'absolute';
-        emptyText.style.zIndex = 10;
-        emptyText.style.fontSize = '20px';
-        emptyText.style.color = '#879acb';
-        emptyText.style.marginTop = '220px';
-        emptyText.style.textShadow = '0 0 10px rgba(135, 154, 203, 0.3)';
-        emptyText.textContent = `${student.name} 還沒有作品哦～`;
-        gallery.appendChild(emptyText);
+    // ==================== 学生数据 ====================
+    function reloadStudentData() {
+        if(!currentStudentId) return;
+        courses = [...allStudentsData[currentStudentId].courses];
+        originalCourses = [...courses];
+        filteredCourses = [...courses];
+        document.getElementById("galleryTitle").innerText = `🎨 ${allStudentsData[currentStudentId].name} 的专属创意画廊`;
+        renderCourseTable();
+        updateCourseStats();
     }
-}
-
-// 渲染課程進度
-function renderCourseProgress(student) {
-    if (!student || !student.courses) return;
     
-    const courses = student.courses;
-    
-    // 更新課程概況
-    document.getElementById('totalCourses').textContent = courses.total;
-    document.getElementById('completedCourses').textContent = courses.completed;
-    document.getElementById('remainingCourses').textContent = courses.remaining;
-    
-    // 計算完成率
-    const completionRate = Math.round((courses.completed / courses.total) * 100);
-    document.getElementById('completionRate').textContent = `${completionRate}%`;
-    document.getElementById('progressBar').style.width = `${completionRate}%`;
-    
-    // 保存原始課程數據用於搜索
-    filteredCourses = [...courses.records];
-    
-    // 渲染課程記錄表格
-    renderCourseTable();
-}
-
-// 渲染課程表格
-function renderCourseTable() {
-    if (!currentStudent || !currentStudent.courses) return;
-    
-    const tableBody = document.getElementById('courseTableBody');
-    tableBody.innerHTML = '';
-    
-    // 使用過濾後的課程數據
-    filteredCourses.forEach((record, displayIndex) => {
-        // 找到真實索引
-        const realIndex = currentStudent.courses.records.findIndex(
-            r => r.date === record.date && r.theme === record.theme
-        );
+    // ==================== 页面切换 ====================
+    function showSection(section) {
+        document.getElementById('gallerySection').style.display = 'none';
+        document.getElementById('courseSection').style.display = 'none';
         
-        const row = document.createElement('tr');
-        // 添加行高亮效果
-        row.onmouseenter = () => row.classList.add('highlight-row');
-        row.onmouseleave = () => row.classList.remove('highlight-row');
+        if (section === 'gallery') {
+            document.getElementById('gallerySection').style.display = 'block';
+            document.querySelector('.nav-menu a.active').classList.remove('active');
+            document.querySelector('.nav-menu a[onclick="showSection(\'gallery\')"]').classList.add('active');
+        } else if (section === 'course') {
+            document.getElementById('courseSection').style.display = 'block';
+            document.querySelector('.nav-menu a.active').classList.remove('active');
+            document.querySelector('.nav-menu a[onclick="showSection(\'course\')"]').classList.add('active');
+        }
+    }
+
+    // ==================== 作品画廊 ====================
+    function renderGallery() {
+        if(!currentStudentId) return;
+        const container = document.getElementById('rotateContainer');
+        container.innerHTML = '';
+        const student = allStudentsData[currentStudentId];
+        document.querySelector('.center-avatar').src = student.avatar;
         
-        // 構建狀態切換按鈕
-        let statusHtml = '';
-        if (record.status === 'completed') {
-            statusHtml = `
-                <div class="inline-edit">
-                    <div class="status-switch completed" onclick="quickToggleStatus(${realIndex})">已完成 ✔️</div>
-                </div>
+        if(!student.works || student.works.length === 0) {
+            container.innerHTML = '<div style="color:#879acb; font-size:20px;">暂无作品</div>';
+            return;
+        }
+        
+        student.works.forEach((work, idx) => {
+            const angle = (360 / student.works.length) * idx;
+            const card = document.createElement('div');
+            card.className = 'art-card';
+            card.style.transform = `rotate(${angle}deg) translate(225px) rotate(${-angle}deg)`;
+            card.innerHTML = `
+                <img src="${work.img}" class="art-img">
+                <div class="art-info">${work.name}</div>
             `;
-        } else if (record.status === 'pending') {
-            statusHtml = `
-                <div class="inline-edit">
-                    <div class="status-switch pending" onclick="quickToggleStatus(${realIndex})">未完成 ⏳</div>
-                </div>
-            `;
-        } else if (record.status === 'leave') {
-            statusHtml = `
-                <div class="inline-edit">
-                    <div class="status-switch leave" onclick="quickToggleStatus(${realIndex})">請假 📅</div>
-                </div>
-            `;
-        }
-        
-        row.innerHTML = `
-            <td>
-                <input type="checkbox" class="row-checkbox course-checkbox" 
-                       data-index="${realIndex}" 
-                       ${selectedCourseIndexes.includes(realIndex) ? 'checked' : ''}
-                       onclick="toggleCourseSelection(${realIndex})">
-            </td>
-            <td>${record.date}</td>
-            <td>${record.time}</td>
-            <td>${record.theme}</td>
-            <td>${statusHtml}</td>
-            <td>${record.note}</td>
-            <td>
-                <button class="edit-btn" onclick="openEditModal(${realIndex})">編輯</button>
-            </td>
-        `;
-        
-        tableBody.appendChild(row);
-    });
-    
-    // 如果沒有匹配的課程，顯示提示
-    if (filteredCourses.length === 0) {
-        const emptyRow = document.createElement('tr');
-        emptyRow.innerHTML = `
-            <td colspan="7" style="text-align: center; padding: 30px; color: #879acb;">
-                沒有找到匹配的課程記錄 😞
-            </td>
-        `;
-        tableBody.appendChild(emptyRow);
-    }
-}
-
-// 快速切換課程狀態
-function quickToggleStatus(index) {
-    if (!currentStudent || !currentStudent.courses) return;
-    
-    const course = currentStudent.courses.records[index];
-    const oldStatus = course.status;
-    
-    // 如果切換到請假狀態，彈出請假原因選擇
-    if (oldStatus !== 'leave' && confirm('確定要標記為請假嗎？')) {
-        // 詢問請假原因
-        const reason = confirm('請選擇請假原因：\n確定（合理原因，可補課）\n取消（無理由/遲到，不補課）');
-        
-        if (reason) {
-            // 合理原因，顯示補課選項
-            course.status = 'leave';
-            course.note = course.note ? `${course.note} | 請假（合理原因，已安排補課）` : '請假（合理原因，已安排補課）';
-            currentLeaveCourseIndex = index;
-            showMakeupOptions(course.date, course.time, course.theme);
-        } else {
-            // 無理由，不補課
-            course.status = 'leave';
-            course.note = course.note ? `${course.note} | 請假（無理由/遲到，不補課）` : '請假（無理由/遲到，不補課）';
-        }
-    } else if (oldStatus === 'leave') {
-        // 從請假切換回未完成
-        course.status = 'pending';
-        // 移除請假相關備註
-        course.note = course.note ? course.note.replace(/ \| 請假.*$/, '') : '未上課';
-    } else if (oldStatus === 'pending') {
-        course.status = 'completed';
-    } else if (oldStatus === 'completed') {
-        course.status = 'pending';
-    }
-    
-    // 更新統計數據
-    updateCourseStatistics();
-    
-    // 更新UI
-    renderCourseProgress(currentStudent);
-    showToast(`課程狀態已更新為：${getStatusText(course.status)}`);
-}
-
-// 處理編輯表單中狀態改變
-function handleStatusChangeInEdit(status) {
-    const reasonGroup = document.getElementById('leaveReasonGroup');
-    if (status === 'leave') {
-        reasonGroup.style.display = 'block';
-    } else {
-        reasonGroup.style.display = 'none';
-    }
-}
-
-// 顯示補課選項
-function showMakeupOptions(originalDate, originalTime, originalTheme) {
-    const makeupContainer = document.getElementById('makeupDateList');
-    makeupContainer.innerHTML = '';
-    
-    // 解析原始日期
-    const [year, month, day] = originalDate.split('.').map(Number);
-    const originalDateObj = new Date(year, month - 1, day);
-    
-    // 生成未來2周的補課日期選項
-    const makeupDates = [];
-    for (let i = 1; i <= 14; i++) {
-        const makeupDateObj = new Date(originalDateObj);
-        makeupDateObj.setDate(originalDateObj.getDate() + i);
-        
-        // 跳過周末（可根據實際情況調整）
-        const weekday = makeupDateObj.getDay();
-        if (weekday === 0 || weekday === 6) { // 周日或周六
-            const formattedDate = `${makeupDateObj.getFullYear()}.${String(makeupDateObj.getMonth() + 1).padStart(2, '0')}.${String(makeupDateObj.getDate()).padStart(2, '0')}`;
-            makeupDates.push({
-                date: formattedDate,
-                dayOfWeek: ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][weekday]
-            });
-        }
-    }
-    
-    // 生成補課選項HTML
-    makeupDates.forEach((dateInfo, index) => {
-        const dateOption = document.createElement('div');
-        dateOption.className = `makeup-option ${index === 0 ? 'selected' : ''}`;
-        dateOption.dataset.date = dateInfo.date;
-        dateOption.onclick = function() {
-            // 移除其他選項的選中狀態
-            document.querySelectorAll('.makeup-option').forEach(opt => {
-                opt.classList.remove('selected');
-            });
-            // 添加當前選項的選中狀態
-            this.classList.add('selected');
-            selectedMakeupDate = this.dataset.date;
-        };
-        
-        dateOption.innerHTML = `
-            <div style="font-weight: bold; color: #879acb;">${dateInfo.date}</div>
-            <div style="font-size: 14px; color: #666;">${dateInfo.dayOfWeek} ${originalTime}</div>
-            <div style="font-size: 12px; color: #999; margin-top: 5px;">補課主題：${originalTheme}</div>
-        `;
-        
-        makeupContainer.appendChild(dateOption);
-    });
-    
-    // 默認選擇第一個日期
-    if (makeupDates.length > 0) {
-        selectedMakeupDate = makeupDates[0].date;
-    }
-    
-    // 顯示補課彈窗
-    const modal = document.getElementById('makeupModal');
-    modal.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-}
-
-// 確認補課日期
-function confirmMakeupDate() {
-    if (!selectedMakeupDate || currentLeaveCourseIndex === -1) {
-        showToast('請選擇補課日期！');
-        return;
-    }
-    
-    // 獲取原課程信息
-    const originalCourse = currentStudent.courses.records[currentLeaveCourseIndex];
-    
-    // 創建補課課程記錄
-    const makeupCourse = {
-        name: `${originalCourse.name}（補課）`,
-        date: selectedMakeupDate,
-        time: originalCourse.time,
-        theme: `${originalCourse.theme}（補課）`,
-        status: 'pending',
-        note: `補${originalCourse.date}的課程`
-    };
-    
-    // 添加補課課程
-    currentStudent.courses.records.push(makeupCourse);
-    
-    // 更新統計數據
-    updateCourseStatistics();
-    
-    // 更新UI
-    renderCourseProgress(currentStudent);
-    
-    // 關閉補課彈窗
-    closeMakeupModal();
-    
-    // 重置狀態
-    currentLeaveCourseIndex = -1;
-    selectedMakeupDate = '';
-    
-    showToast(`已成功安排補課，補課日期：${selectedMakeupDate}`);
-}
-
-// 批量標記請假（帶原因選擇）
-function batchUpdateLeaveStatus() {
-    if (selectedCourseIndexes.length === 0) {
-        showToast('請先選擇要更新的課程！');
-        return;
-    }
-    
-    // 詢問請假原因類型
-    const reasonType = confirm(
-        `確定要將選中的 ${selectedCourseIndexes.length} 門課程標記為請假嗎？\n\n` +
-        `確定 = 合理原因（可補課）\n取消 = 無理由/遲到（不補課）`
-    );
-    
-    if (reasonType === null) return; // 取消操作
-    
-    let changedCount = 0;
-    
-    // 批量更新狀態
-    selectedCourseIndexes.forEach(index => {
-        const course = currentStudent.courses.records[index];
-        if (course.status !== 'leave') {
-            course.status = 'leave';
-            
-            if (reasonType) {
-                // 合理原因
-                course.note = course.note ? `${course.note} | 請假（合理原因，可補課）` : '請假（合理原因，可補課）';
-                // 自動安排補課（這裡簡化處理，實際可根據需要優化）
-                setTimeout(() => {
-                    showMakeupOptions(course.date, course.time, course.theme);
-                }, 500);
-            } else {
-                // 無理由
-                course.note = course.note ? `${course.note} | 請假（無理由/遲到，不補課）` : '請假（無理由/遲到，不補課）';
-            }
-            
-            changedCount++;
-        }
-    });
-    
-    // 更新統計數據
-    updateCourseStatistics();
-    
-    // 更新UI
-    renderCourseProgress(currentStudent);
-    selectedCourseIndexes = [];
-    document.getElementById('selectAll').checked = false;
-    document.getElementById('headerCheckbox').checked = false;
-    
-    showToast(`已成功將 ${changedCount} 門課程標記為請假！`);
-}
-
-// 更新課程統計數據
-function updateCourseStatistics() {
-    if (!currentStudent || !currentStudent.courses) return;
-    
-    const records = currentStudent.courses.records;
-    const completedCount = records.filter(r => r.status === 'completed').length;
-    const pendingCount = records.filter(r => r.status === 'pending').length;
-    const leaveCount = records.filter(r => r.status === 'leave').length;
-    
-    currentStudent.courses.total = records.length;
-    currentStudent.courses.completed = completedCount;
-    currentStudent.courses.remaining = pendingCount + leaveCount;
-}
-
-// 獲取狀態文字描述
-function getStatusText(status) {
-    switch(status) {
-        case 'completed': return '已完成';
-        case 'pending': return '未完成';
-        case 'leave': return '請假';
-        default: return '未完成';
-    }
-}
-
-// 全選/取消全選
-function toggleSelectAll() {
-    const selectAllCheckbox = document.getElementById('selectAll');
-    const isChecked = selectAllCheckbox.checked;
-    
-    if (isChecked) {
-        // 全選當前顯示的課程
-        selectedCourseIndexes = filteredCourses.map(record => 
-            currentStudent.courses.records.findIndex(
-                r => r.date === record.date && r.theme === record.theme
-            )
-        );
-    } else {
-        // 取消全選
-        selectedCourseIndexes = [];
-    }
-    
-    // 更新UI
-    renderCourseTable();
-    document.getElementById('headerCheckbox').checked = isChecked;
-}
-
-// 單行選擇切換
-function toggleCourseSelection(index) {
-    const checkbox = document.querySelector(`.course-checkbox[data-index="${index}"]`);
-    
-    if (checkbox.checked) {
-        if (!selectedCourseIndexes.includes(index)) {
-            selectedCourseIndexes.push(index);
-        }
-    } else {
-        selectedCourseIndexes = selectedCourseIndexes.filter(i => i !== index);
-    }
-    
-    // 更新全選框狀態
-    const allCheckboxes = document.querySelectorAll('.course-checkbox');
-    const allChecked = allCheckboxes.length > 0 && 
-                      Array.from(allCheckboxes).every(cb => cb.checked);
-    const noneChecked = Array.from(allCheckboxes).every(cb => !cb.checked);
-    
-    document.getElementById('selectAll').checked = allChecked;
-    document.getElementById('headerCheckbox').checked = allChecked;
-    
-    // 如果部分選擇，取消全選框
-    if (!allChecked && !noneChecked) {
-        document.getElementById('selectAll').indeterminate = true;
-        document.getElementById('headerCheckbox').indeterminate = true;
-    } else {
-        document.getElementById('selectAll').indeterminate = false;
-        document.getElementById('headerCheckbox').indeterminate = false;
-    }
-}
-
-// 取消選擇
-function clearSelection() {
-    selectedCourseIndexes = [];
-    document.getElementById('selectAll').checked = false;
-    document.getElementById('headerCheckbox').checked = false;
-    renderCourseTable();
-    showToast('已取消所有選擇');
-}
-
-// 批量更新狀態
-function batchUpdateStatus(newStatus) {
-    if (selectedCourseIndexes.length === 0) {
-        showToast('請先選擇要更新的課程！');
-        return;
-    }
-    
-    if (!confirm(`確定要將選中的 ${selectedCourseIndexes.length} 門課程標記為「${getStatusText(newStatus)}」嗎？`)) {
-        return;
-    }
-    
-    let changedCount = 0;
-    
-    // 批量更新狀態
-    selectedCourseIndexes.forEach(index => {
-        const course = currentStudent.courses.records[index];
-        if (course.status !== newStatus) {
-            course.status = newStatus;
-            changedCount++;
-        }
-    });
-    
-    // 更新統計數據
-    updateCourseStatistics();
-    
-    // 更新UI
-    renderCourseProgress(currentStudent);
-    selectedCourseIndexes = [];
-    document.getElementById('selectAll').checked = false;
-    document.getElementById('headerCheckbox').checked = false;
-    
-    showToast(`已成功更新 ${changedCount} 門課程的狀態！`);
-}
-
-// 搜索課程
-function searchCourses() {
-    const searchText = document.getElementById('courseSearch').value.toLowerCase().trim();
-    
-    if (!currentStudent || !currentStudent.courses) return;
-    
-    if (searchText === '') {
-        // 重置為全部課程
-        filteredCourses = [...currentStudent.courses.records];
-    } else {
-        // 過濾課程
-        filteredCourses = currentStudent.courses.records.filter(record => 
-            record.date.toLowerCase().includes(searchText) ||
-            record.theme.toLowerCase().includes(searchText) ||
-            record.note.toLowerCase().includes(searchText) ||
-            record.time.toLowerCase().includes(searchText)
-        );
-    }
-    
-    // 重新渲染表格
-    renderCourseTable();
-}
-
-// 打開課程編輯彈窗
-function openEditModal(index) {
-    if (!currentStudent || !currentStudent.courses) return;
-    
-    const course = currentStudent.courses.records[index];
-    
-    // 設置彈窗標題
-    document.getElementById('editModalTitle').textContent = '編輯課程記錄';
-    
-    // 填充表單數據 - 格式化日期為標準格式
-    const formattedDate = course.date.replace(/(\d{4})\.(\d{2})\.(\d{2})/, '$1-$2-$3');
-    
-    document.getElementById('editCourseIndex').value = index;
-    document.getElementById('editCourseDate').value = formattedDate;
-    document.getElementById('editCourseTime').value = course.time;
-    document.getElementById('editCourseTheme').value = course.theme;
-    document.getElementById('editCourseStatus').value = course.status;
-    document.getElementById('editCourseNote').value = course.note;
-    
-    // 顯示/隱藏請假原因選項
-    handleStatusChangeInEdit(course.status);
-    
-    // 顯示彈窗
-    const modal = document.getElementById('editModal');
-    modal.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-}
-
-// 打開新增課程彈窗
-function openAddCourseModal() {
-    // 重置表單
-    document.getElementById('addCourseForm').reset();
-    
-    // 設置默認日期為今天
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('addCourseDate').value = today;
-    
-    // 顯示彈窗
-    const modal = document.getElementById('addCourseModal');
-    modal.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-}
-
-// 打開批量添加課程彈窗
-function openBatchAddModal() {
-    // 重置表單
-    document.getElementById('batchAddForm').reset();
-    
-    // 設置默認日期為今天
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('batchStartDate').value = today;
-    
-    // 顯示彈窗
-    const modal = document.getElementById('batchAddModal');
-    modal.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-}
-
-// 更新套餐信息
-function updatePackageInfo() {
-    const packageSelect = document.getElementById('coursePackage');
-    const packageInfo = document.getElementById('packageInfo');
-    const packageValue = packageSelect.value;
-    
-    if (!packageValue) {
-        packageInfo.textContent = '';
-        return;
-    }
-    
-    const packageMonths = {
-        '4': '約1個月',
-        '12': '約3個月',
-        '24': '約6個月'
-    };
-    
-    packageInfo.textContent = `${packageValue}節課，每周上1次，總共${packageMonths[packageValue]}完成`;
-}
-
-// 關閉課程編輯彈窗
-function closeEditModal() {
-    const modal = document.getElementById('editModal');
-    modal.style.display = 'none';
-    document.body.style.overflow = 'auto';
-}
-
-// 關閉新增課程彈窗
-function closeAddCourseModal() {
-    const modal = document.getElementById('addCourseModal');
-    modal.style.display = 'none';
-    document.body.style.overflow = 'auto';
-}
-
-// 關閉批量添加課程彈窗
-function closeBatchAddModal() {
-    const modal = document.getElementById('batchAddModal');
-    modal.style.display = 'none';
-    document.body.style.overflow = 'auto';
-}
-
-// 關閉補課彈窗
-function closeMakeupModal() {
-    const modal = document.getElementById('makeupModal');
-    modal.style.display = 'none';
-    document.body.style.overflow = 'auto';
-}
-
-// 保存課程編輯
-function saveCourseEdit() {
-    if (!currentStudent || !currentStudent.courses) return;
-    
-    const index = parseInt(document.getElementById('editCourseIndex').value);
-    const newDate = document.getElementById('editCourseDate').value;
-    const newTime = document.getElementById('editCourseTime').value;
-    const newTheme = document.getElementById('editCourseTheme').value;
-    const newStatus = document.getElementById('editCourseStatus').value;
-    const newNote = document.getElementById('editCourseNote').value;
-    
-    // 驗證必填欄位
-    if (!newDate || !newTime || !newTheme) {
-        showToast('請填寫所有必填欄位！');
-        return;
-    }
-    
-    // 格式化日期為 YYYY.MM.DD 格式
-    const formattedDate = newDate.replace(/-/g, '.');
-    
-    // 保存原始狀態用於比較
-    const oldStatus = currentStudent.courses.records[index].status;
-    
-    // 處理請假原因
-    let finalNote = newNote;
-    if (newStatus === 'leave') {
-        const reason = document.querySelector('input[name="leaveReason"]:checked').value;
-        if (reason === 'valid') {
-            finalNote = finalNote ? `${finalNote} | 請假（合理原因，可補課）` : '請假（合理原因，可補課）';
-            // 如果是新標記為請假且原因合理，彈出補課選項
-            if (oldStatus !== 'leave') {
-                currentLeaveCourseIndex = index;
-                setTimeout(() => {
-                    showMakeupOptions(formattedDate, newTime, newTheme);
-                }, 500);
-            }
-        } else {
-            finalNote = finalNote ? `${finalNote} | 請假（無理由/遲到，不補課）` : '請假（無理由/遲到，不補課）';
-        }
-    }
-    
-    // 更新課程記錄
-    currentStudent.courses.records[index] = {
-        ...currentStudent.courses.records[index],
-        date: formattedDate,
-        time: newTime,
-        theme: newTheme,
-        status: newStatus,
-        note: finalNote
-    };
-    
-    // 更新統計數據
-    updateCourseStatistics();
-    
-    // 重新渲染課程進度
-    renderCourseProgress(currentStudent);
-    
-    // 關閉彈窗
-    closeEditModal();
-    
-    // 顯示成功提示
-    showToast('課程記錄已成功更新！');
-}
-
-// 保存新課程
-function saveNewCourse() {
-    if (!currentStudent || !currentStudent.courses) return;
-    
-    const newDate = document.getElementById('addCourseDate').value;
-    const newTime = document.getElementById('addCourseTime').value;
-    const newTheme = document.getElementById('addCourseTheme').value;
-    const newStatus = document.getElementById('addCourseStatus').value;
-    const newNote = document.getElementById('addCourseNote').value;
-    
-    // 驗證必填欄位
-    if (!newDate || !newTime || !newTheme) {
-        showToast('請填寫所有必填欄位！');
-        return;
-    }
-    
-    // 格式化日期
-    const formattedDate = newDate.replace(/-/g, '.');
-    
-    // 生成課程名稱
-    const courseCount = currentStudent.courses.records.length + 1;
-    const courseName = `${newTheme} ${courseCount}`;
-    
-    // 創建新課程記錄
-    const newCourse = {
-        name: courseName,
-        date: formattedDate,
-        time: newTime,
-        theme: newTheme,
-        status: newStatus,
-        note: newNote || '新增課程'
-    };
-    
-    // 添加到課程記錄
-    currentStudent.courses.records.push(newCourse);
-    
-    // 更新統計數據
-    updateCourseStatistics();
-    
-    // 重新渲染課程進度
-    renderCourseProgress(currentStudent);
-    
-    // 關閉彈窗
-    closeAddCourseModal();
-    
-    // 顯示成功提示
-    showToast('新課程已成功添加！');
-}
-
-// 保存批量課程
-function saveBatchCourses() {
-    if (!currentStudent || !currentStudent.courses) return;
-    
-    const packageValue = document.getElementById('coursePackage').value;
-    const startDate = document.getElementById('batchStartDate').value;
-    const courseTime = document.getElementById('batchCourseTime').value;
-    const coursePrefix = document.getElementById('batchCoursePrefix').value;
-    
-    // 驗證必填欄位
-    if (!packageValue || !startDate || !courseTime || !coursePrefix) {
-        showToast('請填寫所有必填欄位！');
-        return;
-    }
-    
-    const courseCount = parseInt(packageValue);
-    const startDateObj = new Date(startDate);
-    
-    // 获取选中的上课日
-    const selectedWeekdays = [];
-    document.querySelectorAll('input[name="weekday"]:checked').forEach(checkbox => {
-        selectedWeekdays.push(parseInt(checkbox.value));
-    });
-    
-    if (selectedWeekdays.length === 0) {
-        showToast('請選擇至少一個上課日！');
-        return;
-    }
-    
-    // 生成課程日期
-    const courseDates = [];
-    let currentDate = new Date(startDateObj);
-    let courseIndex = 1;
-    
-    while (courseDates.length < courseCount) {
-        // 檢查當前日期是否是選中的上課日
-        const currentWeekday = currentDate.getDay();
-        if (selectedWeekdays.includes(currentWeekday)) {
-            // 格式化日期
-            const formattedDate = `${currentDate.getFullYear()}.${String(currentDate.getMonth() + 1).padStart(2, '0')}.${String(currentDate.getDate()).padStart(2, '0')}`;
-            
-            // 檢查是否已存在相同日期的課程
-            const exists = currentStudent.courses.records.some(course => 
-                course.date === formattedDate && course.time === courseTime
-            );
-            
-            if (!exists) {
-                courseDates.push({
-                    date: formattedDate,
-                    index: courseIndex++
-                });
-            }
-        }
-        
-        // 增加一天
-        currentDate.setDate(currentDate.getDate() + 1);
-    }
-    
-    // 創建課程記錄
-    const newCourses = courseDates.map(item => ({
-        name: `${coursePrefix} ${item.index}`,
-        date: item.date,
-        time: courseTime,
-        theme: `${coursePrefix} ${item.index}`,
-        status: 'pending',
-        note: '批量添加課程'
-    }));
-    
-    // 添加到課程記錄
-    currentStudent.courses.records.push(...newCourses);
-    
-    // 更新統計數據
-    updateCourseStatistics();
-    
-    // 重新渲染課程進度
-    renderCourseProgress(currentStudent);
-    
-    // 關閉彈窗
-    closeBatchAddModal();
-    
-    // 顯示成功提示
-    showToast(`已成功批量添加 ${newCourses.length} 門課程！`);
-}
-
-// 打開作品詳情彈窗
-function openWorkModal(student, work) {
-    // 填充彈窗內容
-    document.getElementById('modalWorkTitle').textContent = `${student.name} 的作品`;
-    document.getElementById('modalWorkName').textContent = work.name;
-    document.getElementById('modalWorkDate').textContent = work.date;
-    document.getElementById('modalStudentName').textContent = student.name;
-    document.getElementById('modalWorkImg').src = work.img;
-    document.getElementById('modalWorkImg').alt = work.name;
-    document.getElementById('modalTeacherComment').textContent = work.comment || '暫無老師評價';
-    document.getElementById('workIndex').textContent = `${currentWorkIndex + 1}/${student.works.length}`;
-    
-    // 生成技能標籤
-    const tagsContainer = document.getElementById('modalSkillTags');
-    tagsContainer.innerHTML = '';
-    if (work.tags && work.tags.length > 0) {
-        work.tags.forEach(tag => {
-            const tagElement = document.createElement('div');
-            tagElement.className = 'skill-tag';
-            tagElement.textContent = tag;
-            tagsContainer.appendChild(tagElement);
+            card.onclick = () => openWorkDetail(idx);
+            container.appendChild(card);
         });
     }
     
-    // 顯示彈窗
-    const modal = document.getElementById('workModal');
-    modal.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-}
-
-// 滑動切換作品
-function navigateWork(direction) {
-    if (!currentStudent || currentStudent.works.length <= 1) return;
-    
-    // 計算新索引
-    currentWorkIndex += direction;
-    
-    // 循環處理
-    if (currentWorkIndex < 0) {
-        currentWorkIndex = currentStudent.works.length - 1;
-    } else if (currentWorkIndex >= currentStudent.works.length) {
-        currentWorkIndex = 0;
+    // 作品详情
+    function openWorkDetail(index) {
+        if(!currentStudentId) return;
+        const work = allStudentsData[currentStudentId].works[index];
+        currentWorkIndex = index;
+        document.getElementById('modalWorkImg').src = work.img;
+        document.getElementById('modalWorkName').textContent = work.name;
+        document.getElementById('modalWorkDate').textContent = work.date;
+        document.getElementById('modalStudentName').textContent = allStudentsData[currentStudentId].name;
+        document.getElementById('modalWorkComment').textContent = work.comment;
+        
+        const tags = work.tags ? work.tags.split(',').map(t=>`<span class="skill-tag">${t.trim()}</span>`).join('') : '';
+        document.getElementById('modalWorkTags').innerHTML = tags;
+        document.getElementById('workIndex').textContent = `${index+1}/${allStudentsData[currentStudentId].works.length}`;
+        document.getElementById('workModal').style.display = 'flex';
     }
     
-    // 打開新作品
-    openWorkModal(currentStudent, currentStudent.works[currentWorkIndex]);
-    
-    // 添加切換動畫效果
-    const modalImg = document.getElementById('modalWorkImg');
-    modalImg.style.opacity = '0';
-    setTimeout(() => {
-        modalImg.style.opacity = '1';
-    }, 150);
-}
-
-// 回到頂部功能
-function scrollToTop() {
-    window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-    });
-}
-
-// 提示訊息功能
-function showToast(message) {
-    const toast = document.getElementById('toastMessage');
-    toast.textContent = message;
-    toast.style.display = 'block';
-    
-    setTimeout(() => {
-        toast.style.display = 'none';
-    }, 2000);
-}
-
-// 關閉作品詳情彈窗
-function closeWorkModal() {
-    const modal = document.getElementById('workModal');
-    modal.style.display = 'none';
-    document.body.style.overflow = 'auto';
-}
-
-// 點擊彈窗外層關閉
-document.getElementById('workModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeWorkModal();
+    function closeWorkModal() {
+        document.getElementById('workModal').style.display = 'none';
     }
-});
+    
+    function navigateWork(dir) {
+        if(!currentStudentId) return;
+        const total = allStudentsData[currentStudentId].works.length;
+        currentWorkIndex = (currentWorkIndex + dir + total) % total;
+        openWorkDetail(currentWorkIndex);
+    }
 
-// 點擊編輯彈窗外層關閉
-document.getElementById('editModal').addEventListener('click', function(e) {
-    if (e.target === this) {
+    // 新增作品
+    function openAddWorkModal() {
+        if(!isEditMode) return;
+        document.getElementById('addWorkForm').reset();
+        document.getElementById('addWorkDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('addWorkPreview').style.display = 'none';
+        document.getElementById('addWorkModal').style.display = 'flex';
+    }
+    
+    function closeAddWorkModal() {
+        document.getElementById('addWorkModal').style.display = 'none';
+    }
+    
+    function previewWorkImage(input) {
+        const file = input.files[0];
+        if(file) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                const preview = document.getElementById('addWorkPreview');
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+    
+    function saveNewWork() {
+        if(!currentStudentId || !isEditMode) return;
+        const name = document.getElementById('addWorkName').value;
+        const date = document.getElementById('addWorkDate').value;
+        const comment = document.getElementById('addWorkComment').value;
+        const tags = document.getElementById('addWorkTags').value;
+        const img = document.getElementById('addWorkPreview').src || 'https://picsum.photos/300/300?' + Math.random();
+        
+        if(!name || !date || !comment) {
+            showToast('❌ 请填写必填信息');
+            return;
+        }
+        
+        allStudentsData[currentStudentId].works.push({ img, name, date, comment, tags });
+        renderGallery();
+        closeAddWorkModal();
+        showToast('✅ 作品新增成功');
+    }
+
+    // ==================== 课程管理 ====================
+    function renderCourseTable() {
+        const tableBody = document.getElementById('courseTableBody');
+        tableBody.innerHTML = '';
+        
+        let dataToRender = filteredCourses.length > 0 ? [...filteredCourses] : [...courses];
+        
+        dataToRender.sort((a, b) => {
+            const order = { pending: 0, leave: 1, completed: 2 };
+            return order[a.status] - order[b.status];
+        });
+        
+        if (dataToRender.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 30px; color: #666;">暂无课程记录，请添加课程</td></tr>`;
+            return;
+        }
+        
+        dataToRender.forEach((course, index) => {
+            const row = document.createElement('tr');
+            let statusBadge = '';
+            if (course.status === 'completed') statusBadge = '<span class="status-badge status-completed">已完成</span>';
+            else if (course.status === 'pending') statusBadge = '<span class="status-badge status-pending">未完成</span>';
+            else if (course.status === 'leave') statusBadge = '<span class="status-badge status-leave">请假</span>';
+            
+            const imgHtml = course.img ? `<img src="${course.img}" style="width:40px;height:40px;border-radius:5px;object-fit:cover;">` : '无';
+            
+            row.innerHTML = `
+                <td style="display: ${isEditMode ? 'table-cell' : 'none'};">
+                    <input type="checkbox" class="row-checkbox course-checkbox" data-index="${index}">
+                </td>
+                <td>${course.date}</td>
+                <td>${course.time}</td>
+                <td>${course.theme || '-'}</td>
+                <td>${imgHtml}</td>
+                <td>${statusBadge}</td>
+                <td>${course.note || '-'}</td>
+                <td class="inline-edit">
+                    ${isEditMode ? `
+                        <button class="edit-btn" onclick="openEditModal(${index})">编辑</button>
+                        <button class="delete-btn" onclick="deleteCourse(${index})">删除</button>
+                    ` : '-'}
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+    
+    function updateCourseStats() {
+        const total = courses.length;
+        const completed = courses.filter(c => c.status === 'completed').length;
+        const remaining = total - completed;
+        const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
+        
+        document.getElementById('totalCourses').textContent = total;
+        document.getElementById('completedCourses').textContent = completed;
+        document.getElementById('remainingCourses').textContent = remaining;
+        document.getElementById('completionRate').textContent = `${completionRate}%`;
+        document.getElementById('progressBar').style.width = `${completionRate}%`;
+    }
+
+    // 图片预览
+    function previewAddImage(input) {
+        const file = input.files[0];
+        if(file) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                const preview = document.getElementById('addImgPreview');
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+    
+    function previewEditImage(input) {
+        const file = input.files[0];
+        if(file) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                const preview = document.getElementById('editImgPreview');
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+    
+    // 编辑课程
+    function openEditModal(index) {
+        if (!isEditMode) return;
+        currentEditIndex = index;
+        const course = courses[index];
+        const timeParts = course.time ? course.time.split(' - ') : ['', ''];
+        
+        document.getElementById('editCourseIndex').value = index;
+        document.getElementById('editCourseDate').value = course.date;
+        document.getElementById('editCourseTimeStart').value = timeParts[0] || '';
+        document.getElementById('editCourseTimeEnd').value = timeParts[1] || '';
+        document.getElementById('editCourseTheme').value = course.theme || '';
+        document.getElementById('editCourseStatus').value = course.status;
+        document.getElementById('editCourseNote').value = course.note || '';
+        
+        const preview = document.getElementById('editImgPreview');
+        if(course.img) {
+            preview.src = course.img;
+            preview.style.display = 'block';
+        } else {
+            preview.style.display = 'none';
+        }
+        
+        handleStatusChangeInEdit(course.status);
+        document.getElementById('editModal').style.display = 'flex';
+    }
+    
+    function closeEditModal() {
+        document.getElementById('editModal').style.display = 'none';
+    }
+    
+    function saveCourseEdit() {
+        const index = document.getElementById('editCourseIndex').value;
+        const startTime = document.getElementById('editCourseTimeStart').value;
+        const endTime = document.getElementById('editCourseTimeEnd').value;
+        const img = document.getElementById('editImgPreview').src || '';
+        
+        courses[index] = {
+            date: document.getElementById('editCourseDate').value,
+            time: `${startTime} - ${endTime}`,
+            theme: document.getElementById('editCourseTheme').value,
+            status: document.getElementById('editCourseStatus').value,
+            note: document.getElementById('editCourseNote').value,
+            img: img
+        };
+        allStudentsData[currentStudentId].courses = [...courses];
+        originalCourses = [...courses];
+        filteredCourses = [...courses];
+        renderCourseTable();
+        updateCourseStats();
         closeEditModal();
+        showToast('✅ 课程已更新');
     }
-});
-
-// 點擊新增彈窗外層關閉
-document.getElementById('addCourseModal').addEventListener('click', function(e) {
-    if (e.target === this) {
+    
+    // 新增课程
+    function openAddCourseModal() {
+        if (!isEditMode) return;
+        document.getElementById('addCourseForm').reset();
+        document.getElementById('addCourseDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('addCourseTimeStart').value = '10:00';
+        document.getElementById('addCourseTimeEnd').value = '11:15';
+        document.getElementById('addImgPreview').style.display = 'none';
+        document.getElementById('addCourseModal').style.display = 'flex';
+    }
+    
+    function closeAddCourseModal() {
+        document.getElementById('addCourseModal').style.display = 'none';
+    }
+    
+    function addNewCourse() {
+        const startTime = document.getElementById('addCourseTimeStart').value;
+        const endTime = document.getElementById('addCourseTimeEnd').value;
+        const img = document.getElementById('addImgPreview').src || '';
+        
+        const newCourse = {
+            date: document.getElementById('addCourseDate').value,
+            time: `${startTime} - ${endTime}`,
+            theme: document.getElementById('addCourseTheme').value,
+            status: document.getElementById('addCourseStatus').value,
+            note: document.getElementById('addCourseNote').value,
+            img: img
+        };
+        courses.push(newCourse);
+        allStudentsData[currentStudentId].courses = [...courses];
+        originalCourses = [...courses];
+        filteredCourses = [...courses];
+        renderCourseTable();
+        updateCourseStats();
         closeAddCourseModal();
+        showToast('✅ 课程已添加');
     }
-});
-
-// 點擊批量添加彈窗外層關閉
-document.getElementById('batchAddModal').addEventListener('click', function(e) {
-    if (e.target === this) {
+    
+    // 批量添加课程（自动计算周次）
+    function openBatchAddModal() {
+        if (!isEditMode) return;
+        document.getElementById('batchAddForm').reset();
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('batchStartDate').value = today;
+        document.getElementById('batchTimeStart').value = '10:00';
+        document.getElementById('batchTimeEnd').value = '11:15';
+        document.getElementById('batchAddModal').style.display = 'flex';
+    }
+    
+    function closeBatchAddModal() {
+        document.getElementById('batchAddModal').style.display = 'none';
+    }
+    
+    function batchAddCourses() {
+        const startDate = new Date(document.getElementById('batchStartDate').value);
+        const count = parseInt(document.getElementById('batchCourseCount').value);
+        const timeStart = document.getElementById('batchTimeStart').value;
+        const timeEnd = document.getElementById('batchTimeEnd').value;
+        const theme = document.getElementById('batchCourseTheme').value;
+        const status = document.getElementById('batchCourseStatus').value;
+        
+        const tempCourses = [];
+        for(let i=0; i<count; i++) {
+            const d = new Date(startDate);
+            d.setDate(startDate.getDate() + (i*7));
+            const dateStr = d.toISOString().split('T')[0];
+            tempCourses.push({
+                date: dateStr,
+                time: `${timeStart} - ${timeEnd}`,
+                theme: theme,
+                status: status,
+                note: '',
+                img: ''
+            });
+        }
+        
+        courses = [...courses, ...tempCourses];
+        allStudentsData[currentStudentId].courses = [...courses];
+        originalCourses = [...courses];
+        filteredCourses = [...courses];
+        renderCourseTable();
+        updateCourseStats();
         closeBatchAddModal();
-    }
-});
-
-// 點擊補課彈窗外層關閉
-document.getElementById('makeupModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeMakeupModal();
-    }
-});
-
-// 鍵盤導航支持
-document.addEventListener('keydown', function(e) {
-    if (document.getElementById('workModal').style.display === 'flex') {
-        switch(e.key) {
-            case 'ArrowLeft':
-                navigateWork(-1);
-                break;
-            case 'ArrowRight':
-                navigateWork(1);
-                break;
-            case 'Escape':
-                closeWorkModal();
-                break;
-        }
-    } else if (document.getElementById('editModal').style.display === 'flex') {
-        if (e.key === 'Escape') {
-            closeEditModal();
-        }
-    } else if (document.getElementById('addCourseModal').style.display === 'flex') {
-        if (e.key === 'Escape') {
-            closeAddCourseModal();
-        }
-    } else if (document.getElementById('batchAddModal').style.display === 'flex') {
-        if (e.key === 'Escape') {
-            closeBatchAddModal();
-        }
-    } else if (document.getElementById('makeupModal').style.display === 'flex') {
-        if (e.key === 'Escape') {
-            closeMakeupModal();
-        }
-    }
-});
-
-// 切換學員
-function switchStudent(index) {
-    // 重置畫廊
-    const gallery = document.getElementById("artGallery");
-    gallery.innerHTML = '';
-    // 重新生成粒子
-    for (let i = 0; i < 20; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
-        particle.style.left = `${Math.random() * 100}%`;
-        particle.style.top = `${Math.random() * 100}%`;
-        particle.style.animationDelay = `${Math.random() * 6}s`;
-        particle.style.opacity = Math.random() * 0.8 + 0.2;
-        gallery.appendChild(particle);
+        showToast(`✅ 成功添加 ${count} 笔课程`);
     }
     
-    // 重新渲染所有模塊
-    renderGallery(students[index]);
-    renderCourseProgress(students[index]);
+    // 删除课程
+    function deleteCourse(index) {
+        if (confirm('确定要删除此课程吗？')) {
+            courses.splice(index, 1);
+            allStudentsData[currentStudentId].courses = [...courses];
+            originalCourses = [...courses];
+            filteredCourses = [...courses];
+            renderCourseTable();
+            updateCourseStats();
+            showToast('🗑️ 课程已删除');
+        }
+    }
     
-    // 重置課程選擇狀態
-    selectedCourseIndexes = [];
-    document.getElementById('selectAll').checked = false;
-    document.getElementById('courseSearch').value = '';
+    // 批量操作
+    function toggleSelectAll() {
+        const isChecked = document.getElementById('selectAll').checked;
+        document.querySelectorAll('.course-checkbox').forEach(cb => cb.checked = isChecked);
+        document.getElementById('headerCheckbox').checked = isChecked;
+    }
     
-    // 顯示作品區域
-    showSection('gallery');
-}
-
-// 添加切換按鈕
-document.addEventListener('DOMContentLoaded', function() {
-    const btnContainer = document.createElement('div');
-    btnContainer.style.textAlign = 'center';
-    btnContainer.style.margin = '20px 0';
-    btnContainer.innerHTML = `
-        <button onclick="switchStudent(0)" style="padding:8px 15px; margin:0 5px; border:none; border-radius:8px; background:#879acb; color:#fff; cursor:pointer;">小明</button>
-        <button onclick="switchStudent(1)" style="padding:8px 15px; margin:0 5px; border:none; border-radius:8px; background:#879acb; color:#fff; cursor:pointer;">小紅</button>
-        <button onclick="switchStudent(2)" style="padding:8px 15px; margin:0 5px; border:none; border-radius:8px; background:#879acb; color:#fff; cursor:pointer;">王芊朗</button>
-        <button onclick="switchStudent(3)" style="padding:8px 15px; margin:0 5px; border:none; border-radius:8px; background:#879acb; color:#fff; cursor:pointer;">1</button>
-    `;
-    document.querySelector('.container').insertBefore(btnContainer, document.getElementById('galleryTitle'));
-});
+    function clearSelection() {
+        document.querySelectorAll('.course-checkbox').forEach(cb => cb.checked = false);
+        document.getElementById('selectAll').checked = false;
+        document.getElementById('headerCheckbox').checked = false;
+    }
+    
+    function getSelectedIndexes() {
+        const checkboxes = document.querySelectorAll('.course-checkbox:checked');
+        return Array.from(checkboxes).map(cb => parseInt(cb.dataset.index));
+    }
+    
+    function batchUpdateStatus(status) {
+        const indexes = getSelectedIndexes();
+        if (indexes.length === 0) { showToast('❌ 请先选择课程'); return; }
+        indexes.forEach(i => { if (courses[i]) courses[i].status = status; });
+        allStudentsData[currentStudentId].courses = [...courses];
+        originalCourses = [...courses];
+        filteredCourses = [...courses];
+        renderCourseTable();
+        updateCourseStats();
+        showToast(`✅ 已将 ${indexes.length} 笔课程标记为 ${status === 'completed' ? '已完成' : status === 'pending' ? '未完成' : '请假'}`);
+    }
+    
+    function batchUpdateLeaveStatus() {
+        const indexes = getSelectedIndexes();
+        if (indexes.length === 0) { showToast('❌ 请先选择课程'); return; }
+        indexes.forEach(i => { if (courses[i]) courses[i].status = 'leave'; });
+        allStudentsData[currentStudentId].courses = [...courses];
+        originalCourses = [...courses];
+        filteredCourses = [...courses];
+        renderCourseTable();
+        updateCourseStats();
+        showToast(`✅ 已将 ${indexes.length} 笔课程标记为请假`);
+    }
+    
+    function batchDeleteCourses() {
+        const indexes = getSelectedIndexes();
+        if (indexes.length === 0) { showToast('❌ 请先选择课程'); return; }
+        if (confirm(`确定要删除选中的 ${indexes.length} 笔课程吗？`)) {
+            indexes.sort((a, b) => b - a).forEach(i => courses.splice(i, 1));
+            allStudentsData[currentStudentId].courses = [...courses];
+            originalCourses = [...courses];
+            filteredCourses = [...courses];
+            renderCourseTable();
+            updateCourseStats();
+            showToast(`🗑️ 已删除 ${indexes.length} 笔课程`);
+        }
+    }
+    
+    // 搜索
+    function searchCourses() {
+        const keyword = document.getElementById('courseSearch').value.toLowerCase().trim();
+        if (!keyword) { filteredCourses = [...originalCourses]; renderCourseTable(); return; }
+        filteredCourses = originalCourses.filter(c => 
+            c.date.toLowerCase().includes(keyword) ||
+            (c.theme && c.theme.toLowerCase().includes(keyword)) ||
+            (c.note && c.note.toLowerCase().includes(keyword))
+        );
+        renderCourseTable();
+    }
+    
+    function handleStatusChangeInEdit(status) {
+        document.getElementById('leaveReasonGroup').style.display = status === 'leave' ? 'block' : 'none';
+    }
+    
+    // 补课
+    function selectMakeupOption(el, option) {
+        document.querySelectorAll('.makeup-option').forEach(o => o.classList.remove('selected'));
+        el.classList.add('selected');
+        selectedMakeupOption = option;
+        document.getElementById('makeupDateGroup').style.display = option === 'single' ? 'block' : 'none';
+    }
+    
+    function closeMakeupModal() { document.getElementById('makeupModal').style.display = 'none'; }
+    function confirmMakeup() { showToast('✅ 补课安排已储存'); closeMakeupModal(); }
+    
+    // 提示
+    function showToast(msg) {
+        const toast = document.createElement('div');
+        toast.className = 'toast-message';
+        toast.textContent = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => { document.body.removeChild(toast); }, 2000);
+    }
 </script>
 </body>
 </html>
