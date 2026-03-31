@@ -1,204 +1,1147 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>學生作品 | MURMUR ART</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:微軟正黑體}
-body{background:#f7f8fb;color:#333}
-.navbar{background:#fff;padding:16px;position:sticky;top:0;box-shadow:0 2px 10px #0001}
-.nav{max-width:1100px;margin:auto;display:flex;justify-content:space-between;align-items:center}
-.logo{font-size:20px;font-weight:bold;color:#6b8bd1}
-.menu a{margin-left:16px;text-decoration:none;color:#555}
-.main{max-width:1100px;margin:auto;padding:20px}
-.title{text-align:center;margin:20px 0;font-size:22px;color:#6b8bd1}
-.student-select{padding:8px 12px;border:1px solid #ddd;border-radius:8px;width:220px;margin-bottom:16px}
-.art-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:16px}
-.card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px #0001}
-.card img{width:100%;height:170px;object-fit:cover}
-.card .name{padding:8px;text-align:center;font-size:14px}
-.modal{position:fixed;top:0;left:0;width:100%;height:100%;background:#0009;display:none;justify-content:center;align-items:center}
-.modal .box{background:#fff;padding:24px;border-radius:16px;width:90%;max-width:450px}
-.modal input, .modal textarea{width:100%;margin:6px 0;padding:10px;border:1px solid #ddd;border-radius:8px}
-.btn{padding:10px 16px;background:#6b8bd1;color:#fff;border:none;border-radius:8px;margin-top:10px;cursor:pointer}
-.btn.del{background:#e53935}
-.btn.preview{background:#43a047}
-.teacher-btn{position:fixed;bottom:20px;right:20px;width:20px;height:20px;background:transparent;border:none;opacity:0.2}
-footer{background:#6b8bd1;color:#fff;text-align:center;padding:24px;margin-top:60px;font-size:14px;line-height:1.6}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MURMUR ART - 學生作品</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "微軟正黑體", sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fb;
+            color: #444;
+            overflow-x: hidden;
+            background: linear-gradient(120deg, #f5f7fb, #e8edff);
+            background-size: 200% 200%;
+            animation: bgFlow 15s ease infinite;
+        }
+
+        @keyframes bgFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px 0;
+        }
+
+        .navbar {
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-wrap {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .logo-img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            animation: logoRotate 8s ease-in-out infinite;
+        }
+
+        @keyframes logoRotate {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(5deg); }
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: bold;
+            color: #879acb;
+            text-shadow: 0 0 10px rgba(135, 154, 203, 0.5);
+        }
+
+        .nav-menu a {
+            margin-left: 25px;
+            text-decoration: none;
+            color: #666;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-menu a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0%;
+            height: 2px;
+            background: #879acb;
+            transition: width 0.3s ease;
+        }
+
+        .nav-menu a:hover::after {
+            width: 100%;
+        }
+
+        .nav-menu a.active {
+            color: #879acb;
+            font-weight: bold;
+        }
+
+        .art-gallery {
+            position: relative;
+            width: 100%;
+            height: 700px;
+            margin: 40px auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle, rgba(135,154,203,0.1) 0%, rgba(255,255,255,0) 70%);
+            border-radius: 20px;
+        }
+
+        .particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(135, 154, 203, 0.6);
+            animation: particleFloat 6s ease-in-out infinite;
+            z-index: 1;
+        }
+
+        @keyframes particleFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(15px, -10px) scale(1.2); }
+            50% { transform: translate(0, -15px) scale(0.8); }
+            75% { transform: translate(-15px, -5px) scale(1.1); }
+        }
+
+        .center-avatar {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 8px solid #879acb;
+            box-shadow: 0 0 30px rgba(135, 154, 203, 0.6), 
+                        inset 0 0 10px rgba(255, 255, 255, 0.8);
+            z-index: 10;
+            position: absolute;
+            background: #fff;
+            animation: avatarBreath 4s ease-in-out infinite;
+            cursor: pointer;
+        }
+
+        @keyframes avatarBreath {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 30px rgba(135, 154, 203, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.8); }
+            50% { transform: scale(1.05); box-shadow: 0 0 40px rgba(135, 154, 203, 0.8), inset 0 0 15px rgba(255, 255, 255, 0.9); }
+        }
+
+        .art-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            width: 100%;
+            margin-top: 30px;
+        }
+
+        .grid-card {
+            position: relative;
+            width: 100%;
+            height: 180px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .grid-card:hover {
+            transform: translateY(-5px) scale(1.03);
+            box-shadow: 0 12px 30px rgba(135,154,203,0.3);
+        }
+
+        .art-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: filter 0.3s ease;
+        }
+
+        .art-info {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(transparent, rgba(255,255,255,0.9));
+            font-size: 13px;
+            text-align: center;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .grid-card:hover .art-info {
+            transform: translateY(0);
+        }
+
+        .empty-gallery {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            color: #879acb;
+        }
+
+        .gallery-title {
+            text-align: center;
+            font-size: 32px;
+            color: #879acb;
+            margin: 30px 0;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+            animation: titleBounce 2s ease-in-out infinite;
+        }
+
+        @keyframes titleBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .work-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 9999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: #fff;
+            width: 90%;
+            max-width: 1000px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 50px rgba(135, 154, 203, 0.5);
+            animation: modalPop 0.5s ease-out forwards;
+        }
+
+        @keyframes modalPop {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-header {
+            padding: 20px;
+            background: #879acb;
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-close {
+            font-size: 24px;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(255,255,255,0.4);
+        }
+
+        .modal-body {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 30px;
+            gap: 30px;
+        }
+
+        .modal-img-container {
+            flex: 1;
+            min-width: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .modal-nav-btn {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.8);
+            color: #879acb;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+
+        .modal-nav-btn:hover {
+            background: #879acb;
+            color: white;
+        }
+
+        .prev-btn { left: 20px; }
+        .next-btn { right: 20px; }
+
+        .modal-img {
+            max-width: 100%;
+            max-height: 500px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .modal-details {
+            flex: 1;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .work-title {
+            font-size: 28px;
+            color: #879acb;
+            font-weight: bold;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .work-meta {
+            display: flex;
+            gap: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .teacher-comment {
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #879acb;
+        }
+
+        .comment-title {
+            font-weight: bold;
+            color: #879acb;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .comment-content {
+            line-height: 1.6;
+            color: #444;
+        }
+
+        .skill-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .skill-tag {
+            background: #e8edff;
+            color: #879acb;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .edit-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 9999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .edit-modal-content {
+            background: white;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 50px rgba(135, 154, 203, 0.5);
+            animation: modalPop 0.5s ease-out forwards;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #879acb;
+            font-weight: bold;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e8edff;
+            border-radius: 8px;
+            font-size: 16px;
+            color: #444;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #879acb;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+
+        .form-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-save {
+            background: #879acb;
+            color: white;
+        }
+
+        .btn-save:hover {
+            background: #6a80b8;
+        }
+
+        .btn-cancel {
+            background: #e8edff;
+            color: #879acb;
+        }
+
+        .btn-cancel:hover {
+            background: #d4def7;
+        }
+
+        .course-img-preview {
+            max-width: 100px;
+            max-height: 100px;
+            border-radius: 8px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .password-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 99999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .password-content {
+            background: white;
+            width: 90%;
+            max-width: 450px;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 50px rgba(135, 154, 203, 0.5);
+            animation: modalPop 0.5s ease-out forwards;
+            text-align: center;
+        }
+
+        .password-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e8edff;
+            border-radius: 8px;
+            font-size: 16px;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .password-input:focus {
+            outline: none;
+            border-color: #879acb;
+        }
+
+        .edit-mode-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 999;
+            display: none;
+        }
+
+        .delete-btn {
+            padding: 5px 10px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
+        }
+
+        .teacher-login-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 16px;
+            height: 16px;
+            background: transparent;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            opacity: 0.15;
+            z-index: 98;
+        }
+        .teacher-login-btn:hover {
+            opacity: 0.4;
+        }
+
+        .add-course-btn {
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background: #879acb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .add-course-btn:hover {
+            background: #6a80b8;
+            transform: translateY(-2px);
+        }
+
+        .student-selector {
+            margin: 10px 0 20px;
+            padding: 8px 12px;
+            border: 2px solid #e8edff;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #879acb;
+            background: white;
+            cursor: pointer;
+            display: none;
+        }
+
+        .toast-message {
+            position: fixed;
+            bottom: 90px;
+            right: 30px;
+            padding: 15px 25px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            border-radius: 8px;
+            z-index: 100;
+            display: none;
+            animation: toastFade 0.3s ease forwards;
+        }
+
+        @keyframes toastFade {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .art-gallery { height: 550px; }
+            .center-avatar { width: 160px; height: 160px; }
+            
+            .modal-body { padding: 20px; gap: 20px; }
+            .work-title { font-size: 24px; }
+            .modal-nav-btn { width: 40px; height: 40px; font-size: 18px; }
+        }
+    </style>
 </head>
 <body>
 
-<div class="navbar">
-  <div class="nav">
-    <div class="logo">MURMUR ART</div>
-    <div class="menu">
-      <a href="index.html">學生作品</a>
-      <a href="course.html">課程進度</a>
+<button class="teacher-login-btn" onclick="openPasswordModal()" title="老師編輯入口"></button>
+<div class="edit-mode-indicator" id="editModeIndicator">✏️ 編輯模式已開啟</div>
+
+<div class="password-modal" id="parentLoginModal">
+    <div class="password-content">
+        <h2 style="color: #879acb; margin-bottom: 10px;">👨‍👩‍👧‍👦 家長登入</h2>
+        <input type="text" id="parentStudentName" class="password-input" placeholder="學生姓名" required>
+        <input type="text" id="parentPhone" class="password-input" placeholder="聯絡電話" required>
+        <button class="form-btn btn-save" onclick="parentLogin()" style="width: 100%; margin-top:10px">登入查看</button>
+        <button class="form-btn btn-cancel" onclick="closeParentLogin()" style="width: 100%; margin-top:10px">取消</button>
     </div>
-  </div>
 </div>
 
-<button class="teacher-btn" onclick="openTeacherModal()"></button>
-
-<div class="main">
-  <div class="title" id="pageTitle">🎨 請登入瀏覽作品</div>
-
-  <select id="studentSelect" class="student-select" style="display:none" onchange="switchStudent()"></select>
-
-  <div style="display:none; margin-bottom:12px" id="teacherTools">
-    <button class="btn preview" onclick="openPreview()">預覽家長畫面</button>
-    <button class="btn" onclick="openEditStudent()">編輯學生資料</button>
-  </div>
-
-  <div class="art-grid" id="artGrid"></div>
+<div class="password-modal" id="teacherPasswordModal">
+    <div class="password-content">
+        <h2 style="color: #879acb; margin-bottom: 10px;">🔒 老師登入</h2>
+        <p style="color: #666; margin-bottom: 20px;">請輸入編輯密碼</p>
+        <input type="password" id="teacherPasswordInput" class="password-input" placeholder="請輸入密碼" required>
+        <button class="form-btn btn-save" onclick="checkTeacherPassword()" style="width: 100%; margin-top:10px">確認登入</button>
+        <button class="form-btn btn-cancel" onclick="closeTeacherPasswordModal()" style="width: 100%; margin-top:10px">取消</button>
+    </div>
 </div>
 
-<!-- 家長登入 -->
-<div class="modal" id="parentModal">
-  <div class="box">
-    <h3>家長登入</h3>
-    <input id="pName" placeholder="學生姓名">
-    <input id="pPhone" placeholder="家長電話">
-    <button class="btn" onclick="parentLogin()">登入</button>
-  </div>
+<div class="password-modal" id="teacherModal">
+    <div class="password-content">
+        <h2 style="color: #879acb; margin-bottom: 10px;">🔒 選擇身份</h2>
+        <p style="color: #666; margin-bottom: 20px;">請選擇登入身份</p>
+        <button class="form-btn btn-save" onclick="openTeacherPasswordModal()" style="width: 100%; margin-bottom:10px">我是老師（編輯）</button>
+        <button class="form-btn btn-cancel" onclick="openParentLogin()" style="width: 100%">我是家長（檢視）</button>
+    </div>
 </div>
 
-<!-- 老師登入 -->
-<div class="modal" id="teacherModal">
-  <div class="box">
-    <h3>老師登入</h3>
-    <input type="password" id="tPwd" placeholder="密碼">
-    <button class="btn" onclick="teacherLogin()">登入</button>
-  </div>
+<div class="navbar">
+    <div class="container nav-wrap">
+        <div class="logo-container">
+            <img src="https://p11-flow-imagex-download-sign.byteimg.com/tos-cn-i-a9rns2rl98/45afcf8642d843118169b9b9b9b7bddddc.png~tplv-a9rns2rl98-24:720:720.png" 
+                 class="logo-img" alt="MURMUR ART">
+            <div class="logo-text">MURMUR ART</div>
+        </div>
+        <div class="nav-menu">
+            <a href="#" class="active">學生作品</a>
+            <a href="課程進度.html">課程進度</a>
+            <a href="#" onclick="logoutEditMode()">登出</a>
+        </div>
+    </div>
 </div>
 
-<!-- 編輯學生 -->
-<div class="modal" id="editStudentModal">
-  <div class="box">
-    <h3>編輯學生完整資料</h3>
-    <input id="e_name" placeholder="學生姓名">
-    <input id="e_phone" placeholder="家長電話">
-    <button class="btn" onclick="saveStudentEdit()">儲存</button>
-  </div>
+<div class="container">
+    <h2 class="gallery-title" id="galleryTitle">🎨 請登入檢視學生作品</h2>
+    
+    <div style="text-align:center; margin-bottom:20px; display:none;" id="studentManageBar">
+        <select class="student-selector" id="studentSelector" onchange="switchStudent(this.value)"></select>
+        <br><br>
+        <button class="add-course-btn" onclick="openAddWorkModal()">➕ 新增作品</button>
+        <button class="add-course-btn" style="background:#28a745" onclick="openEditStudentModal()">✏️ 編輯學生資料</button>
+    </div>
+
+    <div id="artGrid" class="art-grid"></div>
 </div>
 
-<footer>
-  <p>地址：九龍永康街 55 號金百盛中心 20 樓 2002 室</p>
-  <p>（荔枝角地鐵站 B1 出口，步行約 3 分鐘）</p>
-  <p>聯絡電話：6748 0066</p>
-</footer>
+<div class="work-modal" id="workModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalWorkTitle">作品詳情</h2>
+            <div class="modal-close" onclick="closeWorkModal()">×</div>
+            <button id="workEditBtn" class="edit-btn" style="display:none; padding:8px 15px;" onclick="openEditWorkModal()">編輯作品</button>
+            <button id="workDeleteBtn" class="delete-btn" style="display:none; padding:8px 15px; margin-left:10px;" onclick="deleteCurrentWork()">刪除作品</button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-img-container">
+                <div class="modal-nav-btn prev-btn" onclick="navigateWork(-1)">◀</div>
+                <img src="" alt="" class="modal-img" id="modalWorkImg">
+                <div class="modal-nav-btn next-btn" onclick="navigateWork(1)">▶</div>
+                <div style="position:absolute; bottom:20px; background:rgba(0,0,0,0.5); color:white; padding:5px 15px; border-radius:20px; font-size:14px;" id="workIndex">1/4</div>
+            </div>
+            <div class="modal-details">
+                <div class="work-title" id="modalWorkName">《作品名稱》</div>
+                <div class="work-meta">
+                    <div><strong>創作日期：</strong><span id="modalWorkDate">2024.01.01</span></div>
+                    <div><strong>學員：</strong><span id="modalStudentName">小明</span></div>
+                </div>
+                <div class="teacher-comment">
+                    <div class="comment-title">老師點評</div>
+                    <div class="comment-content" id="modalWorkComment">色彩運用非常棒！繼續加油！</div>
+                    <div class="skill-tags" id="modalWorkTags">
+                        <span class="skill-tag">水彩</span>
+                        <span class="skill-tag">創意</span>
+                        <span class="skill-tag">色彩</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="edit-modal" id="editWorkModal">
+    <div class="edit-modal-content">
+        <div class="modal-header" style="margin: -30px -30px 20px -30px;">
+            <h2 style="font-size: 20px;">編輯學生作品</h2>
+            <div class="modal-close" onclick="closeEditWorkModal()">×</div>
+        </div>
+        
+        <form id="editWorkForm">
+            <input type="hidden" id="editWorkIndex">
+            
+            <div class="form-group">
+                <label class="form-label">作品圖片</label>
+                <input type="file" id="editWorkImg" class="form-control" accept="image/*" onchange="previewEditWorkImage(this)">
+                <img src="" id="editWorkPreview" class="course-img-preview">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">作品名稱</label>
+                <input type="text" id="editWorkName" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">創作日期</label>
+                <input type="date" id="editWorkDate" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">老師點評</label>
+                <textarea id="editWorkComment" class="form-control" rows="3" required></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">技能標籤（逗號分隔）</label>
+                <input type="text" id="editWorkTags" class="form-control" placeholder="例如：水彩,創意,色彩">
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="form-btn btn-cancel" onclick="closeEditWorkModal()">取消</button>
+                <button type="button" class="form-btn btn-save" onclick="saveEditWork()">儲存修改</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="edit-modal" id="addWorkModal">
+    <div class="edit-modal-content">
+        <div class="modal-header" style="margin: -30px -30px 20px -30px;">
+            <h2 style="font-size: 20px;">新增學生作品</h2>
+            <div class="modal-close" onclick="closeAddWorkModal()">×</div>
+        </div>
+        
+        <form id="addWorkForm">
+            <div class="form-group">
+                <label class="form-label">作品圖片</label>
+                <input type="file" id="addWorkImg" class="form-control" accept="image/*" onchange="previewWorkImage(this)">
+                <img src="" id="addWorkPreview" class="course-img-preview">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">作品名稱</label>
+                <input type="text" id="addWorkName" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">創作日期</label>
+                <input type="date" id="addWorkDate" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">老師點評</label>
+                <textarea id="addWorkComment" class="form-control" rows="3" required></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">技能標籤（逗號分隔）</label>
+                <input type="text" id="addWorkTags" class="form-control" placeholder="例如：水彩,創意,色彩">
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="form-btn btn-cancel" onclick="closeAddWorkModal()">取消</button>
+                <button type="button" class="form-btn btn-save" onclick="saveNewWork()">儲存作品</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="edit-modal" id="editStudentModal">
+    <div class="edit-modal-content">
+        <div class="modal-header" style="margin: -30px -30px 20px -30px;">
+            <h2 style="font-size: 20px;">編輯學生資料</h2>
+            <div class="modal-close" onclick="closeEditStudentModal()">×</div>
+        </div>
+        
+        <form id="editStudentForm">
+            <input type="hidden" id="editStudentId">
+            
+            <div class="form-group">
+                <label class="form-label">學生姓名</label>
+                <input type="text" id="editStudentName" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">聯絡電話</label>
+                <input type="text" id="editStudentPhone" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">大頭照</label>
+                <input type="file" id="editStudentAvatar" class="form-control" accept="image/*" onchange="previewEditStudentAvatar(this)">
+                <img src="" id="editStudentPreview" class="course-img-preview">
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="form-btn btn-cancel" onclick="closeEditStudentModal()">取消</button>
+                <button type="button" class="form-btn btn-save" onclick="saveEditStudent()">儲存修改</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <script>
-let DB = {
-  student_1: {name:"小明", phone:"0911222333", works:[
-    {img:"https://picsum.photos/400/400?1", title:"風景畫", date:"2025-10-01", comment:"構圖很好"}
-  ]}
-};
+    let allStudentsData = {
+        student1: {
+            name: "小明", phone: "0912345678", avatar: "https://picsum.photos/200/200",
+            works: [
+                { img: "https://picsum.photos/300/300?1", name: "森林小屋", date: "2024-02-10", comment: "色彩層次很棒，空間感很好！", tags: "水彩,創意,構圖" },
+                { img: "https://picsum.photos/300/300?2", name: "海底世界", date: "2024-02-17", comment: "想像力豐富，顏色搭配超好看！", tags: "創意,色彩,海洋" }
+            ]
+        },
+        student2: {
+            name: "小華", phone: "0987654321", avatar: "https://picsum.photos/200/200?1",
+            works: [{ img: "https://picsum.photos/300/300?3", name: "城市夜景", date: "2024-02-10", comment: "光影處理很棒，很有氛圍感！", tags: "素描,光影,城市" }]
+        },
+        student3: {
+            name: "小美", phone: "0922334455", avatar: "https://picsum.photos/200/200?2",
+            works: [{ img: "https://picsum.photos/300/300?4", name: "彩虹花園", date: "2024-02-17", comment: "顏色非常明亮可愛，充滿童趣！", tags: "彩筆,創意,花朵" }]
+        }
+    };
 
-let isTeacher = false;
-let currentStu = null;
-let previewParentMode = false;
+    let currentStudentId = null;
+    let isEditMode = false;
+    let isParentMode = false;
+    let currentWorkIndex = 0;
+    let currentEditWorkIndex = -1;
+    
+    window.onload = function() {
+        openParentLogin();
+        renderGallery();
+    };
 
-window.onload = () => {
-  renderStudentSelect();
-  openParentModal();
-};
-
-// 登入
-function openParentModal(){document.getElementById('parentModal').style.display='flex'}
-function parentLogin(){
-  const n = document.getElementById('pName').value.trim();
-  const p = document.getElementById('pPhone').value.trim();
-  for(let id in DB){
-    if(DB[id].name===n && DB[id].phone===p){
-      currentStu = id;
-      closeAll();
-      renderWorks();
-      return;
+    function openParentLogin() {
+        document.getElementById('parentLoginModal').style.display = 'flex';
+        document.getElementById('teacherModal').style.display = 'none';
+        document.getElementById('teacherPasswordModal').style.display = 'none';
     }
-  }
-  alert('資訊錯誤');
-}
+    
+    function closeParentLogin() {
+        document.getElementById('parentLoginModal').style.display = 'none';
+    }
+    
+    function parentLogin() {
+        const name = document.getElementById('parentStudentName').value.trim();
+        const phone = document.getElementById('parentPhone').value.trim();
+        
+        if(!name || !phone) { showToast('❌ 請填寫完整資訊'); return; }
+        
+        let foundStudent = null;
+        for(let id in allStudentsData) {
+            if(allStudentsData[id].name === name && allStudentsData[id].phone === phone) {
+                foundStudent = id; break;
+            }
+        }
+        
+        if(!foundStudent) { showToast('❌ 學生資訊不正確'); return; }
+        
+        currentStudentId = foundStudent;
+        isParentMode = true;
+        isEditMode = false;
+        closeParentLogin();
+        renderGallery();
+        showToast(`✅ 歡迎，${allStudentsData[foundStudent].name} 的家長`);
+    }
 
-function openTeacherModal(){document.getElementById('teacherModal').style.display='flex'}
-function teacherLogin(){
-  if(document.getElementById('tPwd').value==='123'){
-    isTeacher = true;
-    closeAll();
-    document.getElementById('studentSelect').style.display='block';
-    document.getElementById('teacherTools').style.display='block';
-    currentStu = Object.keys(DB)[0];
-    renderStudentSelect();
-    renderWorks();
-  }
-}
+    function openPasswordModal() {
+        document.getElementById('teacherModal').style.display = 'flex';
+        document.getElementById('parentLoginModal').style.display = 'none';
+    }
 
-// 學生
-function renderStudentSelect(){
-  const sel = document.getElementById('studentSelect');
-  sel.innerHTML = '';
-  for(let id in DB){
-    const opt = document.createElement('option');
-    opt.value=id; opt.textContent=DB[id].name;
-    sel.appendChild(opt);
-  }
-}
-function switchStudent(){
-  currentStu = document.getElementById('studentSelect').value;
-  renderWorks();
-}
+    function openTeacherPasswordModal() {
+        document.getElementById('teacherPasswordModal').style.display = 'flex';
+        document.getElementById('teacherModal').style.display = 'none';
+    }
 
-// 作品
-function renderWorks(){
-  const g = document.getElementById('artGrid');
-  g.innerHTML = '';
-  if(!currentStu){
-    document.getElementById('pageTitle').innerText='🎨 請登入瀏覽作品';
-    return;
-  }
-  const stu = DB[currentStu];
-  document.getElementById('pageTitle').innerText=`🎨 ${stu.name} 的作品`;
-  if(!stu.works || stu.works.length===0){
-    g.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px">暫無作品</div>';
-    return;
-  }
-  stu.works.forEach(w=>{
-    const c = document.createElement('div');
-    c.className='card';
-    c.innerHTML=`<img src="${w.img}"><div class="name">${w.title}</div>`;
-    g.appendChild(c);
-  });
-}
+    function closeTeacherPasswordModal() {
+        document.getElementById('teacherPasswordModal').style.display = 'none';
+    }
 
-// 編輯學生
-function openEditStudent(){
-  if(!isTeacher || !currentStu) return;
-  const s = DB[currentStu];
-  document.getElementById('e_name').value = s.name;
-  document.getElementById('e_phone').value = s.phone;
-  document.getElementById('editStudentModal').style.display='flex';
-}
-function saveStudentEdit(){
-  DB[currentStu].name = document.getElementById('e_name').value.trim();
-  DB[currentStu].phone = document.getElementById('e_phone').value.trim();
-  renderStudentSelect();
-  renderWorks();
-  closeAll();
-  alert('已儲存');
-}
+    function checkTeacherPassword() {
+        const pwd = document.getElementById('teacherPasswordInput').value.trim();
+        if(pwd === '123') {
+            isEditMode = true; isParentMode = false;
+            currentStudentId = "student1";
+            document.getElementById('editModeIndicator').style.display = 'flex';
+            document.getElementById('studentManageBar').style.display = 'block';
+            document.getElementById('studentSelector').style.display = 'block';
+            refreshStudentSelector();
+            renderGallery();
+            closeTeacherPasswordModal();
+            showToast('✅ 老師編輯模式已開啟');
+        } else { showToast('❌ 密碼錯誤'); }
+    }
+    
+    function logoutEditMode() {
+        if (confirm('確定登出？')) {
+            isEditMode = false; isParentMode = false; currentStudentId = null;
+            document.getElementById('editModeIndicator').style.display = 'none';
+            document.getElementById('studentManageBar').style.display = 'none';
+            document.getElementById('galleryTitle').innerText = "🎨 請登入檢視學生作品";
+            showToast('🔒 已登出');
+            openParentLogin();
+        }
+    }
 
-// 預覽家長
-function openPreview(){
-  previewParentMode = true;
-  renderWorks();
-  alert('已切換為家長預覽模式，再次登入老師即可恢復管理');
-}
+    function refreshStudentSelector() {
+        const sel = document.getElementById('studentSelector');
+        sel.innerHTML = '';
+        for(let id in allStudentsData) {
+            const opt = document.createElement('option');
+            opt.value = id; opt.textContent = allStudentsData[id].name;
+            sel.appendChild(opt);
+        }
+        sel.value = currentStudentId;
+    }
 
-function closeAll(){
-  document.querySelectorAll('.modal').forEach(m=>m.style.display='none');
-}
+    function switchStudent(id) {
+        currentStudentId = id;
+        renderGallery();
+        showToast(`✅ 切換至：${allStudentsData[id].name}`);
+    }
+
+    function renderGallery() {
+        const grid = document.getElementById('artGrid');
+        grid.innerHTML = '';
+        
+        if(!currentStudentId) {
+            grid.innerHTML = '<div class="empty-gallery">請登入檢視作品</div>';
+            return;
+        }
+
+        const stu = allStudentsData[currentStudentId];
+        document.getElementById('galleryTitle').innerText = `🎨 ${stu.name} 的創意畫廊`;
+
+        if(!stu.works || stu.works.length === 0) {
+            grid.innerHTML = '<div class="empty-gallery">暫無作品</div>';
+            return;
+        }
+
+        stu.works.forEach((w, i) => {
+            const c = document.createElement('div');
+            c.className = 'grid-card';
+            c.innerHTML = `<img src="${w.img}" class="art-img"><div class="art-info">${w.name}</div>`;
+            c.onclick = () => openWorkDetail(i);
+            grid.appendChild(c);
+        });
+    }
+
+    function openWorkDetail(idx) {
+        if(!currentStudentId) return;
+        const w = allStudentsData[currentStudentId].works[idx];
+        currentWorkIndex = idx; currentEditWorkIndex = idx;
+        
+        document.getElementById('modalWorkImg').src = w.img;
+        document.getElementById('modalWorkName').textContent = w.name;
+        document.getElementById('modalWorkDate').textContent = w.date;
+        document.getElementById('modalStudentName').textContent = allStudentsData[currentStudentId].name;
+        document.getElementById('modalWorkComment').textContent = w.comment;
+        document.getElementById('workIndex').textContent = `${idx+1}/${allStudentsData[currentStudentId].works.length}`;
+        
+        const tags = w.tags ? w.tags.split(',').map(t=>`<span class="skill-tag">${t.trim()}</span>`).join('') : '';
+        document.getElementById('modalWorkTags').innerHTML = tags;
+        
+        document.getElementById('workEditBtn').style.display = isEditMode ? 'inline-block' : 'none';
+        document.getElementById('workDeleteBtn').style.display = isEditMode ? 'inline-block' : 'none';
+        document.getElementById('workModal').style.display = 'flex';
+    }
+    
+    function closeWorkModal() { document.getElementById('workModal').style.display = 'none'; }
+    
+    function navigateWork(dir) {
+        const total = allStudentsData[currentStudentId].works.length;
+        currentWorkIndex = (currentWorkIndex + dir + total) % total;
+        openWorkDetail(currentWorkIndex);
+    }
+
+    function deleteCurrentWork() {
+        if(!isEditMode) return;
+        if(confirm('確定刪除？')) {
+            allStudentsData[currentStudentId].works.splice(currentWorkIndex, 1);
+            renderGallery(); closeWorkModal();
+            showToast('🗑️ 已刪除');
+        }
+    }
+
+    function openEditWorkModal() {
+        if(!isEditMode) return;
+        const w = allStudentsData[currentStudentId].works[currentEditWorkIndex];
+        document.getElementById('editWorkIndex').value = currentEditWorkIndex;
+        document.getElementById('editWorkName').value = w.name;
+        document.getElementById('editWorkDate').value = w.date;
+        document.getElementById('editWorkComment').value = w.comment;
+        document.getElementById('editWorkTags').value = w.tags || '';
+        
+        const p = document.getElementById('editWorkPreview');
+        p.src = w.img; p.style.display = 'block';
+        closeWorkModal();
+        document.getElementById('editWorkModal').style.display = 'flex';
+    }
+    
+    function closeEditWorkModal() { document.getElementById('editWorkModal').style.display = 'none'; }
+    
+    function previewEditWorkImage(i) {
+        const f = i.files[0];
+        if(f) {
+            const r = new FileReader();
+            r.onload = e => {
+                const p = document.getElementById('editWorkPreview');
+                p.src = e.target.result; p.style.display = 'block';
+            };
+            r.readAsDataURL(f);
+        }
+    }
+    
+    function saveEditWork() {
+        const idx = document.getElementById('editWorkIndex').value;
+        const img = document.getElementById('editWorkPreview').src;
+        const name = document.getElementById('editWorkName').value;
+        const date = document.getElementById('editWorkDate').value;
+        const cmt = document.getElementById('editWorkComment').value;
+        const tags = document.getElementById('editWorkTags').value;
+        
+        allStudentsData[currentStudentId].works[idx] = { img, name, date, comment:cmt, tags };
+        renderGallery(); closeEditWorkModal();
+        showToast('✅ 儲存成功');
+    }
+
+    function openAddWorkModal() {
+        if(!isEditMode) return;
+        document.getElementById('addWorkForm').reset();
+        document.getElementById('addWorkDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('addWorkPreview').style.display = 'none';
+        document.getElementById('addWorkModal').style.display = 'flex';
+    }
+    
+    function closeAddWorkModal() { document.getElementById('addWorkModal').style.display = 'none'; }
+    
+    function previewWorkImage(i) {
+        const f = i.files[0];
+        if(f) {
+            const r = new FileReader();
+            r.onload = e => {
+                const p = document.getElementById('addWorkPreview');
+                p.src = e.target.result; p.style.display = 'block';
+            };
+            r.readAsDataURL(f);
+        }
+    }
+    
+    function saveNewWork() {
+        const name = document.getElementById('addWorkName').value;
+        const date = document.getElementById('addWorkDate').value;
+        const cmt = document.getElementById('addWorkComment').value;
+        const tags = document.getElementById('addWorkTags').value;
+        const img = document.getElementById('addWorkPreview').src || 'https://picsum.photos/300/300?'+Math.random();
+        
+        allStudentsData[currentStudentId].works.push({ img, name, date, comment:cmt, tags });
+        renderGallery(); closeAddWorkModal();
+        showToast('✅ 新增成功');
+    }
+
+    function openEditStudentModal() {
+        if(!isEditMode) return;
+        const s = allStudentsData[currentStudentId];
+        document.getElementById('editStudentId').value = currentStudentId;
+        document.getElementById('editStudentName').value = s.name;
+        document.getElementById('editStudentPhone').value = s.phone;
+        document.getElementById('editStudentPreview').src = s.avatar;
+        document.getElementById('editStudentPreview').style.display = 'block';
+        document.getElementById('editStudentModal').style.display = 'flex';
+    }
+    
+    function closeEditStudentModal() { document.getElementById('editStudentModal').style.display = 'none'; }
+    
+    function previewEditStudentAvatar(i) {
+        const f = i.files[0];
+        if(f) {
+            const r = new FileReader();
+            r.onload = e => {
+                const p = document.getElementById('editStudentPreview');
+                p.src = e.target.result; p.style.display = 'block';
+            };
+            r.readAsDataURL(f);
+        }
+    }
+    
+    function saveEditStudent() {
+        const id = document.getElementById('editStudentId').value;
+        const name = document.getElementById('editStudentName').value;
+        const phone = document.getElementById('editStudentPhone').value;
+        const avatar = document.getElementById('editStudentPreview').src;
+        
+        allStudentsData[id] = { ...allStudentsData[id], name, phone, avatar };
+        refreshStudentSelector();
+        renderGallery();
+        closeEditStudentModal();
+        showToast('✅ 修改成功');
+    }
+
+    function showToast(m) {
+        const t = document.createElement('div');
+        t.className = 'toast-message';
+        t.textContent = m;
+        document.body.appendChild(t);
+        setTimeout(()=>document.body.removeChild(t), 2000);
+    }
 </script>
 </body>
 </html>
