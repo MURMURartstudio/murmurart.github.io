@@ -1,177 +1,1366 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>課程進度 | MURMUR ART</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:微軟正黑體}
-body{background:#f7f8fb}
-.navbar{background:#fff;padding:16px;position:sticky;top:0;box-shadow:0 2px 10px #0001}
-.nav{max-width:1100px;margin:auto;display:flex;justify-content:space-between;align-items:center}
-.logo{font-size:20px;font-weight:bold;color:#6b8bd1}
-.menu a{margin-left:16px;text-decoration:none;color:#555}
-.main{max-width:1100px;margin:auto;padding:20px}
-.title{text-align:center;margin:20px 0;font-size:22px;color:#6b8bd1}
-.tools{margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap}
-.btn{padding:8px 14px;background:#6b8bd1;color:#fff;border:none;border-radius:8px;cursor:pointer}
-.btn.del{background:#e53935}
-select{padding:8px 12px;border:1px solid #ddd;border-radius:8px}
-table{width:100%;background:#fff;border-radius:10px;overflow:hidden}
-th,td{padding:12px;text-align:left;border-bottom:1px solid #eee}
-th{background:#6b8bd1;color:#fff}
-.modal{position:fixed;top:0;left:0;width:100%;height:100%;background:#0009;display:none;justify-content:center;align-items:center}
-.box{background:#fff;padding:24px;border-radius:16px;width:90%;max-width:500px}
-input,textarea,select{width:100%;margin:6px 0;padding:10px;border:1px solid #ddd;border-radius:8px}
-footer{background:#6b8bd1;color:#fff;text-align:center;padding:24px;margin-top:60px;font-size:14px;line-height:1.6}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MURMUR ART - 課程進度</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "微軟正黑體", sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fb;
+            color: #444;
+            overflow-x: hidden;
+            background: linear-gradient(120deg, #f5f7fb, #e8edff);
+            background-size: 200% 200%;
+            animation: bgFlow 15s ease infinite;
+        }
+
+        @keyframes bgFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px 0;
+        }
+
+        .navbar {
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-wrap {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .logo-img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            animation: logoRotate 8s ease-in-out infinite;
+        }
+
+        @keyframes logoRotate {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(5deg); }
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: bold;
+            color: #879acb;
+            text-shadow: 0 0 10px rgba(135, 154, 203, 0.5);
+        }
+
+        .nav-menu a {
+            margin-left: 25px;
+            text-decoration: none;
+            color: #666;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-menu a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0%;
+            height: 2px;
+            background: #879acb;
+            transition: width 0.3s ease;
+        }
+
+        .nav-menu a:hover::after {
+            width: 100%;
+        }
+
+        .nav-menu a.active {
+            color: #879acb;
+            font-weight: bold;
+        }
+
+        .course-progress {
+            padding: 40px 0;
+        }
+
+        .course-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .course-title {
+            font-size: 32px;
+            color: #879acb;
+            margin-bottom: 10px;
+        }
+
+        .course-subtitle {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .course-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .overview-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(135, 154, 203, 0.1);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .overview-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(135, 154, 203, 0.2);
+        }
+
+        .overview-icon {
+            font-size: 40px;
+            color: #879acb;
+            margin-bottom: 15px;
+        }
+
+        .overview-number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #879acb;
+            margin-bottom: 10px;
+        }
+
+        .overview-label {
+            font-size: 16px;
+            color: #666;
+        }
+
+        .progress-bar-container {
+            background: #e8edff;
+            border-radius: 20px;
+            height: 15px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: #879acb;
+            border-radius: 20px;
+            transition: width 0.5s ease;
+        }
+
+        .course-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(135, 154, 203, 0.1);
+        }
+
+        .course-table th, .course-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e8edff;
+        }
+
+        .course-table th {
+            background: #879acb;
+            color: white;
+        }
+
+        .course-table tr:hover {
+            background: #f8f9ff;
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-completed {
+            background: #d4edda;
+            color: #28a745;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #ffc107;
+        }
+        
+        .status-leave {
+            background: #f8d7da;
+            color: #dc3545;
+        }
+
+        .edit-btn {
+            padding: 5px 10px;
+            background: #879acb;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .edit-btn:hover {
+            background: #6a80b8;
+        }
+        
+        .add-course-btn {
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background: #879acb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .add-course-btn:hover {
+            background: #6a80b8;
+            transform: translateY(-2px);
+        }
+
+        .edit-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 9999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .edit-modal-content {
+            background: white;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 50px rgba(135, 154, 203, 0.5);
+            animation: modalPop 0.5s ease-out forwards;
+        }
+
+        @keyframes modalPop {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #879acb;
+            font-weight: bold;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e8edff;
+            border-radius: 8px;
+            font-size: 16px;
+            color: #444;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #879acb;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+
+        .form-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-save {
+            background: #879acb;
+            color: white;
+        }
+
+        .btn-save:hover {
+            background: #6a80b8;
+        }
+
+        .btn-cancel {
+            background: #e8edff;
+            color: #879acb;
+        }
+
+        .btn-cancel:hover {
+            background: #d4def7;
+        }
+
+        .student-selector {
+            margin: 10px 0 20px;
+            padding: 8px 12px;
+            border: 2px solid #e8edff;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #879acb;
+            background: white;
+            cursor: pointer;
+            display: none;
+        }
+
+        .course-img-preview {
+            max-width: 100px;
+            max-height: 100px;
+            border-radius: 8px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .batch-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(135, 154, 203, 0.1);
+            display: none;
+        }
+        
+        .batch-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .batch-select-all {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #666;
+        }
+        
+        .batch-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 8px;
+            background: #879acb;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .batch-btn:hover {
+            background: #6a80b8;
+        }
+        
+        .batch-btn.secondary {
+            background: #e8edff;
+            color: #879acb;
+        }
+        
+        .search-container {
+            position: relative;
+            width: 300px;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 8px 15px 8px 35px;
+            border: 2px solid #e8edff;
+            border-radius: 20px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        
+        .search-input:focus {
+            border-color: #879acb;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #879acb;
+        }
+
+        .row-checkbox {
+            width: 18px;
+            height: 18px;
+            accent-color: #879acb;
+            cursor: pointer;
+        }
+
+        .password-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 99999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .password-content {
+            background: white;
+            width: 90%;
+            max-width: 450px;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 50px rgba(135, 154, 203, 0.5);
+            animation: modalPop 0.5s ease-out forwards;
+            text-align: center;
+        }
+
+        .password-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e8edff;
+            border-radius: 8px;
+            font-size: 16px;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .password-input:focus {
+            outline: none;
+            border-color: #879acb;
+        }
+
+        .edit-mode-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 999;
+            display: none;
+        }
+
+        .delete-btn {
+            padding: 5px 10px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
+        }
+
+        .teacher-login-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 16px;
+            height: 16px;
+            background: transparent;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            opacity: 0.15;
+            z-index: 98;
+        }
+        .teacher-login-btn:hover {
+            opacity: 0.4;
+        }
+
+        .makeup-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 9999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .makeup-content {
+            background: white;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 50px rgba(135, 154, 203, 0.5);
+        }
+        
+        .makeup-option {
+            padding: 15px;
+            border: 2px solid #e8edff;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .makeup-option:hover {
+            border-color: #879acb;
+            background: #f8f9ff;
+        }
+        
+        .makeup-option.selected {
+            border-color: #879acb;
+            background: #e8edff;
+        }
+        
+        .leave-reason-group {
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .reason-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .batch-add-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 9999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .batch-add-content {
+            background: white;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 50px rgba(135, 154, 203, 0.5);
+        }
+
+        .toast-message {
+            position: fixed;
+            bottom: 90px;
+            right: 30px;
+            padding: 15px 25px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            border-radius: 8px;
+            z-index: 100;
+            display: none;
+            animation: toastFade 0.3s ease forwards;
+        }
+
+        @keyframes toastFade {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .batch-actions {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 15px;
+            }
+            .search-container { width: 100%; }
+            .course-table { font-size: 14px; }
+            .course-table th, .course-table td { padding: 10px 8px; }
+        }
+    </style>
 </head>
 <body>
 
-<div class="navbar">
-  <div class="nav">
-    <div class="logo">MURMUR ART</div>
-    <div class="menu">
-      <a href="index.html">學生作品</a>
-      <a href="course.html">課程進度</a>
+<button class="teacher-login-btn" onclick="openPasswordModal()" title="老師編輯入口"></button>
+<div class="edit-mode-indicator" id="editModeIndicator">✏️ 編輯模式已開啟</div>
+
+<div class="password-modal" id="parentLoginModal">
+    <div class="password-content">
+        <h2 style="color: #879acb; margin-bottom: 10px;">👨‍👩‍👧‍👦 家長登入</h2>
+        <input type="text" id="parentStudentName" class="password-input" placeholder="學生姓名" required>
+        <input type="text" id="parentPhone" class="password-input" placeholder="聯絡電話" required>
+        <button class="form-btn btn-save" onclick="parentLogin()" style="width: 100%; margin-top:10px">登入查看</button>
+        <button class="form-btn btn-cancel" onclick="closeParentLogin()" style="width: 100%; margin-top:10px">取消</button>
     </div>
-  </div>
 </div>
 
-<div class="main">
-  <div class="title">📘 課程進度管理</div>
-
-  <div class="tools">
-    <select id="studentSelect" onchange="switchStudent()"></select>
-    <button class="btn" onclick="openBatchCourse()">批次新增課程</button>
-    <button class="btn" onclick="openAddCourse()">新增單堂</button>
-    <button class="btn del" onclick="deleteStudent()">刪除學生</button>
-  </div>
-
-  <table>
-    <thead>
-      <tr><th>日期</th><th>時間</th><th>主題</th><th>狀態</th><th>操作</th></tr>
-    </thead>
-    <tbody id="courseTable"></tbody>
-  </table>
+<div class="password-modal" id="teacherPasswordModal">
+    <div class="password-content">
+        <h2 style="color: #879acb; margin-bottom: 10px;">🔒 老師登入</h2>
+        <p style="color: #666; margin-bottom: 20px;">請輸入編輯密碼</p>
+        <input type="password" id="teacherPasswordInput" class="password-input" placeholder="請輸入密碼" required>
+        <button class="form-btn btn-save" onclick="checkTeacherPassword()" style="width: 100%; margin-top:10px">確認登入</button>
+        <button class="form-btn btn-cancel" onclick="closeTeacherPasswordModal()" style="width: 100%; margin-top:10px">取消</button>
+    </div>
 </div>
 
-<!-- 新增課程 -->
-<div class="modal" id="addModal">
-  <div class="box">
-    <h3>新增課程</h3>
-    <input type="date" id="c_date">
-    <input type="text" id="c_topic" placeholder="主題">
-    <button class="btn" onclick="saveCourse()">儲存</button>
-  </div>
+<div class="password-modal" id="teacherModal">
+    <div class="password-content">
+        <h2 style="color: #879acb; margin-bottom: 10px;">🔒 選擇身份</h2>
+        <p style="color: #666; margin-bottom: 20px;">請選擇登入身份</p>
+        <button class="form-btn btn-save" onclick="openTeacherPasswordModal()" style="width: 100%; margin-bottom:10px">我是老師（編輯）</button>
+        <button class="form-btn btn-cancel" onclick="openParentLogin()" style="width: 100%">我是家長（檢視）</button>
+    </div>
 </div>
 
-<!-- 批次新增 -->
-<div class="modal" id="batchModal">
-  <div class="box">
-    <h3>批次新增 4/12/24 堂</h3>
-    <input type="date" id="b_start">
-    <select id="b_count">
-      <option value="4">4 堂</option>
-      <option value="12">12 堂</option>
-      <option value="24">24 堂</option>
-    </select>
-    <button class="btn" onclick="batchCreate()">確認新增</button>
-  </div>
+<div class="navbar">
+    <div class="container nav-wrap">
+        <div class="logo-container">
+            <img src="https://p11-flow-imagex-download-sign.byteimg.com/tos-cn-i-a9rns2rl98/45afcf8642d843118169b9b9b9b7bddddc.png~tplv-a9rns2rl98-24:720:720.png" 
+                 class="logo-img" alt="MURMUR ART">
+            <div class="logo-text">MURMUR ART</div>
+        </div>
+        <div class="nav-menu">
+            <a href="學生作品.html">學生作品</a>
+            <a href="#" class="active">課程進度</a>
+            <a href="#" onclick="logoutEditMode()">登出</a>
+        </div>
+    </div>
 </div>
 
-<footer>
-  <p>地址：九龍永康街 55 號金百盛中心 20 樓 2002 室</p>
-  <p>（荔枝角地鐵站 B1 出口，步行約 3 分鐘）</p>
-  <p>聯絡電話：6748 0066</p>
-</footer>
+<div class="container course-progress">
+    <div class="course-header">
+        <h2 class="course-title">📋 課程進度管理</h2>
+        <p class="course-subtitle">檢視課程完成狀況與上課紀錄</p>
+    </div>
+    
+    <select class="student-selector" id="studentSelector" onchange="switchStudent(this.value)"></select>
+
+    <div class="course-overview">
+        <div class="overview-card">
+            <div class="overview-icon">📚</div>
+            <div class="overview-number" id="totalCourses">0</div>
+            <div class="overview-label">總課程數</div>
+        </div>
+        <div class="overview-card">
+            <div class="overview-icon">✅</div>
+            <div class="overview-number" id="completedCourses">0</div>
+            <div class="overview-label">已完成課程</div>
+        </div>
+        <div class="overview-card">
+            <div class="overview-icon">🔄</div>
+            <div class="overview-number" id="remainingCourses">0</div>
+            <div class="overview-label">剩餘課程數</div>
+        </div>
+        <div class="overview-card">
+            <div class="overview-icon">📊</div>
+            <div class="overview-number" id="completionRate">0%</div>
+            <div class="overview-label">完成率</div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar" style="width: 0%;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div style="display: flex; gap: 10px; margin-bottom: 20px; display: none;" id="editButtonsGroup">
+        <button class="add-course-btn" onclick="openAddCourseModal()">➕ 新增單一課程</button>
+        <button class="add-course-btn" style="background: #6a80b8;" onclick="openBatchAddModal()">📚 批次新增課程</button>
+    </div>
+    
+    <div class="batch-actions" id="batchActionsBar">
+        <div class="batch-left">
+            <div class="batch-select-all">
+                <input type="checkbox" id="selectAll" class="row-checkbox" onclick="toggleSelectAll()">
+                <label for="selectAll">全選</label>
+            </div>
+            <button class="batch-btn" onclick="batchUpdateStatus('completed')">標記已完成</button>
+            <button class="batch-btn" onclick="batchUpdateStatus('pending')">標記未完成</button>
+            <button class="batch-btn" onclick="batchUpdateLeaveStatus()">標記請假</button>
+            <button class="batch-btn secondary" onclick="clearSelection()">取消選擇</button>
+            <button class="batch-btn" style="background: #dc3545;" onclick="batchDeleteCourses()">🗑️ 批次刪除</button>
+        </div>
+        <div class="search-container">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="search-input" id="courseSearch" placeholder="搜尋課程日期/主題" oninput="searchCourses()">
+        </div>
+    </div>
+    
+    <table class="course-table">
+        <thead>
+            <tr>
+                <th style="width: 50px; display: none;" id="checkboxHeader">
+                    <input type="checkbox" class="row-checkbox" id="headerCheckbox" onclick="toggleSelectAll()">
+                </th>
+                <th>課程日期</th>
+                <th>上課時間</th>
+                <th>課程主題</th>
+                <th>作品</th>
+                <th>狀態</th>
+                <th>備註</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody id="courseTableBody"></tbody>
+    </table>
+</div>
+
+<div class="edit-modal" id="editModal">
+    <div class="edit-modal-content">
+        <div class="modal-header" style="margin: -30px -30px 20px -30px;">
+            <h2 style="font-size: 20px;">編輯課程</h2>
+            <div class="modal-close" onclick="closeEditModal()">×</div>
+        </div>
+        <form id="editCourseForm">
+            <input type="hidden" id="editCourseIndex">
+            <div class="form-group">
+                <label class="form-label">課程日期</label>
+                <input type="date" id="editCourseDate" class="form-control">
+            </div>
+            <div class="form-group">
+                <label class="form-label">上課時間</label>
+                <input type="time" id="editCourseTimeStart" class="form-control" style="margin-bottom:10px;">
+                <input type="time" id="editCourseTimeEnd" class="form-control">
+            </div>
+            <div class="form-group">
+                <label class="form-label">課程主題</label>
+                <input type="text" id="editCourseTheme" class="form-control">
+            </div>
+            <div class="form-group">
+                <label class="form-label">作品圖片</label>
+                <input type="file" id="editCourseImg" class="form-control" accept="image/*" onchange="previewEditImage(this)">
+                <img src="" id="editImgPreview" class="course-img-preview">
+            </div>
+            <div class="form-group">
+                <label class="form-label">狀態</label>
+                <select id="editCourseStatus" class="form-control" onchange="handleStatusChangeInEdit(this.value)">
+                    <option value="completed">已完成</option>
+                    <option value="pending">未完成</option>
+                    <option value="leave">請假</option>
+                </select>
+            </div>
+            <div class="form-group" id="leaveReasonGroup">
+                <label class="form-label">請假原因</label>
+                <div class="reason-option">
+                    <input type="radio" id="reason-valid" name="leaveReason" value="valid" checked>
+                    <label for="reason-valid">可補課</label>
+                </div>
+                <div class="reason-option">
+                    <input type="radio" id="reason-invalid" name="leaveReason" value="invalid">
+                    <label for="reason-invalid">不補課</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">備註</label>
+                <textarea id="editCourseNote" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="form-btn btn-cancel" onclick="closeEditModal()">取消</button>
+                <button type="button" class="form-btn btn-save" onclick="saveCourseEdit()">儲存</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="edit-modal" id="addCourseModal">
+    <div class="edit-modal-content">
+        <div class="modal-header" style="margin: -30px -30px 20px -30px;">
+            <h2 style="font-size: 20px;">新增課程</h2>
+            <div class="modal-close" onclick="closeAddCourseModal()">×</div>
+        </div>
+        <form id="addCourseForm">
+            <div class="form-group">
+                <label class="form-label">課程日期</label>
+                <input type="date" id="addCourseDate" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">上課時間</label>
+                <input type="time" id="addCourseTimeStart" class="form-control" required value="10:00">
+                <input type="time" id="addCourseTimeEnd" class="form-control" required value="11:15">
+            </div>
+            <div class="form-group">
+                <label class="form-label">課程主題</label>
+                <input type="text" id="addCourseTheme" class="form-control">
+            </div>
+            <div class="form-group">
+                <label class="form-label">作品圖片</label>
+                <input type="file" id="addCourseImg" class="form-control" accept="image/*" onchange="previewAddImage(this)">
+                <img src="" id="addImgPreview" class="course-img-preview">
+            </div>
+            <div class="form-group">
+                <label class="form-label">狀態</label>
+                <select id="addCourseStatus" class="form-control">
+                    <option value="pending">未完成</option>
+                    <option value="completed">已完成</option>
+                    <option value="leave">請假</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">備註</label>
+                <textarea id="addCourseNote" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="form-btn btn-cancel" onclick="closeAddCourseModal()">取消</button>
+                <button type="button" class="form-btn btn-save" onclick="addNewCourse()">儲存</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="batch-add-modal" id="batchAddModal">
+    <div class="batch-add-content">
+        <div class="modal-header" style="margin: -30px -30px 20px -30px;">
+            <h2 style="font-size: 20px;">批次新增課程</h2>
+            <div class="modal-close" onclick="closeBatchAddModal()">×</div>
+        </div>
+        <form id="batchAddForm">
+            <div class="form-group">
+                <label class="form-label">開始日期</label>
+                <input type="date" id="batchStartDate" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">課程數量</label>
+                <select id="batchCourseCount" class="form-control" required>
+                    <option value="4">4堂（1個月）</option>
+                    <option value="12">12堂（3個月）</option>
+                    <option value="24">24堂（6個月）</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">上課時間</label>
+                <input type="time" id="batchTimeStart" class="form-control" required value="10:00">
+                <input type="time" id="batchTimeEnd" class="form-control" required value="11:15">
+            </div>
+            <div class="form-group">
+                <label class="form-label">課程主題</label>
+                <input type="text" id="batchCourseTheme" class="form-control">
+            </div>
+            <div class="form-group">
+                <label class="form-label">狀態</label>
+                <select id="batchCourseStatus" class="form-control">
+                    <option value="pending">未完成</option>
+                    <option value="completed">已完成</option>
+                </select>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="form-btn btn-cancel" onclick="closeBatchAddModal()">取消</button>
+                <button type="button" class="form-btn btn-save" onclick="batchAddCourses()">批次新增</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="makeup-modal" id="makeupModal">
+    <div class="makeup-content">
+        <div class="modal-header" style="margin: -30px -30px 20px -30px;">
+            <h2 style="font-size: 20px;">補課安排</h2>
+            <div class="modal-close" onclick="closeMakeupModal()">×</div>
+        </div>
+        <div id="makeupContent">
+            <p>請選擇補課方式：</p>
+            <div class="makeup-option" onclick="selectMakeupOption(this, 'single')">
+                <h3>單次補課</h3>
+                <p>選擇新日期補課</p>
+            </div>
+            <div class="makeup-option" onclick="selectMakeupOption(this, 'merge')">
+                <h3>合併課程</h3>
+                <p>合併至下一次課程</p>
+            </div>
+            <div class="form-group" id="makeupDateGroup" style="display:none; margin-top:20px;">
+                <label class="form-label">補課日期</label>
+                <input type="date" id="makeupDate" class="form-control">
+            </div>
+            <div class="form-actions">
+                <button type="button" class="form-btn btn-cancel" onclick="closeMakeupModal()">取消</button>
+                <button type="button" class="form-btn btn-save" onclick="confirmMakeup()">確認</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
-// 與作品頁 完全相同資料
-let DB = {
-  student_1: {
-    name:"小明", phone:"0911222333",
-    works:[{img:"https://picsum.photos/400/400?1", title:"風景畫"}],
-    courses:[
-      {date:"2025-10-01", topic:"水彩基礎", status:"已完成"}
-    ]
-  }
-};
+    let allStudentsData = {
+        student1: {
+            name: "小明", phone: "0912345678",
+            courses: [
+                { date: '2024-01-10', time: '10:00 - 11:15', theme: '水彩基礎', status: 'completed', note: '基礎暈染', img: '' },
+                { date: '2024-01-17', time: '10:00 - 11:15', theme: '色彩練習', status: 'completed', note: '冷暖色', img: '' },
+                { date: '2024-01-24', time: '10:00 - 11:15', theme: '動物畫', status: 'pending', note: '', img: '' }
+            ]
+        },
+        student2: {
+            name: "小華", phone: "0987654321",
+            courses: [
+                { date: '2024-01-10', time: '14:00 - 15:15', theme: '素描入門', status: 'completed', note: '', img: '' },
+                { date: '2024-01-24', time: '14:00 - 15:15', theme: '線條練習', status: 'pending', note: '', img: '' }
+            ]
+        },
+        student3: {
+            name: "小美", phone: "0922334455",
+            courses: [
+                { date: '2024-01-17', time: '13:00 - 14:15', theme: '彩筆創意', status: 'pending', note: '', img: '' }
+            ]
+        }
+    };
 
-let current = Object.keys(DB)[0];
+    let currentStudentId = null;
+    let courses = [];
+    let isEditMode = false;
+    let isParentMode = false;
+    let currentEditIndex = -1;
+    let filteredCourses = [];
+    let originalCourses = [];
+    let selectedMakeupOption = '';
+    
+    window.onload = function() {
+        openParentLogin();
+    };
 
-window.onload = () => {
-  renderStudentSelect();
-  renderTable();
-};
+    function openParentLogin() {
+        document.getElementById('parentLoginModal').style.display = 'flex';
+        document.getElementById('teacherModal').style.display = 'none';
+        document.getElementById('teacherPasswordModal').style.display = 'none';
+    }
+    
+    function closeParentLogin() {
+        document.getElementById('parentLoginModal').style.display = 'none';
+    }
+    
+    function parentLogin() {
+        const name = document.getElementById('parentStudentName').value.trim();
+        const phone = document.getElementById('parentPhone').value.trim();
+        if(!name || !phone) { showToast('❌ 請填寫完整'); return; }
+        
+        let found = null;
+        for(let id in allStudentsData) {
+            if(allStudentsData[id].name === name && allStudentsData[id].phone === phone) {
+                found = id; break;
+            }
+        }
+        if(!found) { showToast('❌ 資訊錯誤'); return; }
+        
+        currentStudentId = found;
+        isParentMode = true;
+        isEditMode = false;
+        closeParentLogin();
+        reloadStudentData();
+        showToast(`✅ 歡迎，${allStudentsData[found].name}家長`);
+    }
 
-function renderStudentSelect(){
-  const sel = document.getElementById('studentSelect');
-  sel.innerHTML='';
-  for(let id in DB){
-    const o = document.createElement('option');
-    o.value=id; o.textContent=DB[id].name;
-    sel.appendChild(o);
-  }
-  sel.value = current;
-}
+    function openPasswordModal() {
+        document.getElementById('teacherModal').style.display = 'flex';
+        document.getElementById('parentLoginModal').style.display = 'none';
+    }
 
-function switchStudent(){
-  current = document.getElementById('studentSelect').value;
-  renderTable();
-}
+    function openTeacherPasswordModal() {
+        document.getElementById('teacherPasswordModal').style.display = 'flex';
+        document.getElementById('teacherModal').style.display = 'none';
+    }
 
-function renderTable(){
-  const tb = document.getElementById('courseTable');
-  tb.innerHTML='';
-  const arr = DB[current].courses || [];
-  arr.forEach(c=>{
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${c.date}</td>
-      <td>1小時15分</td>
-      <td>${c.topic}</td>
-      <td>${c.status}</td>
-      <td><button class='btn' onclick='editCourse()'>編輯</button></td>
-    `;
-    tb.appendChild(tr);
-  });
-}
+    function closeTeacherPasswordModal() {
+        document.getElementById('teacherPasswordModal').style.display = 'none';
+    }
 
-function openAddCourse(){document.getElementById('addModal').style.display='flex'}
-function openBatchCourse(){document.getElementById('batchModal').style.display='flex'}
+    function checkTeacherPassword() {
+        const pwd = document.getElementById('teacherPasswordInput').value.trim();
+        if(pwd === '123') {
+            isEditMode = true; isParentMode = false;
+            currentStudentId = "student1";
+            document.getElementById('editModeIndicator').style.display = 'flex';
+            document.getElementById('editButtonsGroup').style.display = 'flex';
+            document.getElementById('batchActionsBar').style.display = 'flex';
+            document.getElementById('checkboxHeader').style.display = 'block';
+            document.getElementById('studentSelector').style.display = 'block';
+            refreshStudentSelector();
+            reloadStudentData();
+            closeTeacherPasswordModal();
+            showToast('✅ 老師模式已開啟');
+        } else { showToast('❌ 密碼錯誤'); }
+    }
+    
+    function logoutEditMode() {
+        if(confirm('確定登出？')) {
+            isEditMode = false; isParentMode = false; currentStudentId = null;
+            document.getElementById('editModeIndicator').style.display = 'none';
+            document.getElementById('editButtonsGroup').style.display = 'none';
+            document.getElementById('batchActionsBar').style.display = 'none';
+            document.getElementById('checkboxHeader').style.display = 'none';
+            document.getElementById('studentSelector').style.display = 'none';
+            showToast('🔒 已登出');
+            openParentLogin();
+        }
+    }
 
-function saveCourse(){
-  const d = document.getElementById('c_date').value;
-  const t = document.getElementById('c_topic').value;
-  DB[current].courses.push({date:d, topic:t, status:"未完成"});
-  renderTable();
-  closeAll();
-}
+    function refreshStudentSelector() {
+        const sel = document.getElementById('studentSelector');
+        sel.innerHTML = '';
+        for(let id in allStudentsData) {
+            const opt = document.createElement('option');
+            opt.value = id; opt.textContent = allStudentsData[id].name;
+            sel.appendChild(opt);
+        }
+        sel.value = currentStudentId;
+    }
 
-function batchCreate(){
-  const start = new Date(document.getElementById('b_start').value);
-  const cnt = parseInt(document.getElementById('b_count').value);
-  for(let i=0;i<cnt;i++){
-    const dt = new Date(start);
-    dt.setDate(start.getDate() + i*7);
-    const ds = dt.toISOString().split('T')[0];
-    DB[current].courses.push({date:ds, topic:"", status:"未完成"});
-  }
-  renderTable();
-  closeAll();
-}
+    function switchStudent(id) {
+        currentStudentId = id;
+        reloadStudentData();
+        showToast(`✅ 切換至：${allStudentsData[id].name}`);
+    }
 
-function deleteStudent(){
-  if(!confirm('確定刪除？所有作品與課程將消失')) return;
-  delete DB[current];
-  current = Object.keys(DB)[0] || null;
-  renderStudentSelect();
-  renderTable();
-}
+    function reloadStudentData() {
+        if(!currentStudentId) return;
+        courses = [...allStudentsData[currentStudentId].courses];
+        originalCourses = [...courses];
+        filteredCourses = [...courses];
+        renderCourseTable();
+        updateCourseStats();
+    }
 
-function editCourse(){alert('點擊確定後可編輯此堂課')}
-function closeAll(){document.querySelectorAll('.modal').forEach(m=>m.style.display='none')}
+    function renderCourseTable() {
+        const body = document.getElementById('courseTableBody');
+        body.innerHTML = '';
+        let data = filteredCourses.length ? [...filteredCourses] : [...courses];
+        data.sort((a,b) => { const o={pending:0,leave:1,completed:2}; return o[a.status]-o[b.status]; });
+        
+        if(data.length === 0) {
+            body.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:30px;">暫無課程</td></tr>`;
+            return;
+        }
+
+        data.forEach((c, idx) => {
+            let badge = '';
+            if(c.status === 'completed') badge = '<span class="status-badge status-completed">已完成</span>';
+            else if(c.status === 'pending') badge = '<span class="status-badge status-pending">未完成</span>';
+            else badge = '<span class="status-badge status-leave">請假</span>';
+            
+            const img = c.img ? `<img src="${c.img}" style="width:40px;height:40px;border-radius:5px;">` : '無';
+            
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td style="display:${isEditMode?'table-cell':'none'}">
+                    <input type="checkbox" class="row-checkbox course-checkbox" data-index="${idx}">
+                </td>
+                <td>${c.date}</td>
+                <td>${c.time}</td>
+                <td>${c.theme||'-'}</td>
+                <td>${img}</td>
+                <td>${badge}</td>
+                <td>${c.note||'-'}</td>
+                <td>${isEditMode?`
+                    <button class="edit-btn" onclick="openEditModal(${idx})">編輯</button>
+                    <button class="delete-btn" onclick="deleteCourse(${idx})">刪除</button>
+                `:'-'}</td>
+            `;
+            body.appendChild(tr);
+        });
+    }
+
+    function updateCourseStats() {
+        const total = courses.length;
+        const done = courses.filter(x=>x.status==='completed').length;
+        const rem = total - done;
+        const rate = total ? Math.round(done/total*100) : 0;
+        
+        document.getElementById('totalCourses').textContent = total;
+        document.getElementById('completedCourses').textContent = done;
+        document.getElementById('remainingCourses').textContent = rem;
+        document.getElementById('completionRate').textContent = rate+'%';
+        document.getElementById('progressBar').style.width = rate+'%';
+    }
+
+    function previewAddImage(i) {
+        const f = i.files[0];
+        if(f) {
+            const r = new FileReader();
+            r.onload = e => {
+                const p = document.getElementById('addImgPreview');
+                p.src = e.target.result; p.style.display = 'block';
+            };
+            r.readAsDataURL(f);
+        }
+    }
+    
+    function previewEditImage(i) {
+        const f = i.files[0];
+        if(f) {
+            const r = new FileReader();
+            r.onload = e => {
+                const p = document.getElementById('editImgPreview');
+                p.src = e.target.result; p.style.display = 'block';
+            };
+            r.readAsDataURL(f);
+        }
+    }
+
+    function openEditModal(idx) {
+        if(!isEditMode) return;
+        currentEditIndex = idx;
+        const c = courses[idx];
+        const t = c.time ? c.time.split(' - ') : ['',''];
+        
+        document.getElementById('editCourseIndex').value = idx;
+        document.getElementById('editCourseDate').value = c.date;
+        document.getElementById('editCourseTimeStart').value = t[0]||'';
+        document.getElementById('editCourseTimeEnd').value = t[1]||'';
+        document.getElementById('editCourseTheme').value = c.theme||'';
+        document.getElementById('editCourseStatus').value = c.status;
+        document.getElementById('editCourseNote').value = c.note||'';
+        
+        const p = document.getElementById('editImgPreview');
+        if(c.img) { p.src = c.img; p.style.display = 'block'; }
+        else p.style.display = 'none';
+        
+        handleStatusChangeInEdit(c.status);
+        document.getElementById('editModal').style.display = 'flex';
+    }
+    
+    function closeEditModal() { document.getElementById('editModal').style.display = 'none'; }
+    
+    function saveCourseEdit() {
+        const idx = document.getElementById('editCourseIndex').value;
+        const s = document.getElementById('editCourseTimeStart').value;
+        const e = document.getElementById('editCourseTimeEnd').value;
+        const img = document.getElementById('editImgPreview').src || '';
+        
+        courses[idx] = {
+            date: document.getElementById('editCourseDate').value,
+            time: `${s} - ${e}`,
+            theme: document.getElementById('editCourseTheme').value,
+            status: document.getElementById('editCourseStatus').value,
+            note: document.getElementById('editCourseNote').value,
+            img: img
+        };
+        
+        allStudentsData[currentStudentId].courses = [...courses];
+        originalCourses = [...courses];
+        filteredCourses = [...courses];
+        renderCourseTable();
+        updateCourseStats();
+        closeEditModal();
+        showToast('✅ 儲存成功');
+    }
+
+    function openAddCourseModal() {
+        if(!isEditMode) return;
+        document.getElementById('addCourseForm').reset();
+        document.getElementById('addCourseDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('addImgPreview').style.display = 'none';
+        document.getElementById('addCourseModal').style.display = 'flex';
+    }
+    
+    function closeAddCourseModal() { document.getElementById('addCourseModal').style.display = 'none'; }
+    
+    function addNewCourse() {
+        const s = document.getElementById('addCourseTimeStart').value;
+        const e = document.getElementById('addCourseTimeEnd').value;
+        const img = document.getElementById('addImgPreview').src || '';
+        
+        const n = {
+            date: document.getElementById('addCourseDate').value,
+            time: `${s} - ${e}`,
+            theme: document.getElementById('addCourseTheme').value,
+            status: document.getElementById('addCourseStatus').value,
+            note: document.getElementById('addCourseNote').value,
+            img: img
+        };
+        
+        courses.push(n);
+        allStudentsData[currentStudentId].courses = [...courses];
+        originalCourses = [...courses];
+        filteredCourses = [...courses];
+        renderCourseTable();
+        updateCourseStats();
+        closeAddCourseModal();
+        showToast('✅ 新增成功');
+    }
+
+    function openBatchAddModal() {
+        if(!isEditMode) return;
+        document.getElementById('batchAddForm').reset();
+        document.getElementById('batchStartDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('batchAddModal').style.display = 'flex';
+    }
+    
+    function closeBatchAddModal() { document.getElementById('batchAddModal').style.display = 'none'; }
+    
+    function batchAddCourses() {
+        const start = new Date(document.getElementById('batchStartDate').value);
+        const cnt = parseInt(document.getElementById('batchCourseCount').value);
+        const s = document.getElementById('batchTimeStart').value;
+        const e = document.getElementById('batchTimeEnd').value;
+        const theme = document.getElementById('batchCourseTheme').value;
+        const status = document.getElementById('batchCourseStatus').value;
+        
+        const arr = [];
+        for(let i=0;i<cnt;i++) {
+            const d = new Date(start);
+            d.setDate(start.getDate() + i*7);
+            arr.push({
+                date: d.toISOString().split('T')[0],
+                time: `${s} - ${e}`,
+                theme: theme,
+                status: status,
+                note: '', img: ''
+            });
+        }
+        
+        courses = [...courses, ...arr];
+        allStudentsData[currentStudentId].courses = [...courses];
+        originalCourses = [...courses];
+        filteredCourses = [...courses];
+        renderCourseTable();
+        updateCourseStats();
+        closeBatchAddModal();
+        showToast(`✅ 新增 ${cnt} 筆`);
+    }
+
+    function deleteCourse(idx) {
+        if(confirm('確定刪除？')) {
+            courses.splice(idx,1);
+            allStudentsData[currentStudentId].courses = [...courses];
+            originalCourses = [...courses];
+            filteredCourses = [...courses];
+            renderCourseTable();
+            updateCourseStats();
+            showToast('🗑️ 已刪除');
+        }
+    }
+
+    function toggleSelectAll() {
+        const ck = document.getElementById('selectAll').checked;
+        document.querySelectorAll('.course-checkbox').forEach(x=>x.checked=ck);
+        document.getElementById('headerCheckbox').checked=ck;
+    }
+    
+    function clearSelection() {
+        document.querySelectorAll('.course-checkbox').forEach(x=>x.checked=false);
+        document.getElementById('selectAll').checked=false;
+        document.getElementById('headerCheckbox').checked=false;
+    }
+    
+    function getSelected() {
+        return Array.from(document.querySelectorAll('.course-checkbox:checked')).map(x=>parseInt(x.dataset.index));
+    }
+    
+    function batchUpdateStatus(st) {
+        const arr = getSelected();
+        if(arr.length===0) { showToast('❌ 請選擇'); return; }
+        arr.forEach(i=>{ if(courses[i]) courses[i].status=st; });
+        allStudentsData[currentStudentId].courses = [...courses];
+        originalCourses = [...courses];
+        filteredCourses = [...courses];
+        renderCourseTable();
+        updateCourseStats();
+        showToast(`✅ 標記 ${arr.length} 筆`);
+    }
+    
+    function batchUpdateLeaveStatus() { batchUpdateStatus('leave'); }
+    
+    function batchDeleteCourses() {
+        const arr = getSelected();
+        if(arr.length===0) { showToast('❌ 請選擇'); return; }
+        if(confirm(`確定刪除 ${arr.length} 筆？`)) {
+            arr.sort((a,b)=>b-a).forEach(i=>courses.splice(i,1));
+            allStudentsData[currentStudentId].courses = [...courses];
+            originalCourses = [...courses];
+            filteredCourses = [...courses];
+            renderCourseTable();
+            updateCourseStats();
+            showToast(`🗑️ 刪除 ${arr.length} 筆`);
+        }
+    }
+    
+    function searchCourses() {
+        const kw = document.getElementById('courseSearch').value.toLowerCase().trim();
+        if(!kw) { filteredCourses = [...originalCourses]; renderCourseTable(); return; }
+        filteredCourses = originalCourses.filter(x=>
+            x.date.toLowerCase().includes(kw) ||
+            (x.theme&&x.theme.toLowerCase().includes(kw)) ||
+            (x.note&&x.note.toLowerCase().includes(kw))
+        );
+        renderCourseTable();
+    }
+    
+    function handleStatusChangeInEdit(st) {
+        document.getElementById('leaveReasonGroup').style.display = st==='leave'?'block':'none';
+    }
+    
+    function selectMakeupOption(el, opt) {
+        document.querySelectorAll('.makeup-option').forEach(x=>x.classList.remove('selected'));
+        el.classList.add('selected');
+        selectedMakeupOption = opt;
+        document.getElementById('makeupDateGroup').style.display = opt==='single'?'block':'none';
+    }
+    
+    function closeMakeupModal() { document.getElementById('makeupModal').style.display = 'none'; }
+    function confirmMakeup() { showToast('✅ 補課設定完成'); closeMakeupModal(); }
+
+    function showToast(m) {
+        const t = document.createElement('div');
+        t.className = 'toast-message';
+        t.textContent = m;
+        document.body.appendChild(t);
+        setTimeout(()=>document.body.removeChild(t), 2000);
+    }
 </script>
 </body>
 </html>
