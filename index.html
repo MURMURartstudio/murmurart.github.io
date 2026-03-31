@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>學生作品 | MURMUR ART</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:微軟正黑體}
+body{background:#f7f8fb;color:#333}
+.navbar{background:#fff;padding:16px;position:sticky;top:0;box-shadow:0 2px 10px #0001}
+.nav{max-width:1100px;margin:auto;display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:20px;font-weight:bold;color:#6b8bd1}
+.menu a{margin-left:16px;text-decoration:none;color:#555}
+.main{max-width:1100px;margin:auto;padding:20px}
+.title{text-align:center;margin:20px 0;font-size:22px;color:#6b8bd1}
+.student-select{padding:8px 12px;border:1px solid #ddd;border-radius:8px;width:220px;margin-bottom:16px}
+.art-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:16px}
+.card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px #0001}
+.card img{width:100%;height:170px;object-fit:cover}
+.card .name{padding:8px;text-align:center;font-size:14px}
+.modal{position:fixed;top:0;left:0;width:100%;height:100%;background:#0009;display:none;justify-content:center;align-items:center}
+.modal .box{background:#fff;padding:24px;border-radius:16px;width:90%;max-width:450px}
+.modal input, .modal textarea{width:100%;margin:6px 0;padding:10px;border:1px solid #ddd;border-radius:8px}
+.btn{padding:10px 16px;background:#6b8bd1;color:#fff;border:none;border-radius:8px;margin-top:10px;cursor:pointer}
+.btn.del{background:#e53935}
+.btn.preview{background:#43a047}
+.teacher-btn{position:fixed;bottom:20px;right:20px;width:20px;height:20px;background:transparent;border:none;opacity:0.2}
+footer{background:#6b8bd1;color:#fff;text-align:center;padding:24px;margin-top:60px;font-size:14px;line-height:1.6}
+</style>
+</head>
+<body>
+
+<div class="navbar">
+  <div class="nav">
+    <div class="logo">MURMUR ART</div>
+    <div class="menu">
+      <a href="index.html">學生作品</a>
+      <a href="course.html">課程進度</a>
+    </div>
+  </div>
+</div>
+
+<button class="teacher-btn" onclick="openTeacherModal()"></button>
+
+<div class="main">
+  <div class="title" id="pageTitle">🎨 請登入瀏覽作品</div>
+
+  <select id="studentSelect" class="student-select" style="display:none" onchange="switchStudent()"></select>
+
+  <div style="display:none; margin-bottom:12px" id="teacherTools">
+    <button class="btn preview" onclick="openPreview()">預覽家長畫面</button>
+    <button class="btn" onclick="openEditStudent()">編輯學生資料</button>
+  </div>
+
+  <div class="art-grid" id="artGrid"></div>
+</div>
+
+<!-- 家長登入 -->
+<div class="modal" id="parentModal">
+  <div class="box">
+    <h3>家長登入</h3>
+    <input id="pName" placeholder="學生姓名">
+    <input id="pPhone" placeholder="家長電話">
+    <button class="btn" onclick="parentLogin()">登入</button>
+  </div>
+</div>
+
+<!-- 老師登入 -->
+<div class="modal" id="teacherModal">
+  <div class="box">
+    <h3>老師登入</h3>
+    <input type="password" id="tPwd" placeholder="密碼">
+    <button class="btn" onclick="teacherLogin()">登入</button>
+  </div>
+</div>
+
+<!-- 編輯學生 -->
+<div class="modal" id="editStudentModal">
+  <div class="box">
+    <h3>編輯學生完整資料</h3>
+    <input id="e_name" placeholder="學生姓名">
+    <input id="e_phone" placeholder="家長電話">
+    <button class="btn" onclick="saveStudentEdit()">儲存</button>
+  </div>
+</div>
+
+<footer>
+  <p>地址：九龍永康街 55 號金百盛中心 20 樓 2002 室</p>
+  <p>（荔枝角地鐵站 B1 出口，步行約 3 分鐘）</p>
+  <p>聯絡電話：6748 0066</p>
+</footer>
+
+<script>
+let DB = {
+  student_1: {name:"小明", phone:"0911222333", works:[
+    {img:"https://picsum.photos/400/400?1", title:"風景畫", date:"2025-10-01", comment:"構圖很好"}
+  ]}
+};
+
+let isTeacher = false;
+let currentStu = null;
+let previewParentMode = false;
+
+window.onload = () => {
+  renderStudentSelect();
+  openParentModal();
+};
+
+// 登入
+function openParentModal(){document.getElementById('parentModal').style.display='flex'}
+function parentLogin(){
+  const n = document.getElementById('pName').value.trim();
+  const p = document.getElementById('pPhone').value.trim();
+  for(let id in DB){
+    if(DB[id].name===n && DB[id].phone===p){
+      currentStu = id;
+      closeAll();
+      renderWorks();
+      return;
+    }
+  }
+  alert('資訊錯誤');
+}
+
+function openTeacherModal(){document.getElementById('teacherModal').style.display='flex'}
+function teacherLogin(){
+  if(document.getElementById('tPwd').value==='123'){
+    isTeacher = true;
+    closeAll();
+    document.getElementById('studentSelect').style.display='block';
+    document.getElementById('teacherTools').style.display='block';
+    currentStu = Object.keys(DB)[0];
+    renderStudentSelect();
+    renderWorks();
+  }
+}
+
+// 學生
+function renderStudentSelect(){
+  const sel = document.getElementById('studentSelect');
+  sel.innerHTML = '';
+  for(let id in DB){
+    const opt = document.createElement('option');
+    opt.value=id; opt.textContent=DB[id].name;
+    sel.appendChild(opt);
+  }
+}
+function switchStudent(){
+  currentStu = document.getElementById('studentSelect').value;
+  renderWorks();
+}
+
+// 作品
+function renderWorks(){
+  const g = document.getElementById('artGrid');
+  g.innerHTML = '';
+  if(!currentStu){
+    document.getElementById('pageTitle').innerText='🎨 請登入瀏覽作品';
+    return;
+  }
+  const stu = DB[currentStu];
+  document.getElementById('pageTitle').innerText=`🎨 ${stu.name} 的作品`;
+  if(!stu.works || stu.works.length===0){
+    g.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px">暫無作品</div>';
+    return;
+  }
+  stu.works.forEach(w=>{
+    const c = document.createElement('div');
+    c.className='card';
+    c.innerHTML=`<img src="${w.img}"><div class="name">${w.title}</div>`;
+    g.appendChild(c);
+  });
+}
+
+// 編輯學生
+function openEditStudent(){
+  if(!isTeacher || !currentStu) return;
+  const s = DB[currentStu];
+  document.getElementById('e_name').value = s.name;
+  document.getElementById('e_phone').value = s.phone;
+  document.getElementById('editStudentModal').style.display='flex';
+}
+function saveStudentEdit(){
+  DB[currentStu].name = document.getElementById('e_name').value.trim();
+  DB[currentStu].phone = document.getElementById('e_phone').value.trim();
+  renderStudentSelect();
+  renderWorks();
+  closeAll();
+  alert('已儲存');
+}
+
+// 預覽家長
+function openPreview(){
+  previewParentMode = true;
+  renderWorks();
+  alert('已切換為家長預覽模式，再次登入老師即可恢復管理');
+}
+
+function closeAll(){
+  document.querySelectorAll('.modal').forEach(m=>m.style.display='none');
+}
+</script>
+</body>
+</html>
