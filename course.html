@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>課程進度 | MURMUR ART</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:微軟正黑體}
+body{background:#f7f8fb}
+.navbar{background:#fff;padding:16px;position:sticky;top:0;box-shadow:0 2px 10px #0001}
+.nav{max-width:1100px;margin:auto;display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:20px;font-weight:bold;color:#6b8bd1}
+.menu a{margin-left:16px;text-decoration:none;color:#555}
+.main{max-width:1100px;margin:auto;padding:20px}
+.title{text-align:center;margin:20px 0;font-size:22px;color:#6b8bd1}
+.tools{margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap}
+.btn{padding:8px 14px;background:#6b8bd1;color:#fff;border:none;border-radius:8px;cursor:pointer}
+.btn.del{background:#e53935}
+select{padding:8px 12px;border:1px solid #ddd;border-radius:8px}
+table{width:100%;background:#fff;border-radius:10px;overflow:hidden}
+th,td{padding:12px;text-align:left;border-bottom:1px solid #eee}
+th{background:#6b8bd1;color:#fff}
+.modal{position:fixed;top:0;left:0;width:100%;height:100%;background:#0009;display:none;justify-content:center;align-items:center}
+.box{background:#fff;padding:24px;border-radius:16px;width:90%;max-width:500px}
+input,textarea,select{width:100%;margin:6px 0;padding:10px;border:1px solid #ddd;border-radius:8px}
+footer{background:#6b8bd1;color:#fff;text-align:center;padding:24px;margin-top:60px;font-size:14px;line-height:1.6}
+</style>
+</head>
+<body>
+
+<div class="navbar">
+  <div class="nav">
+    <div class="logo">MURMUR ART</div>
+    <div class="menu">
+      <a href="index.html">學生作品</a>
+      <a href="course.html">課程進度</a>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="title">📘 課程進度管理</div>
+
+  <div class="tools">
+    <select id="studentSelect" onchange="switchStudent()"></select>
+    <button class="btn" onclick="openBatchCourse()">批次新增課程</button>
+    <button class="btn" onclick="openAddCourse()">新增單堂</button>
+    <button class="btn del" onclick="deleteStudent()">刪除學生</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>日期</th><th>時間</th><th>主題</th><th>狀態</th><th>操作</th></tr>
+    </thead>
+    <tbody id="courseTable"></tbody>
+  </table>
+</div>
+
+<!-- 新增課程 -->
+<div class="modal" id="addModal">
+  <div class="box">
+    <h3>新增課程</h3>
+    <input type="date" id="c_date">
+    <input type="text" id="c_topic" placeholder="主題">
+    <button class="btn" onclick="saveCourse()">儲存</button>
+  </div>
+</div>
+
+<!-- 批次新增 -->
+<div class="modal" id="batchModal">
+  <div class="box">
+    <h3>批次新增 4/12/24 堂</h3>
+    <input type="date" id="b_start">
+    <select id="b_count">
+      <option value="4">4 堂</option>
+      <option value="12">12 堂</option>
+      <option value="24">24 堂</option>
+    </select>
+    <button class="btn" onclick="batchCreate()">確認新增</button>
+  </div>
+</div>
+
+<footer>
+  <p>地址：九龍永康街 55 號金百盛中心 20 樓 2002 室</p>
+  <p>（荔枝角地鐵站 B1 出口，步行約 3 分鐘）</p>
+  <p>聯絡電話：6748 0066</p>
+</footer>
+
+<script>
+// 與作品頁 完全相同資料
+let DB = {
+  student_1: {
+    name:"小明", phone:"0911222333",
+    works:[{img:"https://picsum.photos/400/400?1", title:"風景畫"}],
+    courses:[
+      {date:"2025-10-01", topic:"水彩基礎", status:"已完成"}
+    ]
+  }
+};
+
+let current = Object.keys(DB)[0];
+
+window.onload = () => {
+  renderStudentSelect();
+  renderTable();
+};
+
+function renderStudentSelect(){
+  const sel = document.getElementById('studentSelect');
+  sel.innerHTML='';
+  for(let id in DB){
+    const o = document.createElement('option');
+    o.value=id; o.textContent=DB[id].name;
+    sel.appendChild(o);
+  }
+  sel.value = current;
+}
+
+function switchStudent(){
+  current = document.getElementById('studentSelect').value;
+  renderTable();
+}
+
+function renderTable(){
+  const tb = document.getElementById('courseTable');
+  tb.innerHTML='';
+  const arr = DB[current].courses || [];
+  arr.forEach(c=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${c.date}</td>
+      <td>1小時15分</td>
+      <td>${c.topic}</td>
+      <td>${c.status}</td>
+      <td><button class='btn' onclick='editCourse()'>編輯</button></td>
+    `;
+    tb.appendChild(tr);
+  });
+}
+
+function openAddCourse(){document.getElementById('addModal').style.display='flex'}
+function openBatchCourse(){document.getElementById('batchModal').style.display='flex'}
+
+function saveCourse(){
+  const d = document.getElementById('c_date').value;
+  const t = document.getElementById('c_topic').value;
+  DB[current].courses.push({date:d, topic:t, status:"未完成"});
+  renderTable();
+  closeAll();
+}
+
+function batchCreate(){
+  const start = new Date(document.getElementById('b_start').value);
+  const cnt = parseInt(document.getElementById('b_count').value);
+  for(let i=0;i<cnt;i++){
+    const dt = new Date(start);
+    dt.setDate(start.getDate() + i*7);
+    const ds = dt.toISOString().split('T')[0];
+    DB[current].courses.push({date:ds, topic:"", status:"未完成"});
+  }
+  renderTable();
+  closeAll();
+}
+
+function deleteStudent(){
+  if(!confirm('確定刪除？所有作品與課程將消失')) return;
+  delete DB[current];
+  current = Object.keys(DB)[0] || null;
+  renderStudentSelect();
+  renderTable();
+}
+
+function editCourse(){alert('點擊確定後可編輯此堂課')}
+function closeAll(){document.querySelectorAll('.modal').forEach(m=>m.style.display='none')}
+</script>
+</body>
+</html>
