@@ -8,94 +8,51 @@
 </head>
 <body>
 
+<!-- 老師 / 家長 切換 -->
+<div class="role-selector">
+    <button onclick="switchRole('teacher')">👩‍🏫 老師模式</button>
+    <button onclick="switchRole('parent')">👨‍👩‍👧 家長模式</button>
+</div>
+
 <!-- 導航欄 -->
 <div class="navbar">
     <div class="container nav-wrap">
         <div class="logo-container">
-            <img src="https://p11-flow-imagex-download-sign.byteimg.com/tos-cn-i-a9rns2rl98/45afcf8642d843118169b9b9b9b7bddddc.png~tplv-a9rns2rl98-24:720:720.png?lk3s=8e244e95&rcl=20260401013439D665515F9C2863619009&rrcfp=8a172a1a&x-expires=1775583279&x-signature=KSRf3YywiqC8pJ%2BWD5fT7XL01rE%3D" 
-                 class="logo-img" alt="MURMUR ART">
+            <img src="https://p11-flow-imagex-download-sign.byteimg.com/tos-cn-i-a9rns2rl98/45afcf8642d843118169b9b9b9b7bddddc.png~tplv-a9rns2rl98-24:720:720.png" class="logo-img">
             <div class="logo-text">MURMUR ART</div>
         </div>
         <div class="nav-menu">
             <a href="#" class="active" onclick="showSection('gallery')">我的作品</a>
             <a href="#" onclick="showSection('course')">課程進度</a>
-            <a href="#">登出</a>
         </div>
     </div>
 </div>
 
-<!-- 作品畫廊 -->
+<!-- 作品 -->
 <div class="container" id="gallerySection">
-    <h2 class="gallery-title" id="galleryTitle">🎨 小明 的專屬創意畫廊</h2>
+    <h2 class="gallery-title">🎨 作品專區</h2>
     <div id="artGallery" class="art-gallery"></div>
 </div>
 
-<!-- 課程進度 -->
+<!-- 課程 -->
 <div class="container course-progress" id="courseSection">
-    <div class="course-header">
-        <h2 class="course-title">📋 課程進度管理</h2>
-        <p class="course-subtitle">查看課程完成情況和上課記錄</p>
-    </div>
+    <h2 class="course-title">📋 課程進度</h2>
 
-    <div class="course-overview">
-        <div class="overview-card">
-            <div class="overview-icon">📚</div>
-            <div class="overview-number" id="totalCourses">0</div>
-            <div class="overview-label">總課程數</div>
-        </div>
-        <div class="overview-card">
-            <div class="overview-icon">✅</div>
-            <div class="overview-number" id="completedCourses">0</div>
-            <div class="overview-label">已完成課程</div>
-        </div>
-        <div class="overview-card">
-            <div class="overview-icon">🔄</div>
-            <div class="overview-number" id="remainingCourses">0</div>
-            <div class="overview-label">剩餘課程數</div>
-        </div>
-        <div class="overview-card">
-            <div class="overview-icon">📊</div>
-            <div class="overview-number" id="completionRate">0%</div>
-            <div class="overview-label">完成率</div>
-            <div class="progress-bar-container">
-                <div class="progress-bar" id="progressBar" style="width:0%"></div>
-            </div>
-        </div>
-    </div>
-
-    <div style="display:flex;gap:10px;margin-bottom:20px;">
-        <button class="add-course-btn" onclick="openAddCourseModal()">➕ 新增單一課程</button>
-        <button class="add-course-btn" style="background:#6a80b8" onclick="openBatchAddModal()">📚 批量添加課程</button>
-        <button class="add-course-btn" style="background:#ff6b6b" onclick="clearAllCourses()">🗑️ 一鍵清空所有課程</button>
-    </div>
-
-    <div class="batch-actions">
-        <div class="batch-left">
-            <div class="batch-select-all">
-                <input type="checkbox" id="selectAll" class="row-checkbox" onclick="toggleSelectAll()">
-                <label for="selectAll">全選</label>
-            </div>
-            <button class="batch-btn" onclick="batchUpdateStatus('completed')">標記為已完成</button>
-            <button class="batch-btn" onclick="batchUpdateStatus('pending')">標記為未完成</button>
-            <button class="batch-btn" onclick="batchUpdateLeaveStatus()">標記為請假</button>
-            <button class="batch-btn secondary" onclick="clearSelection()">取消選擇</button>
-        </div>
-        <div class="search-container">
-            <span class="search-icon">🔍</span>
-            <input type="text" class="search-input" id="courseSearch" placeholder="搜索課程..." oninput="searchCourses()">
-        </div>
+    <!-- 老師專用按鈕 (家長看不到) -->
+    <div id="teacherControls" style="display:none; margin:20px 0;">
+        <button class="add-btn" onclick="openAddCourseModal()">➕ 新增課程</button>
+        <button class="add-btn" onclick="openAddStudentModal()">➕ 新增學生</button>
+        <button class="clear-btn" onclick="clearAllCourses()">🗑️ 清空課程</button>
     </div>
 
     <table class="course-table">
         <thead>
             <tr>
-                <th style="width:50px"><input type="checkbox" class="row-checkbox" id="headerCheckbox" onclick="toggleSelectAll()"></th>
-                <th>課程日期</th>
-                <th>上課時間</th>
-                <th>課程主題</th>
-                <th>完成狀態</th>
-                <th>備註</th>
-                <th>操作</th>
+                <th>日期</th>
+                <th>時間</th>
+                <th>主題</th>
+                <th>狀態</th>
+                <th id="actionHeader">操作（老師專用）</th>
             </tr>
         </thead>
         <tbody id="courseTableBody"></tbody>
@@ -103,11 +60,9 @@
 </div>
 
 <!-- 彈窗 -->
-<div class="edit-modal" id="editModal"></div>
-<div class="edit-modal" id="addCourseModal"></div>
-<div class="batch-add-modal" id="batchAddModal"></div>
+<div id="modalOverlay" class="modal-overlay"></div>
+<div id="editModal" class="modal"></div>
 
-<div class="back-to-top" id="backToTop" onclick="scrollToTop()">↑</div>
 <script src="script.js"></script>
 </body>
 </html>
