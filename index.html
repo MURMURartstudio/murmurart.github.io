@@ -811,7 +811,7 @@
             .course-table th, .course-table td { padding: 10px 8px; }
         }
     </style>
-    <!-- 引入 Firebase SDK -->
+    <!-- Firebase SDK 已正确引入（无需修改） -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js"></script>
@@ -1059,18 +1059,18 @@
     </div>
 
     <script>
-        // ========== Firebase 配置 ==========
+        // ========== Firebase 配置（只需要替换这6个参数！） ==========
         const firebaseConfig = {
-            // 请替换为你的 Firebase 配置
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
+          apiKey: "AIzaSyBqUEh-MjMZ5Gj2gaFJpKffrDmvP9l7Slo",
+  authDomain: "murmurart-8f6cc.firebaseapp.com",
+  projectId: "murmurart-8f6cc",
+  storageBucket: "murmurart-8f6cc.firebasestorage.app",
+  messagingSenderId: "205741159610",
+  appId: "1:205741159610:web:624b7ca35c04e6e09a7e83",
+  measurementId: "G-LRSB35J1KJ"
         };
 
-        // 初始化 Firebase
+        // 初始化 Firebase（无需修改）
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const storage = firebase.storage();
@@ -1680,28 +1680,173 @@
             document.getElementById('progressBar').style.width = `${completionRate}%`;
         }
 
-        // ========== 辅助函数 ==========
-        // 显示验证信息
-        function showAuthMessage(message, type) {
-            const messageElement = document.getElementById('authMessage');
-            messageElement.textContent = message;
-            messageElement.className = `auth-message message-${type}`;
+        // ========== 新增/编辑课程功能（已整合） ==========
+        // 打开新增/编辑课程模态框
+        function openEditCourseModal(courseId = null) {
+            // 先创建课程模态框（如果不存在）
+            if (!document.getElementById('courseModal')) {
+                const modalHtml = `
+                    <div class="modal" id="courseModal">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h3 class="modal-title" id="courseModalTitle">新增課程記錄</h3>
+                                <div class="modal-close" onclick="closeCourseModal()">×</div>
+                            </div>
+                            <form id="courseForm">
+                                <input type="hidden" id="courseId">
+                                <input type="hidden" id="courseStudentId" value="${currentStudent?.id || ''}">
+                                
+                                <div class="form-group">
+                                    <label class="form-label">課程日期</label>
+                                    <input type="date" id="courseDate" class="form-control" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">上課時間</label>
+                                    <input type="time" id="courseTime" class="form-control" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">課程主題</label>
+                                    <input type="text" id="courseTheme" class="form-control" placeholder="例如：水彩基礎" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">完成狀態</label>
+                                    <select id="courseStatus" class="form-control" required>
+                                        <option value="pending">未完成</option>
+                                        <option value="completed">已完成</option>
+                                        <option value="leave">請假</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">備註</label>
+                                    <textarea id="courseNote" class="form-control" rows="2" placeholder="備註信息"></textarea>
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button type="button" class="form-btn btn-cancel" onclick="closeCourseModal()">取消</button>
+                                    <button type="button" class="form-btn btn-save" onclick="saveCourse()">保存</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                `;
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+            }
+
+            const modal = document.getElementById('courseModal');
+            const modalTitle = document.getElementById('courseModalTitle');
+            const courseForm = document.getElementById('courseForm');
+            
+            // 重置表单
+            courseForm.reset();
+            document.getElementById('courseId').value = '';
+            document.getElementById('courseDate').valueAsDate = new Date();
+            
+            // 如果是编辑课程
+            if (courseId) {
+                modalTitle.textContent = '編輯課程記錄';
+                // 获取课程信息
+                db.collection('courses').doc(courseId).get()
+                    .then((doc) => {
+                        const course = doc.data();
+                        document.getElementById('courseId').value = courseId;
+                        document.getElementById('courseDate').value = course.date;
+                        document.getElementById('courseTime').value = course.time;
+                        document.getElementById('courseTheme').value = course.theme;
+                        document.getElementById('courseStatus').value = course.status || 'pending';
+                        document.getElementById('courseNote').value = course.note || '';
+                    });
+            } else {
+                modalTitle.textContent = '新增課程記錄';
+                // 新增课程时默认选中当前学生
+                if (!currentStudent) {
+                    alert('請先選擇學生');
+                    return;
+                }
+            }
+            
+            modal.style.display = 'flex';
         }
 
-        // 更新用户信息显示
-        function updateUserInfo() {
-            if (currentUser.role === 'teacher') {
-                document.getElementById('userDisplayName').textContent = '管理老師';
-                document.getElementById('userAvatar').textContent = '師';
-                document.getElementById('galleryTitle').textContent = '🎨 學生作品管理';
-            } else if (currentUser.role === 'parent') {
-                document.getElementById('userDisplayName').textContent = `家長 (${currentUser.name})`;
-                document.getElementById('userAvatar').textContent = currentUser.name.charAt(0);
-                document.getElementById('galleryTitle').textContent = `🎨 ${currentUser.name} 的專屬創意畫廊`;
+        // 关闭课程模态框
+        function closeCourseModal() {
+            const modal = document.getElementById('courseModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        // 保存课程记录
+        function saveCourse() {
+            const courseId = document.getElementById('courseId').value;
+            const studentId = document.getElementById('courseStudentId').value;
+            const date = document.getElementById('courseDate').value;
+            const time = document.getElementById('courseTime').value;
+            const theme = document.getElementById('courseTheme').value.trim();
+            const status = document.getElementById('courseStatus').value;
+            const note = document.getElementById('courseNote').value.trim();
+            
+            if (!studentId || !date || !time || !theme) {
+                alert('請填寫所有必填欄位');
+                return;
+            }
+            
+            const courseData = {
+                studentId: studentId,
+                date: date,
+                time: time,
+                theme: theme,
+                status: status,
+                note: note,
+                createTime: new Date()
+            };
+            
+            if (courseId) {
+                // 更新课程
+                db.collection('courses').doc(courseId).update(courseData)
+                    .then(() => {
+                        alert('課程記錄更新成功');
+                        closeCourseModal();
+                        loadStudentCourses(studentId);
+                    })
+                    .catch((error) => {
+                        console.error('更新課程失敗：', error);
+                        alert('更新課程失敗，請稍後再試');
+                    });
+            } else {
+                // 新增课程
+                db.collection('courses').add(courseData)
+                    .then(() => {
+                        alert('課程記錄新增成功');
+                        closeCourseModal();
+                        loadStudentCourses(studentId);
+                    })
+                    .catch((error) => {
+                        console.error('新增課程失敗：', error);
+                        alert('新增課程失敗，請稍後再試');
+                    });
             }
         }
 
-        // 显示指定区域
+        // 在课程进度页面添加「新增课程」按钮
+        function addCourseBtn() {
+            if (currentUser.role === 'teacher' && currentStudent) {
+                const courseHeader = document.querySelector('.course-header');
+                if (!document.getElementById('addCourseBtn')) {
+                    const btn = document.createElement('button');
+                    btn.id = 'addCourseBtn';
+                    btn.className = 'add-student-btn';
+                    btn.style.margin = '0 auto';
+                    btn.style.display = 'block';
+                    btn.textContent = '+ 新增課程記錄';
+                    btn.onclick = () => openEditCourseModal();
+                    courseHeader.appendChild(btn);
+                }
+            }
+        }
+
+        // 修改showSection函数，添加新增课程按钮
         function showSection(section) {
             // 隐藏所有区域
             document.getElementById('dashboardSection').style.display = 'none';
@@ -1726,6 +1871,32 @@
                 if (currentUser.role === 'parent' && currentStudent) {
                     loadStudentCourses(currentStudent.id);
                 }
+                // 如果是老师，添加新增课程按钮
+                if (currentUser.role === 'teacher' && currentStudent) {
+                    addCourseBtn();
+                    loadStudentCourses(currentStudent.id);
+                }
+            }
+        }
+
+        // ========== 辅助函数 ==========
+        // 显示验证信息
+        function showAuthMessage(message, type) {
+            const messageElement = document.getElementById('authMessage');
+            messageElement.textContent = message;
+            messageElement.className = `auth-message message-${type}`;
+        }
+
+        // 更新用户信息显示
+        function updateUserInfo() {
+            if (currentUser.role === 'teacher') {
+                document.getElementById('userDisplayName').textContent = '管理老師';
+                document.getElementById('userAvatar').textContent = '師';
+                document.getElementById('galleryTitle').textContent = '🎨 學生作品管理';
+            } else if (currentUser.role === 'parent') {
+                document.getElementById('userDisplayName').textContent = `家長 (${currentUser.name})`;
+                document.getElementById('userAvatar').textContent = currentUser.name.charAt(0);
+                document.getElementById('galleryTitle').textContent = `🎨 ${currentUser.name} 的專屬創意畫廊`;
             }
         }
 
