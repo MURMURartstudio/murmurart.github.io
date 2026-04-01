@@ -74,7 +74,6 @@
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.min.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.min.js"></script>
 </head>
 <body>
 
@@ -91,8 +90,7 @@
       <button class="btn" onclick="parentLogin()">登入</button>
     </div>
     <div id="teacherLogin" style="display:none">
-      <input class="input" id="email" placeholder="管理者信箱" type="email">
-      <input class="input" id="password" placeholder="管理者密碼" type="password">
+      <input class="input" id="teacherPass" placeholder="請輸入老師密碼">
       <button class="btn" onclick="teacherLogin()">登入</button>
     </div>
   </div>
@@ -259,8 +257,8 @@ const firebaseConfig = {
 };
 if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-const auth = firebase.auth();
 
+let isTeacher = false;
 let currentStudentId = null;
 let currentCourseId = null;
 let studentList = [];
@@ -270,21 +268,31 @@ let courseRaw = [];
 
 function switchTab(role) {
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  if (event && event.target) event.target.classList.add('active');
+  event.target.classList.add('active');
   document.getElementById('parentLogin').style.display = role==='parent'?'block':'none';
   document.getElementById('teacherLogin').style.display = role==='teacher'?'block':'none';
 }
 
+// 安全版：從資料庫驗證密碼，F12 看不到
 async function teacherLogin() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+  const pass = document.getElementById("teacherPass").value;
   try {
-    await auth.signInWithEmailAndPassword(email, password);
-    document.getElementById('loginPage').style.display='none';
-    document.getElementById('main').style.display='block';
-    loadAllStudents();
-  } catch(e) {
-    alert("登入失敗：帳號或密碼錯誤");
+    const doc = await db.collection('settings').doc('admin').get();
+    if (!doc.exists) {
+      alert('請先在 Firebase 建立 settings/admin/password');
+      return;
+    }
+    const correctPass = doc.data().password;
+    if (pass === correctPass) {
+      isTeacher = true;
+      document.getElementById('loginPage').style.display='none';
+      document.getElementById('main').style.display='block';
+      loadAllStudents();
+    } else {
+      alert("密碼錯誤");
+    }
+  } catch (e) {
+    alert("登入失敗，請檢查規則");
     console.error(e);
   }
 }
@@ -313,18 +321,10 @@ async function parentLogin() {
 
     location.href = `class.html?sid=${found}`;
   } catch (e) {
-    alert('家長登入失敗，請檢查網路或資料庫設定');
+    alert('家長登入失敗');
     console.error(e);
   }
 }
-
-auth.onAuthStateChanged(user => {
-  if (user) {
-    document.getElementById('loginPage').style.display='none';
-    document.getElementById('main').style.display='block';
-    loadAllStudents();
-  }
-});
 
 function show(n) {
   document.getElementById('page1').style.display=n==1?'block':'none';
@@ -367,8 +367,8 @@ async function loadAllStudents() {
       ${s.warning?'<p style="color:red;font-weight:bold;margin-top:6px">即將續課</p>':''}
       <div class="action">
         <button onclick="selectStudent('${s.id}')">選取</button>
-        <button onclick="editStu('${s.id}')">編輯</button>
-        <button onclick="delStu('${s.id}')">刪除</button>
+        ${isTeacher ? `<button onclick="editStu('${s.id}')">編輯</button>
+        <button onclick="delStu('${s.id}')">刪除</button>` : ''}
       </div>
     </div>`;
   }
@@ -393,6 +393,7 @@ async function loadWarningList(){
 }
 
 function exportCSV(){
+  if(!isTeacher)return alert("僅限老師");
   let csv = "姓名,學生編號,家長電話,課程方案,剩餘堂數,學校,出生年份,性別,備註\n";
   studentList.forEach(s=>{
     csv += `"${s.name}","${s.studentNo||''}","${s.parentPhone||''}","${s.courseType||''}","${s.left||0}","${s.school||''}","${s.birthYear||''}","${s.gender||''}","${s.note||''}"\n`;
@@ -425,8 +426,8 @@ function searchStudent(){
       ${s.warning?'<p style="color:red;font-weight:bold">即將續課</p>':''}
       <div class="action">
         <button onclick="selectStudent('${s.id}')">選取</button>
-        <button onclick="editStu('${s.id}')">編輯</button>
-        <button onclick="delStu('${s.id}')">刪除</button>
+        ${isTeacher ? `<button onclick="editStu('${s.id}')">編輯</button>
+        <button onclick="delStu('${s.id}')">刪除</button>` : ''}
       </div>
     </div>`;
   })
@@ -452,6 +453,7 @@ function closeAll(){
   document.getElementById('preview').style.display='none';
 }
 function addStu(){
+  if(!isTeacher)return alert("僅限老師");
   currentStudentId=null;
   document.getElementById('sname').value='';
   document.getElementById('sno').value='';
@@ -465,6 +467,7 @@ function addStu(){
   document.getElementById('stuModal').style.display='flex';
 }
 async function saveStu(){
+  if(!isTeacher)return;
   const n=document.getElementById('sname').value;
   const no=document.getElementById('sno').value;
   const p=document.getElementById('sphone').value;
@@ -482,6 +485,7 @@ async function saveStu(){
   loadAllStudents();
 }
 async function delStu(id){
+  if(!isTeacher)return;
   if(!confirm('確定刪除學生？'))return;
   await db.collection('students').doc(id).delete();
   await db.collection('artworks').where('studentId','==',id).get().then(s=>s.forEach(d=>d.ref.delete()));
@@ -489,6 +493,7 @@ async function delStu(id){
   loadAllStudents();
 }
 function editStu(id){
+  if(!isTeacher)return;
   currentStudentId=id;
   db.collection('students').doc(id).get().then(d=>{
     const s=d.data();
@@ -516,8 +521,12 @@ async function loadArtList(){
   let a=0;const step=360/artList.length;
   artList.forEach((d,i)=>{g.innerHTML+=`<div class="art" style="transform:rotate(${a}deg) translate(220px) rotate(${-a}deg)" onclick="showPreview(${i})"><img src="${d.imageUrl}"></div>`;a+=step});
 }
-function openArt(){document.getElementById('artModal').style.display='flex'}
+function openArt(){
+  if(!isTeacher)return alert("僅限老師");
+  document.getElementById('artModal').style.display='flex';
+}
 async function saveArt(){
+  if(!isTeacher)return;
   const sid=document.getElementById('artStudentSelect').value;
   const url=document.getElementById('img').value,d=document.getElementById('cdate').value,n=document.getElementById('artNote').value;
   if(!sid||!url||!d)return alert('填寫完整');
@@ -534,6 +543,7 @@ function showPreview(i){
   document.getElementById('preview').style.display='block';
 }
 async function deleteCurrentArt(){
+  if(!isTeacher)return;
   if(!confirm('確定刪除作品？'))return;
   const id=artList[currentImg].id;
   await db.collection('artworks').doc(id).delete();
@@ -609,13 +619,16 @@ function renderCourseList(arr){
       <td>${imgHtml}</td>
       <td>${c.note||'-'}</td>
       <td>
+        ${isTeacher ? `
         <button onclick="editCourse('${c.id}')" style="background:#ffc107;padding:6px 10px;border:none;border-radius:6px;color:white">修改</button>
         <button onclick="delCourse('${c.id}')" style="background:#dc3545;padding:6px 10px;border:none;border-radius:6px;color:white">刪除</button>
+        ` : ''}
       </td>
     </tr>`;
   });
 }
 async function batchSet(status){
+  if(!isTeacher)return;
   const checks=document.querySelectorAll('.courseCheck:checked');
   if(checks.length===0)return alert('請選擇課程');
   if(!confirm('確定批量修改？'))return;
@@ -623,6 +636,7 @@ async function batchSet(status){
   loadCourseList();
 }
 async function batchDeleteCourses(){
+  if(!isTeacher)return;
   const checks=document.querySelectorAll('.courseCheck:checked');
   if(checks.length===0)return alert('請選擇要刪除的課程');
   if(!confirm('確定刪除？'))return;
@@ -630,6 +644,7 @@ async function batchDeleteCourses(){
   loadCourseList();
 }
 function addCourse(){
+  if(!isTeacher)return;
   currentCourseId=null;
   document.getElementById('cday').valueAsDate=new Date();
   document.getElementById('ctime').value='';
@@ -640,6 +655,7 @@ function addCourse(){
   document.getElementById('courseModal').style.display='flex';
 }
 async function saveCourse(){
+  if(!isTeacher)return;
   const sid=document.getElementById('courseStudentSelect').value;
   const d=document.getElementById('cday').value;
   const t=document.getElementById('ctime').value;
@@ -653,6 +669,7 @@ async function saveCourse(){
   closeAll();loadCourseList();
 }
 function editCourse(id){
+  if(!isTeacher)return;
   currentCourseId=id;
   db.collection('courses').doc(id).get().then(d=>{
     const c=d.data();
@@ -666,8 +683,13 @@ function editCourse(id){
     document.getElementById('courseModal').style.display='flex';
   })
 }
-async function delCourse(id){if(!confirm('刪除課程？'))return;await db.collection('courses').doc(id).delete();loadCourseList();}
+async function delCourse(id){
+  if(!isTeacher)return;
+  if(!confirm('刪除課程？'))return;
+  await db.collection('courses').doc(id).delete();loadCourseList();
+}
 async function quickPackage(count){
+  if(!isTeacher)return;
   const sid=document.getElementById('courseStudentSelect').value;
   const startDate=document.getElementById('cday').value;
   const startTime=document.getElementById('ctime').value;
@@ -681,7 +703,7 @@ async function quickPackage(count){
   }
   alert('已產生 '+count+' 堂課');closeAll();loadCourseList();
 }
-function logout(){auth.signOut();location.reload()}
+function logout(){location.reload()}
 </script>
 </body>
 </html>
