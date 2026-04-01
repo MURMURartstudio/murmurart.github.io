@@ -72,8 +72,9 @@
     .warningPage{background:#fff3cd;padding:15px;border-radius:16px;margin:15px 0}
     .warningItem{background:white;padding:12px;border-radius:10px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
   </style>
+  <!-- 🔒 正確的 Firebase SDK 載入順序，解決 CORB 問題 -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -248,16 +249,7 @@
 </div>
 
 <script>
-// 🔒 先宣告變數，再初始化，解決 Cannot access 'db' before initialization 錯誤
-let db;
-let isTeacher = false;
-let currentStudentId = null;
-let currentCourseId = null;
-let studentList = [];
-let artList = [];
-let currentImg = 0;
-let courseRaw = [];
-
+// 🔒 正確的 Firebase 初始化，解決所有語法錯誤
 const firebaseConfig = {
   apiKey:"AIzaSyBqUEh-MjMZ5Gj2gaFJpKffrDmvP9l7Slo",
   authDomain:"murmurart-8f6cc.firebaseapp.com",
@@ -266,11 +258,17 @@ const firebaseConfig = {
   appId:"1:205741159610:web:624b7ca35c04e6e09a7e83"
 };
 
-// 🔒 正確初始化 Firebase
-if(!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
-}
-db = firebase.firestore();
+// 初始化 Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+let isTeacher = false;
+let currentStudentId = null;
+let currentCourseId = null;
+let studentList = [];
+let artList = [];
+let currentImg = 0;
+let courseRaw = [];
 
 function switchTab(role) {
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
