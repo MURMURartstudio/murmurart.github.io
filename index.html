@@ -1,31 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-
-    <!-- 🔥 这是给你准备好的完整版 CDN 代码 -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-  import { getFirestore } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
-  import { getAuth } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
-
-  // 你的配置（我已经帮你填好了！）
-  const firebaseConfig = {
-    apiKey: "AIzaSyBqUEh-MjMZ5Gj2gaFJpKffrDmvP9l7Slo",
-    authDomain: "murmurart-8f6cc.firebaseapp.com",
-    projectId: "murmurart-8f6cc",
-    storageBucket: "murmurart-8f6cc.firebasestorage.app",
-    messagingSenderId: "205741159610",
-    appId: "1:205741159610:web:624b7ca35c04e6e09a7e83"
-  };
-
-  // 初始化 Firebase
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app); // 数据库
-  const auth = getAuth(app);   // 登录
-
-  console.log("✅ Firebase 连接成功！");
-</script>
-    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MURMUR ART - 家長專區</title>
@@ -40,8 +15,6 @@
             background: #f5f7fb;
             padding: 20px;
         }
-
-        /* 登入面板 */
         .login-panel {
             max-width: 450px;
             margin: 50px auto;
@@ -83,8 +56,6 @@
         }
         .success { background: #d4edda; color: #28a745; }
         .error { background: #f8d7da; color: #dc3545; }
-
-        /* 課程進度 */
         .course-section {
             max-width: 600px;
             margin: 30px auto;
@@ -112,8 +83,6 @@
             background: #879acb;
             border-radius: 5px;
         }
-
-        /* 作品展示 */
         .art-section {
             max-width: 800px;
             margin: 30px auto;
@@ -154,7 +123,6 @@
 
 <body>
 
-<!-- 家長登入面板 -->
 <div class="login-panel">
     <h2 class="login-title">家長專區登入</h2>
     <input class="login-input" id="studentName" placeholder="學生姓名">
@@ -163,25 +131,22 @@
     <div id="loginStatus" class="status"></div>
 </div>
 
-<!-- 課程進度 -->
 <div class="course-section" id="courseSection">
     <h3 style="color:#879acb; margin-bottom:15px;">📚 課程進度</h3>
     <div id="courseList"></div>
 </div>
 
-<!-- 孩子作品 + 老師評語 -->
 <div class="art-section" id="artSection">
     <h3 style="color:#879acb; margin-bottom:15px;">🎨 孩子作品</h3>
     <div class="art-grid" id="artGrid"></div>
     <div class="teacher-comment" id="teacherComment"></div>
 </div>
 
-<!-- ====================== 你提供的 FIREBASE 完整程式 ====================== -->
+<!-- ====================== 唯一一段 Firebase 程式 ====================== -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-import { getFirestore, doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
-// 你提供的 Firebase 配置
 const firebaseConfig = {
   apiKey: "AIzaSyBqUEh-MjMZ5Gj2gaFJpKffrDmvP9l7Slo",
   authDomain: "murmurart-8f6cc.firebaseapp.com",
@@ -197,11 +162,9 @@ const db = getFirestore(app);
 window.db = db;
 </script>
 
-<!-- ====================== 登入 + 顯示資料 ====================== -->
 <script>
 let currentStudent = null;
 
-// 家長登入（只有老師建立的學生才能登入）
 async function parentLogin() {
     const name = document.getElementById("studentName").value.trim();
     const phone = document.getElementById("studentPhone").value.trim();
@@ -214,66 +177,48 @@ async function parentLogin() {
     }
 
     try {
-        // 查詢 Firebase 中老師建立的學生資料
         const studentRef = doc(db, "students", phone);
         const snap = await getDoc(studentRef);
 
         if (!snap.exists()) {
-            status.textContent = "❌ 找不到學生資料，請聯繫老師建立";
+            status.textContent = "❌ 找不到學生資料，請聯繫老師";
             status.className = "status error";
             return;
         }
 
-        // 登入成功
         currentStudent = snap.data();
         status.textContent = `✅ 登入成功！歡迎 ${currentStudent.name} 家長`;
         status.className = "status success";
-
-        // 顯示所有資料
         showAllData();
 
     } catch (e) {
-        status.textContent = "❌ 登入失敗，請稍後再試";
+        status.textContent = "❌ 登入失敗";
         status.className = "status error";
     }
 }
 
-// 顯示：課程 + 作品 + 老師評語
-async function showAllData() {
-    // 顯示課程進度
+function showAllData() {
     document.getElementById("courseSection").style.display = "block";
+    document.getElementById("artSection").style.display = "block";
+
     document.getElementById("courseList").innerHTML = `
         <div class="progress-card">
             <div>兒童美術基礎班</div>
             <div class="progress-bar-bg"><div class="progress-bar" style="width:65%"></div></div>
             <div>進度：65%</div>
         </div>
-        <div class="progress-card">
-            <div>創意手工課程</div>
-            <div class="progress-bar-bg"><div class="progress-bar" style="width:40%"></div></div>
-            <div>進度：40%</div>
-        </div>
     `;
 
-    // 顯示作品面板
-    document.getElementById("artSection").style.display = "block";
-    
-    // 作品圖片（老師在 Firebase 填入圖片網址）
     document.getElementById("artGrid").innerHTML = `
         <div class="art-card">
-            <img class="art-img" src="https://picsum.photos/seed/${currentStudent.phone}/500/500" alt="作品1">
+            <img class="art-img" src="https://picsum.photos/seed/${currentStudent.phone}/500/500">
             <div class="art-info">作品：快樂小畫家</div>
-        </div>
-        <div class="art-card">
-            <img class="art-img" src="https://picsum.photos/seed/art2/500/500" alt="作品2">
-            <div class="art-info">作品：動物王國</div>
         </div>
     `;
 
-    // 老師評語
     document.getElementById("teacherComment").innerHTML = `
         <strong>老師評語：</strong><br>
-        ${currentStudent.name} 學習態度認真，創意豐富，色彩運用越來越棒！繼續加油！
+        ${currentStudent.comment || '表現優秀，繼續加油！'}
     `;
 }
 </script>
