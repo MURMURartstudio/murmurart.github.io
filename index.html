@@ -262,9 +262,7 @@ if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
 
-// 密碼寫在這裡，你可以自己改
 const ADMIN_PWD = "teacher123";
-
 let db = firebase.firestore();
 let isTeacher = false;
 let currentStudentId = null;
@@ -274,14 +272,6 @@ let artList = [];
 let currentImg = 0;
 let courseRaw = [];
 
-// 寫入時自動帶密碼參數
-function getDBWithPwd() {
-  return firebase.firestore().doc("dummy").withConverter({
-    toFirestore: x => x,
-    fromFirestore: x => x.data()
-  }).firestore;
-}
-
 function switchTab(role) {
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   event.target.classList.add('active');
@@ -289,7 +279,6 @@ function switchTab(role) {
   document.getElementById('teacherLogin').style.display = role === 'teacher' ? 'block' : 'none';
 }
 
-// 老師登入
 function teacherLogin() {
   const p = document.getElementById('adminPwd').value.trim();
   if (p === ADMIN_PWD) {
@@ -302,7 +291,6 @@ function teacherLogin() {
   }
 }
 
-// 家長登入
 async function parentLogin() {
   const name = document.getElementById('pName').value.trim();
   const phone = document.getElementById('pPhone').value.trim().replace(/\s/g, '');
@@ -451,21 +439,19 @@ async function saveStu(){
   const note=document.getElementById('note').value;
   if(!n||!p)return;
   const data={name:n,studentNo:no,parentPhone:p,avatar:a,courseType:ct,school,birthYear,gender,note};
-  const wdb = getDBWithPwd();
   if(currentStudentId)
-    await wdb.collection('students').doc(currentStudentId).update(data);
+    await db.collection('students').doc(currentStudentId).update(data);
   else
-    await wdb.collection('students').add({...data,createdAt:new Date()});
+    await db.collection('students').add({...data,createdAt:new Date()});
   closeAll();loadAllStudents();
 }
 
 async function delStu(id){
   if(!isTeacher)return;
   if(!confirm('確定刪除？'))return;
-  const wdb = getDBWithPwd();
-  await wdb.collection('students').doc(id).delete();
-  await wdb.collection('artworks').where('studentId','==',id).get().then(s=>s.forEach(d=>d.ref.delete()));
-  await wdb.collection('courses').where('studentId','==',id).get().then(s=>s.forEach(d=>d.ref.delete()));
+  await db.collection('students').doc(id).delete();
+  await db.collection('artworks').where('studentId','==',id).get().then(s=>s.forEach(d=>d.ref.delete()));
+  await db.collection('courses').where('studentId','==',id).get().then(s=>s.forEach(d=>d.ref.delete()));
   loadAllStudents();
 }
 
@@ -511,8 +497,7 @@ async function saveArt(){
   const d=document.getElementById('cdate').value;
   const n=document.getElementById('artNote').value;
   if(!sid||!url||!d)return;
-  const wdb = getDBWithPwd();
-  await wdb.collection('artworks').add({studentId:sid,imageUrl:url,createDate:d,note:n,time:new Date()});
+  await db.collection('artworks').add({studentId:sid,imageUrl:url,createDate:d,note:n,time:new Date()});
   closeAll();loadArtList();
 }
 
@@ -529,8 +514,7 @@ async function deleteCurrentArt(){
   if(!isTeacher)return;
   if(!confirm('確定刪除？'))return;
   const id=artList[currentImg].id;
-  const wdb = getDBWithPwd();
-  await wdb.collection('artworks').doc(id).delete();
+  await db.collection('artworks').doc(id).delete();
   closeAll();loadArtList();
 }
 
@@ -613,9 +597,8 @@ async function batchSet(status){
   const checks=document.querySelectorAll('.courseCheck:checked');
   if(checks.length===0)return alert('請選擇');
   if(!confirm('確定修改？'))return;
-  const wdb = getDBWithPwd();
   for(let cb of checks){
-    await wdb.collection('courses').doc(cb.dataset.id).update({status})
+    await db.collection('courses').doc(cb.dataset.id).update({status})
   }
   loadCourseList();
 }
@@ -625,9 +608,8 @@ async function batchDeleteCourses(){
   const checks=document.querySelectorAll('.courseCheck:checked');
   if(checks.length===0)return alert('請選擇');
   if(!confirm('確定刪除？'))return;
-  const wdb = getDBWithPwd();
   for(let cb of checks){
-    await wdb.collection('courses').doc(cb.dataset.id).delete()
+    await db.collection('courses').doc(cb.dataset.id).delete()
   }
   loadCourseList();
 }
@@ -644,11 +626,10 @@ async function saveCourse(){
   const s=document.getElementById('cstatus').value;
   if(!sid||!d||!t)return;
   const data={studentId:sid,date:d,time:t,note:nt,status:s,imgUrl};
-  const wdb = getDBWithPwd();
   if(currentCourseId)
-    await wdb.collection('courses').doc(currentCourseId).update(data);
+    await db.collection('courses').doc(currentCourseId).update(data);
   else
-    await wdb.collection('courses').add(data);
+    await db.collection('courses').add(data);
   closeAll();loadCourseList();
 }
 
@@ -671,8 +652,7 @@ function editCourse(id){
 async function delCourse(id){
   if(!isTeacher)return;
   if(!confirm('確定刪除？'))return;
-  const wdb = getDBWithPwd();
-  await wdb.collection('courses').doc(id).delete();
+  await db.collection('courses').doc(id).delete();
   loadCourseList();
 }
 
@@ -683,13 +663,12 @@ async function quickPackage(count){
   const startTime=document.getElementById('ctime').value;
   if(!sid||!startDate||!startTime)return;
   if(!confirm('產生'+count+'堂？'))return;
-  const wdb = getDBWithPwd();
   const start=new Date(startDate);
   for(let i=0;i<count;i++){
     const dd=new Date(start);
     dd.setDate(start.getDate()+i*7);
     const date=dd.toISOString().split('T')[0];
-    await wdb.collection('courses').add({studentId:sid,date,time:startTime,note:'課程',status:'pending'});
+    await db.collection('courses').add({studentId:sid,date,time:startTime,note:'課程',status:'pending'});
   }
   alert('完成');
   closeAll();loadCourseList();
