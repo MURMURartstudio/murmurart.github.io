@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MURMUR ART - 登入頁</title>
+ title>MURMUR ART - 登入頁</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;font-family:微軟正黑體}
     body{background:linear-gradient(120deg,#f5f7fb,#e8edff);background-size:200% 200%;animation:bg 15s infinite;color:#444}
@@ -22,10 +22,14 @@
     .logo{font-size:24px;color:#879acb;font-weight:bold}
     .menu a{margin-left:20px;color:#666;text-decoration:none;cursor:pointer}
     .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;margin-top:20px}
-    .stu{background:white;border-radius:15px;padding:20px;text-align:center}
+    .stu{background:white;border-radius:15px;padding:20px;text-align:center;transition:0.3s}
+    .stu:hover{transform:translateY(-5px)}
     .stu img{width:80px;height:80px;border-radius:50%;margin-bottom:10px;border:3px solid #879acb}
     .action{margin-top:10px;display:flex;gap:5px;justify-content:center}
-    .action button{padding:5px 10px;border:none;border-radius:5px}
+    .action button{padding:6px 12px;border:none;border-radius:6px;cursor:pointer}
+    .action button:nth-child(1){background:#879acb;color:white}
+    .action button:nth-child(2){background:#ffc107;color:white}
+    .action button:nth-child(3){background:#dc3545;color:white}
     .gallery{position:relative;width:100%;height:700px;margin:40px 0;display:flex;justify-content:center;align-items:center}
     .avatar{width:200px;height:200px;border-radius:50%;border:8px solid #879acb;position:absolute;z-index:10}
     .rotate{width:450px;height:450px;position:relative;animation:r 25s linear infinite}
@@ -35,23 +39,26 @@
     .modal{position:fixed;top:0;left:0;width:100%;height:100%;background:#000000dd;display:none;justify-content:center;align-items:center;padding:20px}
     .modal .box{background:white;border-radius:15px;padding:30px;max-width:500px;width:100%}
     .add{position:fixed;bottom:30px;right:30px;width:60px;height:60px;border-radius:50%;background:#879acb;color:white;font-size:24px;display:flex;align-items:center;justify-content:center;cursor:pointer}
-    table{width:100%;background:white;border-radius:15px;overflow:hidden;margin-top:20px}
-    th{background:#879acb;color:white;padding:12px}
-    td{padding:12px;border-bottom:1px solid #e8edff}
-    .badge{padding:5px 10px;border-radius:20px;font-size:12px}
+    table{width:100%;background:white;border-radius:15px;overflow:hidden;margin-top:20px;box-shadow:0 5px 15px #00000010}
+    th{background:#879acb;color:white;padding:14px;text-align:left}
+    td{padding:14px;border-bottom:1px solid #e8edff}
+    .badge{padding:6px 12px;border-radius:20px;font-size:12px}
     .ok{background:#d4edda;color:#28a745}
     .wait{background:#fff3cd;color:#ffc107}
     .leave{background:#f8d7da;color:#dc3545}
-    .course-package{display:flex;gap:10px;margin-bottom:15px}
-    .package-btn{padding:8px 12px;background:#e8edff;border:none;border-radius:8px;cursor:pointer}
+    .course-package{display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap}
+    .package-btn{padding:10px 14px;background:#e8edff;border:none;border-radius:8px;cursor:pointer}
     .package-btn.active{background:#879acb;color:white}
+    .course-card{background:white;padding:16px;border-radius:12px;margin-bottom:10px;box-shadow:0 3px 10px #00000008}
+    .course-row{display:flex;justify-content:space-between;align-items:center}
+    .course-op{display:flex;gap:8px}
+    .course-op button{padding:6px 10px;border:none;border-radius:6px}
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
-<!-- 统一登录页：老师 / 家长 选择 -->
 <div id="loginPage" class="login">
   <div class="card">
     <div class="title">MURMUR ART 登入</div>
@@ -60,13 +67,11 @@
       <div class="tab" onclick="switchTab('parent')">家長</div>
     </div>
 
-    <!-- 老师登录 -->
     <div id="teacherLogin">
       <input class="input" id="pwd" type="password" placeholder="輸入老師密碼">
       <button class="btn" onclick="teacherLogin()">登入</button>
     </div>
 
-    <!-- 家长登录 -->
     <div id="parentLogin" style="display:none">
       <input class="input" id="pName" placeholder="學生姓名">
       <input class="input" id="pPhone" placeholder="家長電話">
@@ -75,7 +80,6 @@
   </div>
 </div>
 
-<!-- 老师后台 -->
 <div id="main" style="display:none">
   <div class="navbar">
     <div class="container nav">
@@ -90,14 +94,12 @@
   </div>
 
   <div class="container">
-    <!-- 学生管理 -->
     <div id="page1">
       <h2 style="color:#879acb;margin-bottom:10px">學生管理</h2>
       <button class="btn" style="width:auto;padding:8px 15px" onclick="addStu()">+ 新增學生</button>
       <div class="grid" id="stuList"></div>
     </div>
 
-    <!-- 作品管理 -->
     <div id="page2" style="display:none">
       <h2 style="color:#879acb;margin-bottom:10px">作品管理</h2>
       <select class="input" id="selectStudentForArt" onchange="switchArtStudent()"></select>
@@ -108,30 +110,18 @@
       <div class="add" onclick="openArt()">+</div>
     </div>
 
-    <!-- 课程管理 -->
     <div id="page3" style="display:none">
       <h2 style="color:#879acb;margin-bottom:10px">課程管理</h2>
       <select class="input" id="selectStudentForCourse" onchange="switchCourseStudent()"></select>
-      <div class="course-package">
-        <div class="package-btn" onclick="generatePackage(4)">4 堂</div>
-        <div class="package-btn" onclick="generatePackage(12)">12 堂</div>
-        <div class="package-btn" onclick="generatePackage(24)">24 堂</div>
-      </div>
-      <button class="btn" style="width:auto;padding:8px 15px" onclick="addCourse()">+ 新增課程</button>
-      <table>
-        <thead>
-          <tr><th>日期</th><th>時間</th><th>主題</th><th>狀態</th><th>操作</th></tr>
-        </thead>
-        <tbody id="courseBody"></tbody>
-      </table>
+      <button class="btn" style="width:auto;padding:8px 15px" onclick="addCourse()">+ 新增 / 產生課程</button>
+      <div id="courseList"></div>
     </div>
   </div>
 </div>
 
-<!-- 模态框 -->
 <div class="modal" id="stuModal"><div class="box"><h3>學生資料</h3><input class="input" id="sname" placeholder="姓名"><input class="input" id="sphone" placeholder="家長電話"><button class="btn" onclick="saveStu()">儲存</button></div></div>
-<div class="modal" id="artModal"><div class="box"><h3>上傳作品</h3><select class="input" id="artStudentSelect"></select><input class="input" id="img" placeholder="圖片網址"><input class="input" id="cdate" type="date"><textarea class="input" id="desc" placeholder="說明"></textarea><button class="btn" onclick="saveArt()">儲存</button></div></div>
-<div class="modal" id="courseModal"><div class="box"><h3>課程</h3><select class="input" id="courseStudentSelect"></select><input class="input" type="date" id="cday"><input class="input" type="time" id="ctime"><input class="input" id="ctitle" placeholder="主題"><select class="input" id="cstatus"><option>pending</option><option>completed</option><option>leave</option></select><button class="btn" onclick="saveCourse()">儲存</button></div></div>
+<div class="modal" id="artModal"><div class="box"><h3>上傳作品</h3><select class="input" id="artStudentSelect"></select><input class="input" id="img" placeholder="圖片網址"><input class="input" id="cdate" type="date"><textarea class="input" id="desc" placeholder="備註"></textarea><button class="btn" onclick="saveArt()">儲存</button></div></div>
+<div class="modal" id="courseModal"><div class="box"><h3>課程</h3><select class="input" id="courseStudentSelect"></select><input class="input" type="date" id="cday"><input class="input" type="time" id="ctime"><textarea class="input" id="cnote" placeholder="備註"></textarea><select class="input" id="cstatus"><option>pending</option><option>completed</option><option>leave</option></select><div style="margin-top:10px"><small>一鍵產生課程：</small><div class="course-package"><div class="package-btn" onclick="quickPackage(4)">4堂</div><div class="package-btn" onclick="quickPackage(12)">12堂</div><div class="package-btn" onclick="quickPackage(24)">24堂</div></div></div><button class="btn" onclick="saveCourse()">儲存單一課程</button></div></div>
 
 <script>
 const firebaseConfig = {apiKey:"AIzaSyBqUEh-MjMZ5Gj2gaFJpKffrDmvP9l7Slo",authDomain:"murmurart-8f6cc.firebaseapp.com",projectId:"murmurart-8f6cc",messagingSenderId:"205741159610",appId:"1:205741159610:web:624b7ca35c04e6e09a7e83"};
@@ -142,7 +132,6 @@ let currentStudentId = null;
 let currentCourseId = null;
 let studentList = [];
 
-// 登录切换
 function switchTab(role) {
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   event.target.classList.add('active');
@@ -150,7 +139,6 @@ function switchTab(role) {
   document.getElementById('parentLogin').style.display = role==='parent'?'block':'none';
 }
 
-// 老师登录
 function teacherLogin() {
   if(document.getElementById('pwd').value!==PWD) return alert('密碼錯誤');
   document.getElementById('loginPage').style.display='none';
@@ -158,7 +146,6 @@ function teacherLogin() {
   loadAllStudents();
 }
 
-// 家长登录 → 跳转到 class.html
 async function parentLogin() {
   const name = document.getElementById('pName').value.trim();
   const phone = document.getElementById('pPhone').value.trim().replace(/\s/g,'');
@@ -174,7 +161,6 @@ async function parentLogin() {
   location.href=`class.html?sid=${found}`;
 }
 
-// 页面切换
 function show(n) {
   document.getElementById('page1').style.display=n==1?'block':'none';
   document.getElementById('page2').style.display=n==2?'block':'none';
@@ -183,7 +169,6 @@ function show(n) {
   if(n==3) loadCourseList();
 }
 
-// 加载所有学生
 async function loadAllStudents() {
   const snap = await db.collection('students').get();
   studentList=[];
@@ -214,7 +199,6 @@ function selectStudent(id) {
   loadArtList();
 }
 
-// 学生管理
 function addStu(){currentStudentId=null;document.getElementById('sname').value='';document.getElementById('sphone').value='';document.getElementById('stuModal').style.display='flex'}
 async function saveStu(){
   const n=document.getElementById('sname').value,p=document.getElementById('sphone').value;
@@ -224,10 +208,9 @@ async function saveStu(){
   document.getElementById('stuModal').style.display='none';
   loadAllStudents();
 }
-async function delStu(id){if(!confirm('確定刪除？'))return;await db.collection('students').doc(id).delete();loadAllStudents();}
+async function delStu(id){if(!confirm('確定刪除學生？'))return;await db.collection('students').doc(id).delete();await db.collection('artworks').where('studentId','==',id).get().then(s=>s.forEach(d=>d.ref.delete()));await db.collection('courses').where('studentId','==',id).get().then(s=>s.forEach(d=>d.ref.delete()));loadAllStudents();}
 function editStu(id){currentStudentId=id;db.collection('students').doc(id).get().then(d=>{const s=d.data();document.getElementById('sname').value=s.name;document.getElementById('sphone').value=s.parentPhone||'';document.getElementById('stuModal').style.display='flex'})}
 
-// 作品
 function switchArtStudent(){currentStudentId=document.getElementById('selectStudentForArt').value;loadArtList();}
 async function loadArtList(){
   if(!currentStudentId)return;
@@ -236,7 +219,7 @@ async function loadArtList(){
   document.getElementById('mainAvatar').src='https://via.placeholder.com/200';
   const arts=await db.collection('artworks').where('studentId','==',currentStudentId).get();
   let a=0;const step=360/arts.size;
-  arts.forEach(d=>{const art=d.data();g.innerHTML+=`<div class="art" style="transform:rotate(${a}deg) translate(220px) rotate(${-a}deg)"><img src="${art.imageUrl}"></div>`;a+=step});
+  arts.forEach(d=>{const art=d.data();g.innerHTML+=`<div class="art" style="transform:rotate(${a}deg) translate(220px) rotate(${-a}deg)"><img src="${art.imageUrl}" onclick="delArt('${d.id}')"></div>`;a+=step});
 }
 function openArt(){document.getElementById('artModal').style.display='flex'}
 async function saveArt(){
@@ -247,42 +230,48 @@ async function saveArt(){
   document.getElementById('artModal').style.display='none';
   loadArtList();
 }
+async function delArt(id){if(!confirm('刪除作品？'))return;await db.collection('artworks').doc(id).delete();loadArtList();}
 
-// 课程
 function switchCourseStudent(){currentStudentId=document.getElementById('selectStudentForCourse').value;loadCourseList();}
 async function loadCourseList(){
   if(!currentStudentId)return;
-  const b=document.getElementById('courseBody');b.innerHTML='';
+  const b=document.getElementById('courseList');b.innerHTML='';
   const courses=await db.collection('courses').where('studentId','==',currentStudentId).get();
   const t={pending:'wait',completed:'ok',leave:'leave'},n={pending:'未完成',completed:'已完成',leave:'請假'};
-  courses.forEach(d=>{const c=d.data();b.innerHTML+=`<tr><td>${c.date}</td><td>${c.time}</td><td>${c.theme}</td><td><span class="badge ${t[c.status]}">${n[c.status]}</span></td><td><button onclick="editCourse('${d.id}')">修改</button></td></tr>`})
+  let arr=[];courses.forEach(d=>arr.push({id:d.id,...d.data()}));
+  arr.sort((a,b)=>{
+    if(a.status==='completed')return -1;
+    if(b.status==='completed')return 1;
+    return new Date(a.date)-new Date(b.date);
+  });
+  arr.forEach(c=>{
+    b.innerHTML+=`<div class="course-card"><div class="course-row"><div><div>${c.date} ${c.time}</div><div style="margin:5px 0">${c.note||'無備註'}</div><span class="badge ${t[c.status]}">${n[c.status]}</span></div><div class="course-op"><button onclick="editCourse('${c.id}')" style="background:#ffc107;color:white">修改</button><button onclick="delCourse('${c.id}')" style="background:#dc3545;color:white">刪除</button></div></div></div>`;
+  });
 }
-function addCourse(){currentCourseId=null;document.getElementById('cday').valueAsDate=new Date();document.getElementById('ctime').value='';document.getElementById('ctitle').value='';document.getElementById('cstatus').value='pending';document.getElementById('courseModal').style.display='flex'}
+function addCourse(){currentCourseId=null;document.getElementById('cday').valueAsDate=new Date();document.getElementById('ctime').value='';document.getElementById('cnote').value='';document.getElementById('cstatus').value='pending';document.getElementById('courseModal').style.display='flex'}
 async function saveCourse(){
   const sid=document.getElementById('courseStudentSelect').value;
-  const d=document.getElementById('cday').value,t=document.getElementById('ctime').value,th=document.getElementById('ctitle').value,s=document.getElementById('cstatus').value;
-  if(!sid||!d||!t||!th)return alert('填寫完整');
-  if(currentCourseId) await db.collection('courses').doc(currentCourseId).update({studentId:sid,date:d,time:t,theme:th,status:s});
-  else await db.collection('courses').add({studentId:sid,date:d,time:t,theme:th,status:s});
+  const d=document.getElementById('cday').value,t=document.getElementById('ctime').value,nt=document.getElementById('cnote').value,s=document.getElementById('cstatus').value;
+  if(!sid||!d||!t)return alert('填寫完整');
+  if(currentCourseId) await db.collection('courses').doc(currentCourseId).update({studentId:sid,date:d,time:t,note:nt,status:s});
+  else await db.collection('courses').add({studentId:sid,date:d,time:t,note:nt,status:s});
   document.getElementById('courseModal').style.display='none';
   loadCourseList();
 }
-function editCourse(id){currentCourseId=id;db.collection('courses').doc(id).get().then(d=>{const c=d.data();document.getElementById('courseStudentSelect').value=c.studentId;document.getElementById('cday').value=c.date;document.getElementById('ctime').value=c.time;document.getElementById('ctitle').value=c.theme;document.getElementById('cstatus').value=c.status;document.getElementById('courseModal').style.display='flex'})}
+function editCourse(id){currentCourseId=id;db.collection('courses').doc(id).get().then(d=>{const c=d.data();document.getElementById('courseStudentSelect').value=c.studentId;document.getElementById('cday').value=c.date;document.getElementById('ctime').value=c.time;document.getElementById('cnote').value=c.note||'';document.getElementById('cstatus').value=c.status;document.getElementById('courseModal').style.display='flex'})}
+async function delCourse(id){if(!confirm('刪除課程？'))return;await db.collection('courses').doc(id).delete();loadCourseList();}
 
-// 自动生成课程包
-async function generatePackage(count) {
-  if(!currentStudentId)return alert('先選學生');
+async function quickPackage(count){
+  const sid=document.getElementById('courseStudentSelect').value;
+  if(!sid)return alert('請先選學生');
+  if(!confirm('產生 '+count+' 堂課？'))return;
   const start = new Date();
-  const time = '14:00';
   for(let i=0;i<count;i++){
-    const d = new Date(start);
-    d.setDate(start.getDate() + i*7);
-    const date = d.toISOString().split('T')[0];
-    await db.collection('courses').add({
-      studentId:currentStudentId,date,time,theme:`主題 ${i+1}`,status:'pending'
-    });
+    const dd = new Date(start);dd.setDate(start.getDate()+i*7);
+    const date=dd.toISOString().split('T')[0];
+    await db.collection('courses').add({studentId:sid,date,time:'14:00',note:'課程',status:'pending'});
   }
-  alert('已產生 '+count+' 堂課');
+  alert('已產生');
   loadCourseList();
 }
 
