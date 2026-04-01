@@ -51,6 +51,7 @@
     .wait{background:#fff3cd;color:#ffc107}
     .leave{background:#f8d7da;color:#dc3545}
     .absent{background:#e9ecef;color:#6c757d}
+    .holiday{background:#d1ecf1;color:#17a2b8}
     .course-package{display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap}
     .package-btn{padding:10px 14px;background:#e8edff;border:none;border-radius:8px;cursor:pointer}
     .package-btn.active{background:#879acb;color:white}
@@ -66,6 +67,7 @@
     .stat{flex:1}
     .check-btn{background:#28a745;color:white;padding:8px 12px;border:none;border-radius:8px;margin-right:5px}
     .batch-bar{margin:10px 0;padding:10px;background:#f8f9ff;border-radius:12px}
+    .student-info-bar{background:#fff3cd;padding:12px 15px;border-radius:12px;margin-bottom:10px;font-size:15px;color:#666}
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -128,15 +130,17 @@
       <h2 style="color:#879acb;margin-bottom:10px">📅 課程管理</h2>
       <select class="input" id="selectStudentForCourse" onchange="switchCourseStudent()"></select>
       <input class="search" id="searchCourse" placeholder="🔍 搜尋學生編號" oninput="searchCourse()">
+      <div id="studentInfoDisplay" class="student-info-bar" style="display:none;"></div>
       <button class="btn" style="width:auto;padding:8px 15px" onclick="addCourse()">+ 新增 / 產生課程</button>
       
       <div class="stats" id="courseStats"></div>
       
       <div class="batch-bar">
         <small>🔄 批量操作：</small>
-        <button class="check-btn" onclick="batchSet('completed')">✔️ 標記已完成</button>
+        <button class="check-btn" onclick="batchSet('completed')">✔️ 已完成</button>
         <button class="check-btn" onclick="batchSet('leave')">🏖️ 請假</button>
         <button class="check-btn" onclick="batchSet('absent')">🚫 缺席</button>
+        <button class="check-btn" onclick="batchSet('holiday')">🌧️ 公眾假期</button>
       </div>
 
       <table>
@@ -194,6 +198,7 @@
       <option value="completed">✔️ 已完成</option>
       <option value="leave">🏖️ 請假</option>
       <option value="absent">🚫 缺席</option>
+      <option value="holiday">🌧️ 公眾假期</option>
     </select>
     <div style="margin-top:10px">
       <small>🔄 一鍵產生課程：</small>
@@ -379,11 +384,22 @@ function calcEndTime(){
 function searchCourse(){
   const kw=document.getElementById('searchCourse').value.toLowerCase();
   const st=studentList.find(s=>s.studentNo&&s.studentNo.toLowerCase().includes(kw));
-  if(st)switchCourseStudentById(st.id);
-  else renderCourseList(courseRaw);
+  const infoBar=document.getElementById('studentInfoDisplay');
+  if(st){
+    switchCourseStudentById(st.id);
+    infoBar.style.display='block';
+    infoBar.innerHTML=`👤 學生：${st.name}｜編號：${st.studentNo||'-'}｜電話：${st.parentPhone||'-'}`;
+  }else{
+    renderCourseList(courseRaw);
+    infoBar.style.display='none';
+  }
 }
 function switchCourseStudentById(id){currentStudentId=id;loadCourseList();}
-function switchCourseStudent(){currentStudentId=document.getElementById('selectStudentForCourse').value;loadCourseList();}
+function switchCourseStudent(){
+  currentStudentId=document.getElementById('selectStudentForCourse').value;
+  document.getElementById('studentInfoDisplay').style.display='none';
+  loadCourseList();
+}
 
 async function loadCourseList(){
   if(!currentStudentId)return;
@@ -395,22 +411,29 @@ async function loadCourseList(){
 
 function updateStats(){
   const total=courseRaw.length;
-  const ok=courseRaw.filter(c=>c.status==='completed'||c.status==='leave').length;
+  const ok=courseRaw.filter(c=>c.status==='completed'||c.status==='absent').length;
   const left=total-ok;
   const rate=total?Math.round(ok/total*100):0;
   document.getElementById('courseStats').innerHTML=`
   <div class="stat"><h3>📊 總課程</h3><h2>${total}</h2></div>
   <div class="stat"><h3>✅ 已完成</h3><h2>${ok}</h2></div>
-  <div class="stat"><h3>⏳ 剩餘</h3><h2>${left}</h2></div>
+  <div class="stat"><h3>⏳ 剩餘</h2><h2>${left}</h3></div>
   <div class="stat"><h3>🎯 完成率</h3><h2>${rate}%</h2></div>
   `;
 }
 
 function renderCourseList(arr){
   const b=document.getElementById('courseList');b.innerHTML='';
-  const map={pending:'wait',completed:'ok',leave:'leave',absent:'absent'};
-  const txt={pending:'⏳ 未完成',completed:'✔️ 已完成',leave:'🏖️ 請假',absent:'🚫 缺席'};
-  arr.sort((a,b)=>new Date(a.date)-new Date(b.date)).forEach(c=>{
+  const map={pending:'wait',completed:'ok',leave:'leave',absent:'absent',holiday:'holiday'};
+  const txt={pending:'⏳ 未完成',completed:'✔️ 已完成',leave:'🏖️ 請假',absent:'🚫 缺席',holiday:'🌧️ 公眾假期'};
+  
+  arr.sort((a,b)=>{
+    if(a.status==='pending' && b.status!=='pending') return -1;
+    if(a.status!=='pending' && b.status==='pending') return 1;
+    return new Date(a.date)-new Date(b.date);
+  });
+
+  arr.forEach(c=>{
     b.innerHTML+=`<tr>
       <td><input type="checkbox" class="courseCheck" data-id="${c.id}"></td>
       <td>${c.date}（${getWeek(c.date)}）</td>
