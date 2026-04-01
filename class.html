@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MURMUR ART - 學員專區</title>
+  <title>MURMUR ART ✨</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;font-family:微軟正黑體;transition:all 0.25s ease}
     body{background:linear-gradient(120deg,#f5f7fb,#e8edff);color:#444}
@@ -19,7 +19,7 @@
     .art{position:absolute;width:150px;height:150px;border-radius:14px;overflow:hidden;cursor:pointer}
     .art img{width:100%;height:100%;object-fit:cover}
     .container{width:90%;max-width:1200px;margin:0 auto}
-    .info{background:white;padding:25px;border-radius:18px;margin-bottom:20px;display:flex;justify-content:space-between;text-align:center}
+    .info{background:white;padding:25px;border-radius:18px;margin-bottom:20px;display:flex;justify-content:space-between;text-align:center;box-shadow:0 5px 15px #00000010}
     .info-item{flex:1}
     .info-item h3{color:#879acb}
     table{width:100%;background:white;border-radius:16px;overflow:hidden;box-shadow:0 5px 15px #00000010}
@@ -29,6 +29,7 @@
     .ok{background:#d4edda;color:#28a745}
     .wait{background:#fff3cd;color:#ffc107}
     .leave{background:#f8d7da;color:#dc3545}
+    .absent{background:#e9ecef;color:#6c757d}
     .preview{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:90%;max-width:700px;background:white;border-radius:20px;padding:25px;display:none;z-index:9999;box-shadow:0 20px 60px #00000040}
     .preview img{max-width:100%;max-height:400px;border-radius:12px}
     .prev,.next{position:absolute;top:50%;transform:translateY(-50%);font-size:22px;color:white;background:#879acb;padding:10px 16px;border-radius:10px;cursor:pointer}
@@ -42,7 +43,7 @@
 <body>
 <div class="navbar">
   <div class="nav">
-    <div class="logo">MURMUR ART - 學員專區</div>
+    <div class="logo">🎨 MURMUR ART - 學員專區</div>
     <div class="menu">
       <a onclick="sh(1)">🎨 作品</a>
       <a onclick="sh(2)">📋 課程</a>
@@ -95,15 +96,13 @@ let artList=[];
 let currentImg=0;
 
 window.onload=()=>{loadArt();loadCourse();sh(1)}
-
-function sh(x){
-  document.getElementById('p1').style.display=x==1?'block':'none';
-  document.getElementById('p2').style.display=x==2?'block':'none';
-}
-
+function sh(x){document.getElementById('p1').style.display=x==1?'block':'none';document.getElementById('p2').style.display=x==2?'block':'none'}
 function closePrev(){document.getElementById('preview').style.display='none'}
 function prevImg(){event.stopPropagation();currentImg=(currentImg-1+artList.length)%artList.length;showArt(currentImg)}
 function nextImg(){event.stopPropagation();currentImg=(currentImg+1)%artList.length;showArt(currentImg)}
+
+function getWeek(d){const w=['日','一','二','三','四','五','六'];return w[new Date(d).getDay()]}
+function fmtTime(t){const [h,m]=t.split(':');const min=h*60+parseInt(m)+75;const eh=Math.floor(min/60),em=min%60;return `${t} - ${String(eh).padStart(2,0)}:${String(em).padStart(2,0)}`}
 
 async function loadArt(){
   const wrap=document.getElementById('r');wrap.innerHTML='';
@@ -117,39 +116,35 @@ async function loadArt(){
     a+=step;
   })
 }
-function showArt(i){
-  currentImg=i;
-  document.getElementById('previewImg').src=artList[i].imageUrl;
-  document.getElementById('preview').style.display='block';
-}
+function showArt(i){currentImg=i;document.getElementById('previewImg').src=artList[i].imageUrl;document.getElementById('preview').style.display='block'}
 
 async function loadCourse(){
   const list=document.getElementById('courseList');list.innerHTML='';
   const res=await db.collection('courses').where('studentId','==',uid).get();
-  const map={pending:"wait",completed:"ok",leave:"leave"};
-  const name={pending:"未完成",completed:"已完成",leave:"請假"};
+  const map={pending:"wait",completed:"ok",leave:"leave",absent:"absent"};
+  const name={pending:"⏳ 未完成",completed:"✔️ 已完成",leave:"🏖️ 請假",absent:"🚫 缺席"};
   let arr=[];res.forEach(d=>arr.push({id:d.id,...d.data()}));
   
   const total=arr.length;
-  const completed=arr.filter(x=>x.status==='completed').length;
+  const completed=arr.filter(x=>x.status==='completed'||x.status==='leave').length;
   const left=total-completed;
   const rate=total>0?Math.round(completed/total*100):0;
   
   document.getElementById('info').innerHTML=`
-  <div class="info-item"><h3>總課程</h3><h2>${total}</h2></div>
-  <div class="info-item"><h3>已完成</h3><h2>${completed}</h2></div>
-  <div class="info-item"><h3>剩餘</h3><h2>${left}</h2></div>
-  <div class="info-item"><h3>完成率</h3><h2>${rate}%</h2></div>
+  <div class="info-item"><h3>📊 總課程</h3><h2>${total}</h2></div>
+  <div class="info-item"><h3>✅ 已完成</h3><h2>${completed}</h2></div>
+  <div class="info-item"><h3>⏳ 剩餘</h3><h2>${left}</h2></div>
+  <div class="info-item"><h3>🎯 完成率</h3><h2>${rate}%</h2></div>
   `;
 
-  arr.sort((a,b)=>{
-    if(a.status==='completed')return -1;
-    if(b.status==='completed')return 1;
-    return new Date(a.date)-new Date(b.date);
-  });
-  
+  arr.sort((a,b)=>new Date(a.date)-new Date(b.date));
   arr.forEach(c=>{
-    list.innerHTML+=`<tr><td>${c.date}</td><td>${c.time}</td><td><span class="badge ${map[c.status]}">${name[c.status]}</span></td><td>${c.note||'無'}</td></tr>`;
+    list.innerHTML+=`<tr>
+      <td>${c.date}（${getWeek(c.date)}）</td>
+      <td>${fmtTime(c.time)}</td>
+      <td><span class="badge ${map[c.status]}">${name[c.status]}</span></td>
+      <td>${c.note||'無'}</td>
+    </tr>`;
   })
 }
 </script>
