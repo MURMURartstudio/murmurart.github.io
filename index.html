@@ -248,16 +248,8 @@
 </div>
 
 <script>
-const firebaseConfig = {
-  apiKey:"AIzaSyBqUEh-MjMZ5Gj2gaFJpKffrDmvP9l7Slo",
-  authDomain:"murmurart-8f6cc.firebaseapp.com",
-  projectId:"murmurart-8f6cc",
-  messagingSenderId:"205741159610",
-  appId:"1:205741159610:web:624b7ca35c04e6e09a7e83"
-};
-if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
+// 🔒 先宣告變數，再初始化，解決 Cannot access 'db' before initialization 錯誤
+let db;
 let isTeacher = false;
 let currentStudentId = null;
 let currentCourseId = null;
@@ -266,6 +258,20 @@ let artList = [];
 let currentImg = 0;
 let courseRaw = [];
 
+const firebaseConfig = {
+  apiKey:"AIzaSyBqUEh-MjMZ5Gj2gaFJpKffrDmvP9l7Slo",
+  authDomain:"murmurart-8f6cc.firebaseapp.com",
+  projectId:"murmurart-8f6cc",
+  messagingSenderId:"205741159610",
+  appId:"1:205741159610:web:624b7ca35c04e6e09a7e83"
+};
+
+// 🔒 正確初始化 Firebase
+if(!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+db = firebase.firestore();
+
 function switchTab(role) {
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   event.target.classList.add('active');
@@ -273,7 +279,7 @@ function switchTab(role) {
   document.getElementById('teacherLogin').style.display = role==='teacher'?'block':'none';
 }
 
-// 安全登入 從資料庫抓密碼
+// 🔒 安全版老師登入（從資料庫抓密碼，F12看不到）
 async function teacherLogin() {
   const pass = document.getElementById("teacherPass").value;
   try {
@@ -287,11 +293,12 @@ async function teacherLogin() {
       alert("密碼錯誤");
     }
   } catch (e) {
-    alert("登入失敗，請檢查規則");
+    alert("登入失敗，請檢查網路或Firebase設定");
     console.error(e);
   }
 }
 
+// 🔒 家長登入
 async function parentLogin() {
   const name = document.getElementById('pName').value.trim();
   const phone = document.getElementById('pPhone').value.trim().replace(/\s/g, '');
@@ -304,9 +311,9 @@ async function parentLogin() {
       if (p === phone) found = doc.id;
     });
     if (found) location.href = `class.html?sid=${found}`;
-    else alert('找不到學生資料');
+    else alert('找不到學生資料，請確認姓名與電話正確');
   } catch (e) {
-    alert('家長登入失敗');
+    alert('家長登入失敗，請檢查網路或Firebase設定');
     console.error(e);
   }
 }
@@ -403,7 +410,7 @@ function searchStudent(){
       <p>家長：${s.parentPhone||'-'}</p>
       <p>方案：${s.courseType||'-'}</p>
       <span class="leftTag">剩餘 ${s.left||0} 堂</span>
-      ${s.warning?'<p style="color:red;font-weight:bold">即將續課</p>':''}
+      ${s.warning?'<p style="color:red;font-weight:bold;margin-top:6px">即將續課</p>':''}
       <div class="action">
         <button onclick="selectStudent('${s.id}')">選取</button>
         ${isTeacher ? `<button onclick="editStu('${s.id}')">編輯</button><button onclick="delStu('${s.id}')">刪除</button>` : ''}
