@@ -3,230 +3,111 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MURMUR ART STUDIO- 學生專區</title>
+  <link rel="icon" href="favicon.png">
+  <title>MURMUR ART 課程進度</title>
   <style>
-    *{margin:0;padding:0;box-sizing:border-box;font-family:微軟正黑體,"Noto Sans TC";transition:all 0.25s ease}
-    body{background:linear-gradient(120deg,#fdfbf7,#f0e9ff);color:#444}
-    .navbar{background:white;padding:18px 0}
-    .nav{display:flex;justify-content:space-between;align-items:center;width:90%;max-width:1200px;margin:0 auto;flex-wrap:wrap;gap:10px}
-    .logo{font-size:22px;color:#879acb}
-    .menu{display:flex;gap:14px}
-    .menu a{color:#555;text-decoration:none;cursor-pointer}
-    .menu a:hover{color:#879acb}
-    .gallery{position:relative;width:100%;height:600px;display:flex;justify-content:center;align-items:center;margin:20px 0}
-    .avatar{width:170px;height:170px;border-radius:50%;border:6px solid #879acb;position:absolute;z-index:10}
-    .rotate{width:380px;height:380px;position:relative;animation:r 25s linear infinite}
-    @keyframes r{100%{transform:rotate(360deg)}}
-    .art{position:absolute;width:140px;height:140px;border-radius:14px;overflow:hidden;cursor:pointer}
-    .art img{width:100%;height:100%;object-fit:cover}
-    .container{width:90%;max-width:1200px;margin:0 auto}
-    .studentTitle{text-align:center;font-size:22px;color:#879acb;margin:10px 0;font-weight:bold}
-    .courseTypeTag{background:#879acb;color:white;padding:6px 12px;border-radius:15px;font-size:14px;display:inline-block;margin-bottom:10px}
-    .info{background:white;padding:20px;border-radius:18px;margin-bottom:15px;display:flex;justify-content:space-between;text-align:center;box-shadow:0 4px 10px #00000008}
-    .info-item{flex:1}
-    .info-item h3{color:#879acb;font-size:16px}
-    .info-item h2{font-size:22px}
-    table{width:100%;background:white;border-radius:16px;overflow:hidden;box-shadow:0 4px 10px #00000008}
-    th{background:#879acb;color:white;padding:14px}
-    td{padding:14px;border-bottom:1px solid #e8edff}
-    .badge{padding:6px 10px;border-radius:20px;font-size:12px}
+    *{margin:0;padding:0;box-sizing:border-box;font-family:微軟正黑體,"Noto Sans TC"}
+    body{background:linear-gradient(120deg,#fdfbf7,#f0e9ff);color:#444;padding:20px}
+    .container{max-width:800px;margin:0 auto}
+    .card{background:white;border-radius:20px;padding:25px;margin-bottom:20px;box-shadow:0 4px 12px rgba(0,0,0,0.05)}
+    .avatar{width:100px;height:100px;border-radius:50%;border:5px solid #879acb}
+    .badge{padding:6px 12px;border-radius:20px;font-size:12px;margin-right:5px}
     .ok{background:#d4edda;color:#28a745}
     .wait{background:#fff3cd;color:#ffc107}
     .leave{background:#f8d7da;color:#dc3545}
-    .absent{background:#e9ecef;color:#6c757d}
     .holiday{background:#d1ecf1;color:#17a2b8}
-    .preview{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:90%;max-width:700px;background:white;border-radius:20px;padding:25px;display:none;z-index:9999}
-    .preview img{max-width:100%;max-height:400px;border-radius:12px}
-    .prev,.next{position:absolute;top:50%;transform:translateY(-50%);font-size:22px;color:white;background:#879acb;padding:10px 16px;border-radius:10px;cursor:pointer}
-    .prev{left:15px}
-    .next{right:15px}
-    .close{position:absolute;top:18px;right:18px;font-size:22px;cursor-pointer;color:#777}
-    .reminder{background:#fff3cd;color:#ff9800;padding:12px;border-radius:12px;text-align:center;margin-bottom:15px;font-weight:bold}
-    .last-class{text-align:center;background:#e8edff;padding:10px;border-radius:12px;margin-bottom:10px;color:#879acb;font-weight:bold}
-    .course-img{max-width:120px;max-height:80px;border-radius:8px;margin-top:6px}
-    .footer{background:white;padding:20px;text-align:center;margin-top:30px;border-radius:16px}
-    .social{display:flex;justify-content:center;gap:15px;margin-top:10px}
-    .social a{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;text-decoration:none}
-    .ig{background:linear-gradient(45deg,#fca847,#e44569,#9a34c0)}
-    .fb{background:#1877f2}
-    .wa{background:#25d366}
-    .rule{text-align:center;color:#888;margin-top:10px;font-size:14px}
+    .absent{background:#e9ecef;color:#6c757d}
+    .stats{display:flex;gap:15px;margin:15px 0}
+    .stat{flex:1;background:#f8f9ff;padding:15px;border-radius:12px;text-align:center}
+    table{width:100%;border-collapse:collapse;background:white;border-radius:12px;overflow:hidden}
+    th{background:#879acb;color:white;padding:12px;text-align:left}
+    td{padding:12px;border-bottom:1px solid #eee}
+    .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:20px}
+    .art{border-radius:12px;overflow:hidden}
+    .art img{width:100%;height:160px;object-fit:cover}
+    .title{color:#879acb;margin-bottom:10px}
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
-<div class="navbar">
-  <div class="nav">
-    <div class="logo">🎨 MURMUR ART</div>
-    <div class="menu">
-      <a onclick="sh(1)">🎨 學生作品</a>
-      <a onclick="sh(2)">📋 課程進度</a>
-      <a onclick="location.href='index.html'">返回</a>
-    </div>
-  </div>
-</div>
-
 <div class="container">
-  <div id="studentNameBox" class="studentTitle" style="display:none"></div>
-  <div style="text-align:center;margin-bottom:10px">
-    <span id="courseTypeTag" class="courseTypeTag" style="display:none"></span>
+  <div class="card" style="text-align:center">
+    <img id="avatar" class="avatar">
+    <h2 id="name" style="margin:10px 0"></h2>
+    <p id="phone"></p>
   </div>
 
-  <div id="reminderBox" style="display:none;" class="reminder">課程即將用罄，記得續課哦！</div>
-  <div id="lastClass" class="last-class" style="display:none;"></div>
-  
-  <div id="p1">
-    <h2 style="text-align:center;color:#879acb;margin:10px 0 20px">🎨 學生作品</h2>
-    <div class="gallery">
-      <img class="avatar" id="avt" src="https://via.placeholder.com/200">
-      <div class="rotate" id="r"></div>
-    </div>
-  </div>
-
-  <div id="p2" style="display:none">
-    <h2 style="text-align:center;color:#879acb;margin:10px 0 20px">📋 課程進度</h2>
-    <div class="info" id="info"></div>
+  <div class="card">
+    <h3 class="title">課程進度</h3>
+    <div class="stats" id="stats"></div>
     <table>
       <thead>
-        <tr>
-          <th>日期</th>
-          <th>時間</th>
-          <th>狀態</th>
-          <th>課程作品</th>
-          <th>備註</th>
-        </tr>
+        <tr><th>日期</th><th>時間</th><th>狀態</th><th>備註</th></tr>
       </thead>
       <tbody id="courseList"></tbody>
     </table>
   </div>
-</div>
 
-<div class="footer">
-  <h3 style="color:#879acb">🎨 歡迎追蹤我們</h3>
-  <div class="social">
-    <a href="https://www.instagram.com/murmur_artstudio/" target="_blank" class="ig">IG</a>
-    <a href="https://www.facebook.com/share/1DMkDrhF65/?mibextid=wwXIfr" target="_blank" class="fb">FB</a>
-    <a href="https://wa.me/67480066" target="_blank" class="wa">WA</a>
+  <div class="card">
+    <h3 class="title">作品</h3>
+    <div class="gallery" id="artList"></div>
   </div>
-  <div class="rule">
-    請假請提前一天聯絡老師，缺席將不予補課<br>
-    謝謝配合 😊
-  </div>
-</div>
-
-<div class="preview" id="preview">
-  <span class="close" onclick="closePrev()">&times;</span>
-  <div class="prev" onclick="prevImg()">&lt;</div>
-  <img id="previewImg">
-  <div style="margin-top:10px;text-align:center">
-    <p style="margin:4px"><strong>創作日期：</strong><span id="artDate"></span></p>
-    <p style="margin:4px"><strong>備註：</strong><span id="artNote"></span></p>
-  </div>
-  <div class="next" onclick="nextImg()">&gt;</div>
 </div>
 
 <script>
-const cfg = {
+const firebaseConfig = {
   apiKey:"AIzaSyBqUEh-MjMZ5Gj2gaFJpKffrDmvP9l7Slo",
   authDomain:"murmurart-8f6cc.firebaseapp.com",
-  projectId:"murmurart-8f6cc",
-  messagingSenderId:"205741159610",
-  appId:"1:205741159610:web:624b7ca35c04e6e09a7e83"
+  projectId:"murmurart-8f6cc"
 };
-if(!firebase.apps.length)firebase.initializeApp(cfg);
-const db=firebase.firestore();
-const params=new URLSearchParams(location.search);
-const uid=params.get('sid');
-if(!uid)location.href='index.html';
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const params = new URLSearchParams(location.search);
+const sid = params.get('sid');
 
-let artList=[];
-let currentImg=0;
-let studentData=null;
+async function load(){
+  const stu = await db.collection('students').doc(sid).get();
+  const s = stu.data();
+  document.getElementById('name').innerText = s.name;
+  document.getElementById('phone').innerText = s.parentPhone;
+  document.getElementById('avatar').src = s.avatar || 'https://via.placeholder.com/100';
 
-window.onload=()=>{init();loadArt();loadCourse();sh(1)}
-async function init(){
-  const s = await db.collection('students').doc(uid).get();
-  studentData = s.data();
-  document.getElementById('studentNameBox').innerText = `${studentData.name} 同學`;
-  document.getElementById('studentNameBox').style.display='block';
-  if(studentData.courseType){
-    document.getElementById('courseTypeTag').innerText = `課程方案：${studentData.courseType}`;
-    document.getElementById('courseTypeTag').style.display='inline-block';
-  }
-}
-function sh(x){document.getElementById('p1').style.display=x==1?'block':'none';document.getElementById('p2').style.display=x==2?'block':'none'}
-function closePrev(){document.getElementById('preview').style.display='none'}
-function prevImg(){event.stopPropagation();currentImg=(currentImg-1+artList.length)%artList.length;showArt(currentImg)}
-function nextImg(){event.stopPropagation();currentImg=(currentImg+1)%artList.length;showArt(currentImg)}
-
-function getWeek(d){const w=['日','一','二','三','四','五','六'];return w[new Date(d).getDay()]}
-function fmtTime(t){const [h,m]=t.split(':');const min=h*60+parseInt(m)+75;const eh=Math.floor(min/60),em=min%60;return `${t} - ${String(eh).padStart(2,0)}:${String(em).padStart(2,0)}`}
-
-async function loadArt(){
-  const wrap=document.getElementById('r');wrap.innerHTML='';
-  document.getElementById('avt').src=studentData.avatar||'https://via.placeholder.com/200';
-  const res=await db.collection('artworks').where('studentId','==',uid).get();
-  artList=[];res.forEach(d=>artList.push({...d.data()}));
-  let a=0;const step=360/artList.length;
-  artList.forEach((d,i)=>{
-    wrap.innerHTML+=`<div class="art" style="transform:rotate(${a}deg) translate(190px) rotate(${-a}deg)" onclick="showArt(${i})"><img src="${d.imageUrl}"></div>`;
-    a+=step;
-  })
-}
-function showArt(i){
-  currentImg=i;
-  const item=artList[i];
-  document.getElementById('previewImg').src=item.imageUrl;
-  document.getElementById('artDate').innerText=item.createDate||'未填寫';
-  document.getElementById('artNote').innerText=item.note||'無';
-  document.getElementById('preview').style.display='block';
-}
-
-async function loadCourse(){
-  const list=document.getElementById('courseList');list.innerHTML='';
-  const res=await db.collection('courses').where('studentId','==',uid).get();
-  const map={pending:"wait",completed:"ok",leave:"leave",absent:"absent",holiday:"holiday"};
-  const name={pending:"⏳ 未完成",completed:"✔️ 已完成",leave:"🏖️ 請假",absent:"🚫 缺席",holiday:"🌧️ 公眾假期"};
-  let arr=[];res.forEach(d=>arr.push({id:d.id,...d.data()}));
+  const courses = await db.collection('courses').where('studentId','==',sid).get();
+  const list = [];
+  courses.forEach(d => list.push({id:d.id,...d.data()}));
   
-  const total=arr.length;
-  const completed=arr.filter(x=>x.status==='completed'||x.status==='absent').length;
-  const left=total-completed;
+  const valid = list.filter(c => !['leave','holiday'].includes(c.status));
+  const total = valid.length;
+  const ok = valid.filter(c => c.status === 'completed' || c.status === 'absent').length;
+  const left = total - ok;
 
-  if(left < 3){
-    document.getElementById('reminderBox').style.display='block';
-  }
+  document.getElementById('stats').innerHTML = `
+<div class="stat"><h4>總課</h4><h2>${total}</h2></div>
+<div class="stat"><h4>已完成</h4><h2>${ok}</h2></div>
+<div class="stat"><h4>剩餘</h4><h2>${left}</h2></div>
+`;
 
-  const last = arr.filter(x=>x.status==='completed').sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
-  if(last){
-    document.getElementById('lastClass').style.display='block';
-    document.getElementById('lastClass').innerText=`🗓️ 上次上課：${last.date}（${getWeek(last.date)}）`;
-  }
-
-  document.getElementById('info').innerHTML=`
-  <div class="info-item"><h3>📊 總課程</h3><h2>${total}</h2></div>
-  <div class="info-item"><h3>✅ 已完成</h3><h2>${completed}</h2></div>
-  <div class="info-item"><h3>⏳ 剩餘</h3><h2>${left}</h2></div>
-  `;
-
-  arr.sort((a,b)=>{
-    if(a.status==='pending' && b.status!=='pending') return -1;
-    if(a.status!=='pending' && b.status==='pending') return 1;
-    return new Date(a.date)-new Date(b.date);
+  const tbody = document.getElementById('courseList');
+  const map = {pending:'wait',completed:'ok',leave:'leave',holiday:'holiday',absent:'absent'};
+  const txt = {pending:'未完成',completed:'已完成',leave:'請假',holiday:'公眾假期',absent:'缺席'};
+  list.forEach(c => {
+    tbody.innerHTML += `<tr>
+<td>${c.date}</td>
+<td>${c.time}</td>
+<td><span class="badge ${map[c.status]}">${txt[c.status]}</span></td>
+<td>${c.note || ''}</td>
+</tr>`;
   });
 
-  arr.forEach(c=>{
-    const imgHtml = c.imgUrl ? `<img src="${c.imgUrl}" class="course-img">` : '';
-    list.innerHTML+=`<tr>
-      <td>${c.date}（${getWeek(c.date)}）</td>
-      <td>${fmtTime(c.time)}</td>
-      <td><span class="badge ${map[c.status]}">${name[c.status]}</span></td>
-      <td>${imgHtml}</td>
-      <td>${c.note||'-'}</td>
-    </tr>`;
+  const arts = await db.collection('artworks').where('studentId','==',sid).get();
+  const artHtml = document.getElementById('artList');
+  arts.forEach(d => {
+    const a = d.data();
+    artHtml.innerHTML += `<div class="art"><img src="${a.imageUrl}"></div>`;
   });
 }
+load();
 </script>
 </body>
 </html>
