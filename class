@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MURMUR ART - 學員專區</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:微軟正黑體}
+    body{background:linear-gradient(120deg,#f5f7fb,#e8edff);color:#444}
+    .login{display:flex;justify-content:center;align-items:center;height:100vh;padding:20px}
+    .card{background:white;border-radius:20px;padding:40px;max-width:450px;width:100%}
+    .title{text-align:center;font-size:28px;color:#879acb;margin-bottom:30px}
+    .input{width:100%;padding:12px;border:2px solid #e8edff;border-radius:10px;margin-bottom:20px}
+    .btn{width:100%;padding:12px;background:#879acb;color:white;border:none;border-radius:10px}
+    .navbar{background:white;padding:15px 0}
+    .nav{display:flex;justify-content:space-between;align-items:center;width:90%;max-width:1200px;margin:0 auto}
+    .logo{font-size:22px;color:#879acb}
+    .menu a{margin-left:15px;color:#666;text-decoration:none}
+    .gallery{position:relative;width:100%;height:650px;display:flex;justify-content:center;align-items:center;margin:30px 0}
+    .avatar{width:180px;height:180px;border-radius:50%;border:6px solid #879acb;position:absolute;z-index:10}
+    .rotate{width:400px;height:400px;position:relative;animation:r 25s linear infinite}
+    @keyframes r{100%{transform:rotate(360deg)}}
+    .art{position:absolute;width:150px;height:150px;border-radius:12px;overflow:hidden}
+    .art img{width:100%;height:100%;object-fit:cover}
+    .container{width:90%;max-width:1200px;margin:0 auto}
+    table{width:100%;background:white;border-radius:15px;overflow:hidden}
+    th{background:#879acb;color:white;padding:12px}
+    td{padding:12px;border-bottom:1px solid #e8edff}
+    .badge{padding:5px 10px;border-radius:20px;font-size:12px}
+    .ok{background:#d4edda;color:#28a745}
+    .wait{background:#fff3cd;color:#ffc107}
+    .leave{background:#f8d7da;color:#dc3545}
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <div id="login" class="login">
+    <div class="card">
+      <div class="title">學員專區</div>
+      <input class="input" id="name" placeholder="學生姓名">
+      <input class="input" id="phone" placeholder="家長電話">
+      <button class="btn" onclick="go()">登入</button>
+    </div>
+  </div>
+
+  <div id="main" style="display:none">
+    <div class="navbar">
+      <div class="nav">
+        <div class="logo">MURMUR ART</div>
+        <div class="menu">
+          <a onclick="sh(1)">作品</a>
+          <a onclick="sh(2)">課程</a>
+          <a onclick="logout()">登出</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div id="p1">
+        <h2 style="text-align:center;color:#879acb;margin:20px 0">🎨 學生作品</h2>
+        <div class="gallery">
+          <img class="avatar" id="avt" src="https://via.placeholder.com/200">
+          <div class="rotate" id="r"></div>
+        </div>
+      </div>
+
+      <div id="p2" style="display:none">
+        <h2 style="text-align:center;color:#879acb;margin:20px 0">📋 課程進度</h2>
+        <table>
+          <thead>
+            <tr><th>日期</th><th>時間</th><th>主題</th><th>狀態</th></tr>
+          </thead>
+          <tbody id="list"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const cfg = {apiKey:"AIzaSyBqUEh-MjMZ5Gj2gaFJpKffrDmvP9l7Slo",authDomain:"murmurart-8f6cc.firebaseapp.com",projectId:"murmurart-8f6cc",messagingSenderId:"205741159610",appId:"1:205741159610:web:624b7ca35c04e6e09a7e83"};
+    if(!firebase.apps.length)firebase.initializeApp(cfg);const db=firebase.firestore();let uid=null;
+
+    async function go(){const n=document.getElementById("name").value.trim();const p=document.getElementById("phone").value.trim().replace(/\s/g,"");if(!n||!p)return alert("請填寫");const q=await db.collection("students").where("name","==",n).get();let u=null;q.forEach(d=>{const pp=(d.data().parentPhone||"").replace(/\s/g,"");if(pp===p)u=d.id});if(!u)return alert("資訊錯誤");uid=u;document.getElementById("login").style.display="none";document.getElementById("main").style.display="block";loadArt();loadCourse()}
+    function sh(x){document.getElementById("p1").style.display=x==1?"block":"none";document.getElementById("p2").style.display=x==2?"block":"none"}
+    function logout(){location.reload()}
+
+    async function loadArt(){const wrap=document.getElementById("r");wrap.innerHTML="";const s=await db.collection("students").doc(uid).get();document.getElementById("avt").src=s.data().avatar||"https://via.placeholder.com/200";const res=await db.collection("artworks").where("studentId","==",uid).get();let a=0;const step=360/res.size;res.forEach(d=>{const art=d.data();wrap.innerHTML+=`<div class="art" style="transform:rotate(${a}deg) translate(200px) rotate(${-a}deg)"><img src="${art.imageUrl}"></div>`;a+=step})}
+
+    async function loadCourse(){const b=document.getElementById("list");b.innerHTML="";const r=await db.collection("courses").where("studentId","==",uid).get();const map={pending:"wait",completed:"ok",leave:"leave"};const name={pending:"未完成",completed:"已完成",leave:"請假"};r.forEach(d=>{const c=d.data();b.innerHTML+=`<tr><td>${c.date}</td><td>${c.time}</td><td>${c.theme}</td><td><span class="badge ${map[c.status]}">${name[c.status]}</span></td></tr>`})}
+  </script>
+</body>
+</html>
