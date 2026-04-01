@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="favicon.png">
   <title>MURMUR ART 學生/家長區</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;font-family:微軟正黑體,"Noto Sans TC";transition:all 0.25s ease}
@@ -39,7 +40,7 @@
     @keyframes r{100%{transform:rotate(360deg)}}
     .art{position:absolute;width:160px;height:160px;border-radius:14px;overflow:hidden;box-shadow:0 8px 20px #00000020;cursor:pointer}
     .art img{width:100%;height:100%;object-fit:cover}
-    .modal{position:fixed;top:0;left:0;width:100%;height:100%;background:#000000dd;display:none;justify-content:center;align-items:center;padding:20px;z-index:999}
+    .modal{position:fixed;top:0;left:0;width:100%;height:100%;background:#000000dd;display:none;justify-content:center;align-items:center;padding:20px;z-index:9999}
     .modal .box{background:white;border-radius:20px;padding:35px;max-width:580px;width:100%;max-height:90vh;overflow-y:auto}
     .close{position:absolute;top:18px;right:18px;font-size:22px;cursor:pointer;color:#777}
     .add{position:fixed;bottom:35px;right:35px;width:65px;height:65px;border-radius:50%;background:#879acb;color:white;font-size:28px;display:flex;align-items:center;justify-content:center;cursor:pointer}
@@ -101,7 +102,7 @@
 <div id="main" style="display:none">
   <div class="navbar">
     <div class="container nav">
-      <div class="logo">老師後台</div>
+      <div class="logo">MURMUR ART 後台</div>
       <div class="menu">
         <a onclick="show(1)">學生管理</a>
         <a onclick="show(9)">續費提醒</a>
@@ -237,6 +238,17 @@
   </div>
 </div>
 
+<div class="modal" id="makeupModal">
+  <div class="box">
+    <span class="close" onclick="closeAll()">&times;</span>
+    <h3>📅 安排補課日期</h3>
+    <p style="margin-bottom:15px">此課程為請假 / 公眾假期，可安排補課</p>
+    <input class="input" type="date" id="makeupDate">
+    <input class="input" type="time" id="makeupTime">
+    <button class="btn" onclick="saveMakeup()">儲存補課</button>
+  </div>
+</div>
+
 <div class="preview" id="preview">
   <span class="close" onclick="closeAll()">&times;</span>
   <div class="prev" onclick="prevImg()">&lt;</div>
@@ -258,18 +270,15 @@ const firebaseConfig = {
   appId:"1:205741159610:web:624b7ca35c04e6e09a7e83"
 };
 
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
-}
-
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 const ADMIN_PWD = "teacher123";
-let db = firebase.firestore();
 let isTeacher = false;
 let currentStudentId = null;
 let currentCourseId = null;
+let currentMakeupId = null;
 let studentList = [];
 let artList = [];
-let currentImg = 0;
 let courseRaw = [];
 
 function switchTab(role) {
@@ -286,9 +295,7 @@ function teacherLogin() {
     document.getElementById('loginPage').style.display = 'none';
     document.getElementById('main').style.display = 'block';
     loadAllStudents();
-  } else {
-    alert('密碼錯誤');
-  }
+  } else alert('密碼錯誤');
 }
 
 async function parentLogin() {
@@ -304,10 +311,7 @@ async function parentLogin() {
     });
     if (found) location.href = `class.html?sid=${found}`;
     else alert('找不到學生資料');
-  } catch (e) {
-    alert('登入失敗：' + e.message);
-    console.error(e);
-  }
+  } catch (e) { alert('登入失敗'); }
 }
 
 function show(n) {
@@ -322,9 +326,10 @@ function show(n) {
 
 async function getLeftCount(sid){
   const courses = await db.collection('courses').where('studentId','==',sid).get();
-  const total = courses.size;
-  const completed = courses.docs.filter(x=>x.data().status==='completed'||x.data().status==='absent').length;
-  return total-completed;
+  const valid = courses.docs.filter(x => !['leave','holiday'].includes(x.data().status));
+  const total = valid.length;
+  const done = valid.filter(x => x.data().status === 'completed' || x.data().status === 'absent').length;
+  return total - done;
 }
 
 async function loadAllStudents() {
@@ -371,46 +376,6 @@ async function loadWarningList(){
   if(w.innerHTML==='') w.innerHTML='<div style="text-align:center;padding:10px">暫無即將續費學生</div>';
 }
 
-function exportCSV(){
-  if(!isTeacher)return;
-  let csv = "姓名,學生編號,家長電話,課程方案,剩餘堂數,學校,出生年份,性別,備註\n";
-  studentList.forEach(s=>{
-    csv += `"${s.name}","${s.studentNo||''}","${s.parentPhone||''}","${s.courseType||''}","${s.left||0}","${s.school||''}","${s.birthYear||''}","${s.gender||''}","${s.note||''}"\n`;
-  });
-  const blob = new Blob([csv],{type:"text/csv"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "學生資料.csv";
-  a.click();
-}
-
-function searchStudent(){
-  const kw=document.getElementById('searchStudent').value.toLowerCase();
-  const list=document.getElementById('stuList');
-  list.innerHTML='';
-  studentList.filter(s=>
-    s.name.toLowerCase().includes(kw)||
-    (s.parentPhone||'').includes(kw)||
-    (s.studentNo||'').toLowerCase().includes(kw)
-  ).forEach(s=>{
-    list.innerHTML+=`
-    <div class="stu ${s.warning?'warning':''}">
-      <img src="${s.avatar||'https://via.placeholder.com/85'}">
-      <h3>${s.name}</h3>
-      <p>編號：${s.studentNo||'-'}</p>
-      <p>家長：${s.parentPhone||'-'}</p>
-      <p>方案：${s.courseType||'-'}</p>
-      <span class="leftTag">剩餘 ${s.left||0} 堂</span>
-      ${s.warning?'<p style="color:red;font-weight:bold;margin-top:6px">即將續課</p>':''}
-      <div class="action">
-        <button onclick="selectStudent('${s.id}')">選取</button>
-        ${isTeacher ? `<button onclick="editStu('${s.id}')">編輯</button><button onclick="delStu('${s.id}')">刪除</button>` : ''}
-      </div>
-    </div>`;
-  })
-}
-
 function fillStudentSelects() {
   const selArt = document.getElementById('selectStudentForArt');
   const selCourse = document.getElementById('selectStudentForCourse');
@@ -422,6 +387,80 @@ function fillStudentSelects() {
   });
 }
 
+function updateStats(){
+  const valid = courseRaw.filter(c => !['leave','holiday'].includes(c.status));
+  const total = valid.length;
+  const ok = valid.filter(c => c.status === 'completed' || c.status === 'absent').length;
+  const left = total - ok;
+  const rate = total ? Math.round(ok/total*100) : 0;
+  document.getElementById('courseStats').innerHTML=`
+<div class="stat"><h3>總課程</h3><h2>${total}</h2></div>
+<div class="stat"><h3>已完成</h3><h2>${ok}</h2></div>
+<div class="stat"><h3>剩餘</h2><h2>${left}</h3></div>
+<div class="stat"><h3>完成率</h3><h2>${rate}%</h2></div>`;
+}
+
+function renderCourseList(arr){
+  const b=document.getElementById('courseList');b.innerHTML='';
+  const map={pending:'wait',completed:'ok',leave:'leave',absent:'absent',holiday:'holiday'};
+  const txt={pending:'未完成',completed:'已完成',leave:'請假',absent:'缺席',holiday:'公眾假期'};
+  arr.sort((a,b)=>{
+    if(a.status==='pending'&&b.status!=='pending')return -1;
+    if(a.status!=='pending'&&b.status==='pending')return 1;
+    return new Date(a.date)-new Date(b.date);
+  });
+  arr.forEach(c=>{
+    const imgHtml = c.imgUrl ? `<img src="${c.imgUrl}" class="course-img">` : '';
+    b.innerHTML+=`<tr>
+<td><input type="checkbox" class="courseCheck" data-id="${c.id}"></td>
+<td>${c.date}（${getWeek(c.date)}）</td>
+<td>${formatTime(c.time)}</td>
+<td><span class="badge ${map[c.status]}">${txt[c.status]}</span></td>
+<td>${imgHtml}</td>
+<td>${c.note||'-'}</td>
+<td>
+  ${isTeacher ? `
+  <button onclick="editCourse('${c.id}')" style="background:#ffc107;padding:6px 10px;border:none;border-radius:6px;color:white">修改</button>
+  <button onclick="openMakeup('${c.id}')" style="background:#17a2b8;padding:6px 10px;border:none;border-radius:6px;color:white">補課</button>
+  <button onclick="delCourse('${c.id}')" style="background:#dc3545;padding:6px 10px;border:none;border-radius:6px;color:white">刪除</button>
+  ` : ''}
+</td>
+</tr>`;
+  });
+}
+
+function openMakeup(cid){
+  currentMakeupId = cid;
+  document.getElementById('makeupModal').style.display = 'flex';
+}
+
+async function saveMakeup(){
+  const d = document.getElementById('makeupDate').value;
+  const t = document.getElementById('makeupTime').value;
+  if(!d || !t) return alert('請填寫完整');
+  await db.collection('courses').add({
+    studentId:currentStudentId, date:d, time:t, note:'補課', status:'pending'
+  });
+  closeAll();
+  loadCourseList();
+  loadAllStudents();
+  alert('補課已新增');
+}
+
+async function loadCourseList(){
+  if(!currentStudentId)return;
+  const courses=await db.collection('courses').where('studentId','==',currentStudentId).get();
+  courseRaw=[];courses.forEach(d=>courseRaw.push({id:d.id,...d.data()}));
+  renderCourseList(courseRaw);
+  updateStats();
+}
+
+function getWeek(d){const w=['日','一','二','三','四','五','六'];return w[new Date(d).getDay()]}
+function formatTime(t){const [h,m]=t.split(':');const min=h*60+parseInt(m)+75;const eh=Math.floor(min/60),em=min%60;return `${t} - ${String(eh).padStart(2,0)}:${String(em).padStart(2,0)}`}
+function calcEndTime(){const t=document.getElementById('ctime').value;if(!t)return;const [h,m]=t.split(':').map(Number);const min=h*60+m+75;const eh=Math.floor(min/60),em=min%60;document.getElementById('endTimeShow').textContent=`結束時間：${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}`;}
+function searchCourse(){const kw=document.getElementById('searchCourse').value.toLowerCase();const st=studentList.find(s=>s.studentNo&&s.studentNo.toLowerCase().includes(kw));if(st){switchCourseStudentById(st.id);document.getElementById('studentInfoDisplay').style.display='block';document.getElementById('studentInfoDisplay').innerHTML=`學生：${st.name}｜編號：${st.studentNo||'-'}`;}else{renderCourseList(courseRaw);document.getElementById('studentInfoDisplay').style.display='none';}}
+function switchCourseStudentById(id){currentStudentId=id;loadCourseList();}
+function switchCourseStudent(){currentStudentId=document.getElementById('selectStudentForCourse').value;document.getElementById('studentInfoDisplay').style.display='none';loadCourseList();}
 function selectStudent(id) { currentStudentId=id; show(2); loadArtList(); }
 function closeAll(){ document.querySelectorAll('.modal').forEach(m=>m.style.display='none'); document.getElementById('preview').style.display='none'; }
 function addStu(){ if(!isTeacher)return; currentStudentId=null; document.getElementById('sname').value='';document.getElementById('sno').value='';document.getElementById('sphone').value='';document.getElementById('savatar').value='';document.getElementById('courseType').value='';document.getElementById('school').value='';document.getElementById('birthYear').value='';document.getElementById('gender').value='';document.getElementById('note').value='';document.getElementById('stuModal').style.display='flex'; }
@@ -439,10 +478,8 @@ async function saveStu(){
   const note=document.getElementById('note').value;
   if(!n||!p)return;
   const data={name:n,studentNo:no,parentPhone:p,avatar:a,courseType:ct,school,birthYear,gender,note};
-  if(currentStudentId)
-    await db.collection('students').doc(currentStudentId).update(data);
-  else
-    await db.collection('students').add({...data,createdAt:new Date()});
+  if(currentStudentId) await db.collection('students').doc(currentStudentId).update(data);
+  else await db.collection('students').add({...data,createdAt:new Date()});
   closeAll();loadAllStudents();
 }
 
@@ -474,7 +511,6 @@ function editStu(id){
 }
 
 function switchArtStudent(){currentStudentId=document.getElementById('selectStudentForArt').value;loadArtList();}
-
 async function loadArtList(){
   if(!currentStudentId)return;
   const g=document.getElementById('rotateWrap');g.innerHTML='';
@@ -487,9 +523,7 @@ async function loadArtList(){
     g.innerHTML+=`<div class="art" style="transform:rotate(${a}deg) translate(220px) rotate(${-a}deg)" onclick="showPreview(${i})"><img src="${d.imageUrl}"></div>`;a+=step;
   });
 }
-
 function openArt(){ if(!isTeacher)return; document.getElementById('artModal').style.display='flex'; }
-
 async function saveArt(){
   if(!isTeacher)return;
   const sid=document.getElementById('artStudentSelect').value;
@@ -500,7 +534,6 @@ async function saveArt(){
   await db.collection('artworks').add({studentId:sid,imageUrl:url,createDate:d,note:n,time:new Date()});
   closeAll();loadArtList();
 }
-
 function showPreview(i){
   currentImg=i;
   const item=artList[i];
@@ -509,7 +542,6 @@ function showPreview(i){
   document.getElementById('pNote').textContent=item.note||'無';
   document.getElementById('preview').style.display='block';
 }
-
 async function deleteCurrentArt(){
   if(!isTeacher)return;
   if(!confirm('確定刪除？'))return;
@@ -517,105 +549,28 @@ async function deleteCurrentArt(){
   await db.collection('artworks').doc(id).delete();
   closeAll();loadArtList();
 }
-
 function prevImg(){event.stopPropagation();currentImg=(currentImg-1+artList.length)%artList.length;showPreview(currentImg)}
 function nextImg(){event.stopPropagation();currentImg=(currentImg+1)%artList.length;showPreview(currentImg)}
-
-function getWeek(d){const w=['日','一','二','三','四','五','六'];return w[new Date(d).getDay()]}
-function formatTime(t){const [h,m]=t.split(':');const min=h*60+parseInt(m)+75;const eh=Math.floor(min/60),em=min%60;return `${t} - ${String(eh).padStart(2,0)}:${String(em).padStart(2,0)}`}
-function calcEndTime(){
-  const t=document.getElementById('ctime').value;
-  if(!t)return;
-  const [h,m]=t.split(':').map(Number);
-  const min=h*60+m+75;
-  const eh=Math.floor(min/60),em=min%60;
-  document.getElementById('endTimeShow').textContent=`結束時間：${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}`;
-}
-
-function searchCourse(){
-  const kw=document.getElementById('searchCourse').value.toLowerCase();
-  const st=studentList.find(s=>s.studentNo&&s.studentNo.toLowerCase().includes(kw));
-  const infoBar=document.getElementById('studentInfoDisplay');
-  if(st){
-    switchCourseStudentById(st.id);
-    infoBar.style.display='block';
-    infoBar.innerHTML=`學生：${st.name}｜編號：${st.studentNo||'-'}`;
-  }else{
-    renderCourseList(courseRaw);
-    infoBar.style.display='none';
-  }
-}
-
-function switchCourseStudentById(id){currentStudentId=id;loadCourseList();}
-function switchCourseStudent(){ currentStudentId=document.getElementById('selectStudentForCourse').value; document.getElementById('studentInfoDisplay').style.display='none'; loadCourseList(); }
-
-async function loadCourseList(){
-  if(!currentStudentId)return;
-  const courses=await db.collection('courses').where('studentId','==',currentStudentId).get();
-  courseRaw=[];courses.forEach(d=>courseRaw.push({id:d.id,...d.data()}));
-  renderCourseList(courseRaw);
-  updateStats();
-}
-
-function updateStats(){
-  const total=courseRaw.length;
-  const ok=courseRaw.filter(c=>c.status==='completed'||c.status==='absent').length;
-  const left=total-ok;
-  const rate=total?Math.round(ok/total*100):0;
-  document.getElementById('courseStats').innerHTML=`
-<div class="stat"><h3>總課程</h3><h2>${total}</h2></div>
-<div class="stat"><h3>已完成</h3><h2>${ok}</h2></div>
-<div class="stat"><h3>剩餘</h2><h2>${left}</h3></div>
-<div class="stat"><h3>完成率</h3><h2>${rate}%</h2></div>`;
-}
-
-function renderCourseList(arr){
-  const b=document.getElementById('courseList');b.innerHTML='';
-  const map={pending:'wait',completed:'ok',leave:'leave',absent:'absent',holiday:'holiday'};
-  const txt={pending:'未完成',completed:'已完成',leave:'請假',absent:'缺席',holiday:'公眾假期'};
-  arr.sort((a,b)=>{
-    if(a.status==='pending'&&b.status!=='pending')return -1;
-    if(a.status!=='pending'&&b.status==='pending')return 1;
-    return new Date(a.date)-new Date(b.date);
-  });
-  arr.forEach(c=>{
-    const imgHtml = c.imgUrl ? `<img src="${c.imgUrl}" class="course-img">` : '';
-    b.innerHTML+=`<tr>
-<td><input type="checkbox" class="courseCheck" data-id="${c.id}"></td>
-<td>${c.date}（${getWeek(c.date)}）</td>
-<td>${formatTime(c.time)}</td>
-<td><span class="badge ${map[c.status]}">${txt[c.status]}</span></td>
-<td>${imgHtml}</td>
-<td>${c.note||'-'}</td>
-<td>${isTeacher ? `<button onclick="editCourse('${c.id}')" style="background:#ffc107;padding:6px 10px;border:none;border-radius:6px;color:white">修改</button><button onclick="delCourse('${c.id}')" style="background:#dc3545;padding:6px 10px;border:none;border-radius:6px;color:white">刪除</button>` : ''}</td>
-</tr>`;
-  });
-}
 
 async function batchSet(status){
   if(!isTeacher)return;
   const checks=document.querySelectorAll('.courseCheck:checked');
   if(checks.length===0)return alert('請選擇');
   if(!confirm('確定修改？'))return;
-  for(let cb of checks){
-    await db.collection('courses').doc(cb.dataset.id).update({status})
-  }
+  for(let cb of checks) await db.collection('courses').doc(cb.dataset.id).update({status});
   loadCourseList();
+  loadAllStudents();
 }
-
 async function batchDeleteCourses(){
   if(!isTeacher)return;
   const checks=document.querySelectorAll('.courseCheck:checked');
   if(checks.length===0)return alert('請選擇');
   if(!confirm('確定刪除？'))return;
-  for(let cb of checks){
-    await db.collection('courses').doc(cb.dataset.id).delete()
-  }
+  for(let cb of checks) await db.collection('courses').doc(cb.dataset.id).delete();
   loadCourseList();
+  loadAllStudents();
 }
-
 function addCourse(){ if(!isTeacher)return; currentCourseId=null; document.getElementById('cday').valueAsDate=new Date(); document.getElementById('ctime').value=''; document.getElementById('endTimeShow').textContent=''; document.getElementById('cnote').value=''; document.getElementById('courseImgUrl').value=''; document.getElementById('cstatus').value='pending'; document.getElementById('courseModal').style.display='flex'; }
-
 async function saveCourse(){
   if(!isTeacher)return;
   const sid=document.getElementById('courseStudentSelect').value;
@@ -626,13 +581,10 @@ async function saveCourse(){
   const s=document.getElementById('cstatus').value;
   if(!sid||!d||!t)return;
   const data={studentId:sid,date:d,time:t,note:nt,status:s,imgUrl};
-  if(currentCourseId)
-    await db.collection('courses').doc(currentCourseId).update(data);
-  else
-    await db.collection('courses').add(data);
-  closeAll();loadCourseList();
+  if(currentCourseId) await db.collection('courses').doc(currentCourseId).update(data);
+  else await db.collection('courses').add(data);
+  closeAll();loadCourseList();loadAllStudents();
 }
-
 function editCourse(id){
   if(!isTeacher)return;
   currentCourseId=id;
@@ -648,14 +600,13 @@ function editCourse(id){
     document.getElementById('courseModal').style.display='flex';
   })
 }
-
 async function delCourse(id){
   if(!isTeacher)return;
   if(!confirm('確定刪除？'))return;
   await db.collection('courses').doc(id).delete();
   loadCourseList();
+  loadAllStudents();
 }
-
 async function quickPackage(count){
   if(!isTeacher)return;
   const sid=document.getElementById('courseStudentSelect').value;
@@ -671,9 +622,10 @@ async function quickPackage(count){
     await db.collection('courses').add({studentId:sid,date,time:startTime,note:'課程',status:'pending'});
   }
   alert('完成');
-  closeAll();loadCourseList();
+  closeAll();loadCourseList();loadAllStudents();
 }
-
+function searchStudent(){const kw=document.getElementById('searchStudent').value.toLowerCase();const list=document.getElementById('stuList');list.innerHTML='';studentList.filter(s=>s.name.toLowerCase().includes(kw)||(s.parentPhone||'').includes(kw)||(s.studentNo||'').toLowerCase().includes(kw)).forEach(s=>{list.innerHTML+=`<div class="stu ${s.warning?'warning':''}"><img src="${s.avatar||'https://via.placeholder.com/85'}"><h3>${s.name}</h3><p>編號：${s.studentNo||'-'}</p><p>家長：${s.parentPhone||'-'}</p><p>方案：${s.courseType||'-'}</p><span class="leftTag">剩餘 ${s.left||0} 堂</span>${s.warning?'<p style="color:red;font-weight:bold;margin-top:6px">即將續課</p>':''}<div class="action"><button onclick="selectStudent('${s.id}')">選取</button>${isTeacher ? `<button onclick="editStu('${s.id}')">編輯</button><button onclick="delStu('${s.id}')">刪除</button>` : ''}</div></div>`;})}
+function exportCSV(){if(!isTeacher)return;let csv = "姓名,學生編號,家長電話,課程方案,剩餘堂數,學校,出生年份,性別,備註\n";studentList.forEach(s=>{csv += `"${s.name}","${s.studentNo||''}","${s.parentPhone||''}","${s.courseType||''}","${s.left||0}","${s.school||''}","${s.birthYear||''}","${s.gender||''}","${s.note||''}"\n`;});const blob = new Blob([csv],{type:"text/csv"});const url = URL.createObjectURL(blob);const a = document.createElement("a");a.href = url;a.download = "學生資料.csv";a.click();}
 function logout(){location.reload()}
 </script>
 </body>
