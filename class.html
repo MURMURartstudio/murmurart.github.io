@@ -5,32 +5,36 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MURMUR ART - 學員專區</title>
   <style>
-    *{margin:0;padding:0;box-sizing:border-box;font-family:微軟正黑體}
+    *{margin:0;padding:0;box-sizing:border-box;font-family:微軟正黑體;transition:all 0.25s ease}
     body{background:linear-gradient(120deg,#f5f7fb,#e8edff);color:#444}
-    .navbar{background:white;padding:15px 0}
+    .navbar{background:white;padding:18px 0}
     .nav{display:flex;justify-content:space-between;align-items:center;width:90%;max-width:1200px;margin:0 auto}
-    .logo{font-size:22px;color:#879acb}
-    .menu a{margin-left:15px;color:#666;text-decoration:none;cursor:pointer}
+    .logo{font-size:24px;color:#879acb}
+    .menu a{margin-left:18px;color:#555;text-decoration:none;cursor:pointer}
+    .menu a:hover{color:#879acb}
     .gallery{position:relative;width:100%;height:650px;display:flex;justify-content:center;align-items:center;margin:30px 0}
     .avatar{width:180px;height:180px;border-radius:50%;border:6px solid #879acb;position:absolute;z-index:10}
     .rotate{width:400px;height:400px;position:relative;animation:r 25s linear infinite}
     @keyframes r{100%{transform:rotate(360deg)}}
-    .art{position:absolute;width:150px;height:150px;border-radius:12px;overflow:hidden;cursor:pointer}
+    .art{position:absolute;width:150px;height:150px;border-radius:14px;overflow:hidden;cursor:pointer}
     .art img{width:100%;height:100%;object-fit:cover}
     .container{width:90%;max-width:1200px;margin:0 auto}
-    .info{background:white;padding:20px;border-radius:15px;margin-bottom:20px;display:flex;justify-content:space-between;text-align:center}
+    .info{background:white;padding:25px;border-radius:18px;margin-bottom:20px;display:flex;justify-content:space-between;text-align:center}
     .info-item{flex:1}
     .info-item h3{color:#879acb}
-    .course-card{background:white;padding:16px;border-radius:12px;margin-bottom:10px}
-    .badge{padding:6px 12px;border-radius:20px;font-size:12px}
+    table{width:100%;background:white;border-radius:16px;overflow:hidden;box-shadow:0 5px 15px #00000010}
+    th{background:#879acb;color:white;padding:16px}
+    td{padding:16px;border-bottom:1px solid #e8edff}
+    .badge{padding:7px 13px;border-radius:20px;font-size:13px}
     .ok{background:#d4edda;color:#28a745}
     .wait{background:#fff3cd;color:#ffc107}
     .leave{background:#f8d7da;color:#dc3545}
-    .preview{position:fixed;top:0;left:0;width:100%;height:100%;background:#000000ee;display:none;justify-content:center;align-items:center;z-index:9999}
-    .preview img{max-width:90%;max-height:90%;border-radius:10px}
-    .prev,.next{position:absolute;top:50%;transform:translateY(-50%);font-size:30px;color:white;background:#879acb;padding:10px 20px;border-radius:10px;cursor:pointer}
-    .prev{left:20px}
-    .next{right:20px}
+    .preview{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:90%;max-width:700px;background:white;border-radius:20px;padding:25px;display:none;z-index:9999;box-shadow:0 20px 60px #00000040}
+    .preview img{max-width:100%;max-height:400px;border-radius:12px}
+    .prev,.next{position:absolute;top:50%;transform:translateY(-50%);font-size:22px;color:white;background:#879acb;padding:10px 16px;border-radius:10px;cursor:pointer}
+    .prev{left:15px}
+    .next{right:15px}
+    .close{position:absolute;top:18px;right:18px;font-size:22px;cursor:pointer;color:#777}
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -40,8 +44,8 @@
   <div class="nav">
     <div class="logo">MURMUR ART - 學員專區</div>
     <div class="menu">
-      <a onclick="sh(1)">作品</a>
-      <a onclick="sh(2)">課程</a>
+      <a onclick="sh(1)">🎨 作品</a>
+      <a onclick="sh(2)">📋 課程</a>
       <a onclick="location.href='index.html'">返回</a>
     </div>
   </div>
@@ -58,11 +62,22 @@
   <div id="p2" style="display:none">
     <h2 style="text-align:center;color:#879acb;margin:20px 0">📋 課程進度</h2>
     <div class="info" id="info"></div>
-    <div id="courseList"></div>
+    <table>
+      <thead>
+        <tr>
+          <th>日期</th>
+          <th>時間</th>
+          <th>狀態</th>
+          <th>備註</th>
+        </tr>
+      </thead>
+      <tbody id="courseList"></tbody>
+    </table>
   </div>
 </div>
 
-<div class="preview" id="preview" onclick="closePrev()">
+<div class="preview" id="preview">
+  <span class="close" onclick="closePrev()">&times;</span>
   <div class="prev" onclick="prevImg()">&lt;</div>
   <img id="previewImg">
   <div class="next" onclick="nextImg()">&gt;</div>
@@ -87,8 +102,8 @@ function sh(x){
 }
 
 function closePrev(){document.getElementById('preview').style.display='none'}
-function prevImg(){event.stopPropagation();currentImg=(currentImg-1+artList.length)%artList.length;document.getElementById('previewImg').src=artList[currentImg].imageUrl}
-function nextImg(){event.stopPropagation();currentImg=(currentImg+1)%artList.length;document.getElementById('previewImg').src=artList[currentImg].imageUrl}
+function prevImg(){event.stopPropagation();currentImg=(currentImg-1+artList.length)%artList.length;showArt(currentImg)}
+function nextImg(){event.stopPropagation();currentImg=(currentImg+1)%artList.length;showArt(currentImg)}
 
 async function loadArt(){
   const wrap=document.getElementById('r');wrap.innerHTML='';
@@ -98,11 +113,15 @@ async function loadArt(){
   artList=[];res.forEach(d=>artList.push({...d.data()}));
   let a=0;const step=360/artList.length;
   artList.forEach((d,i)=>{
-    wrap.innerHTML+=`<div class="art" style="transform:rotate(${a}deg) translate(200px) rotate(${-a}deg)" onclick="showPrev(${i})"><img src="${d.imageUrl}"></div>`;
+    wrap.innerHTML+=`<div class="art" style="transform:rotate(${a}deg) translate(200px) rotate(${-a}deg)" onclick="showArt(${i})"><img src="${d.imageUrl}"></div>`;
     a+=step;
   })
 }
-function showPrev(i){currentImg=i;document.getElementById('previewImg').src=artList[i].imageUrl;document.getElementById('preview').style.display='flex'}
+function showArt(i){
+  currentImg=i;
+  document.getElementById('previewImg').src=artList[i].imageUrl;
+  document.getElementById('preview').style.display='block';
+}
 
 async function loadCourse(){
   const list=document.getElementById('courseList');list.innerHTML='';
@@ -130,7 +149,7 @@ async function loadCourse(){
   });
   
   arr.forEach(c=>{
-    list.innerHTML+=`<div class="course-card"><div style="display:flex;justify-content:space-between"><div>${c.date} ${c.time}</div><span class="badge ${map[c.status]}">${name[c.status]}</span></div><div style="margin-top:5px">${c.note||'無備註'}</div></div>`;
+    list.innerHTML+=`<tr><td>${c.date}</td><td>${c.time}</td><td><span class="badge ${map[c.status]}">${name[c.status]}</span></td><td>${c.note||'無'}</td></tr>`;
   })
 }
 </script>
