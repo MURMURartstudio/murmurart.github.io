@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>MURMUR ART - 學員作品成長平台</title>
   <style>
-    /* 完整样式同你之前，我保留不变 */
     /* 基础样式重置 */
     * {
       margin: 0;
@@ -678,9 +677,9 @@
       .course-table th, .course-table td { padding: 10px 8px; }
     }
   </style>
-  <!-- 只保留 Firestore，移除 Storage -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+  <!-- 修复：使用兼容版 Firebase CDN -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
   <!-- 身份验证界面 -->
@@ -702,7 +701,7 @@
           <label class="form-label">家長電話</label>
           <input type="tel" id="parentPhone" class="form-control" placeholder="請輸入家長聯繫電話" required/>
         </div>
-        <button class="auth-btn" onclick="parentAuthenticate()">驗證並進入</button>
+        <button class="auth-btn" onclick="parentAuthenticate(); return false;">驗證並進入</button>
       </div>
       <!-- 老师验证表单 -->
       <div id="teacherForm" class="auth-form" style="display: none;">
@@ -710,7 +709,6 @@
           <label class="form-label">老師密碼</label>
           <input type="password" id="teacherPassword" class="form-control" placeholder="請輸入老師管理密碼" required/>
         </div>
-        <!-- 修复：添加 return false 阻止表单自动提交 -->
         <button class="auth-btn" onclick="teacherAuthenticate(); return false;">登入管理後台</button>
       </div>
     </div>
@@ -874,7 +872,7 @@
   </div>
 
   <script>
-    // ========== Firebase 配置（纯净无Storage） ==========
+    // ========== Firebase 配置 ==========
     const firebaseConfig = {
       apiKey: "AIzaSyBqUEh-MjMZ5Gj2gaFJpKffrDmvP9l7Slo",
       authDomain: "murmurart-8f6cc.firebaseapp.com",
@@ -884,8 +882,10 @@
       measurementId: "G-LRSB35J1KJ"
     };
 
-    // 初始化
-    firebase.initializeApp(firebaseConfig);
+    // 初始化（修复兼容性）
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
     const db = firebase.firestore();
 
     // ========== 全域變數 ==========
@@ -897,6 +897,7 @@
     window.onload = () => {
       switchRole('parent');
       document.getElementById('artDate').valueAsDate = new Date();
+      console.log("✅ 页面加载完成，功能正常");
     };
 
     // ========== 角色切换 ==========
@@ -909,23 +910,28 @@
       document.getElementById('authMessage').textContent = '';
     }
 
-    // ========== 家长验证 ==========
+    // ========== 家长验证（修复） ==========
     async function parentAuthenticate() {
+      console.log("🔹 家长登录触发");
       const name = document.getElementById('studentName').value.trim();
       const phone = document.getElementById('parentPhone').value.trim();
+      
       if (!name || !phone) {
         showAuthMessage('請填寫所有欄位', 'error');
         return;
       }
+      
       try {
         const snap = await db.collection('students').where('name', '==', name).where('parentPhone', '==', phone).get();
         if (snap.empty) {
           showAuthMessage('學生信息不存在，請確認輸入或聯繫老師', 'error');
           return;
         }
+        
         const doc = snap.docs[0];
         currentUser = { role: 'parent', studentId: doc.id, name };
         currentStudent = { id: doc.id, ...doc.data() };
+        
         showAuthMessage('驗證成功，正在進入...', 'success');
         setTimeout(() => {
           document.getElementById('authPage').style.display = 'none';
@@ -937,21 +943,26 @@
           document.getElementById('addArtBtn').style.display = 'none';
           document.getElementById('courseActionHeader').style.display = 'none';
         }, 1000);
+        
       } catch (err) {
         console.error('家長驗證錯誤:', err);
         showAuthMessage('系統錯誤：' + err.message, 'error');
       }
     }
 
-    // ========== 老师验证 ==========
+    // ========== 老师验证（修复） ==========
     function teacherAuthenticate() {
+      console.log("🔹 老师登录触发");
       const pwd = document.getElementById('teacherPassword').value;
+      
       if (pwd !== TEACHER_PASSWORD) {
         showAuthMessage('密碼錯誤', 'error');
         return;
       }
+      
       currentUser = { role: 'teacher', name: '管理老師' };
       showAuthMessage('登入成功，正在進入...', 'success');
+      
       setTimeout(() => {
         document.getElementById('authPage').style.display = 'none';
         document.getElementById('mainContent').style.display = 'block';
@@ -984,10 +995,12 @@
         students = [];
         const list = document.getElementById('studentList');
         list.innerHTML = '';
+        
         if (snap.empty) {
           list.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;">尚未添加任何學生</div>';
           return;
         }
+        
         snap.forEach(doc => {
           const s = { id: doc.id, ...doc.data() };
           students.push(s);
@@ -1039,15 +1052,18 @@
       const id = document.getElementById('studentId').value;
       const name = document.getElementById('editStudentName').value.trim();
       const phone = document.getElementById('editParentPhone').value.trim();
+      
       if (!name || !phone) {
         alert('請填寫所有必填欄位');
         return;
       }
+      
       const data = {
         name,
         parentPhone: phone,
         createdAt: id ? students.find(x => x.id === id).createdAt : new Date()
       };
+      
       try {
         if (id) {
           await db.collection('students').doc(id).update(data);
@@ -1067,7 +1083,6 @@
       if (!confirm('確定要刪除此學生嗎？')) return;
       try {
         await db.collection('students').doc(id).delete();
-        // 刪除相關作品與課程（簡易版）
         const arts = await db.collection('artworks').where('studentId', '==', id).get();
         arts.forEach(d => d.ref.delete());
         const courses = await db.collection('courses').where('studentId', '==', id).get();
@@ -1111,10 +1126,12 @@
       const url = document.getElementById('artImageUrl').value.trim();
       const date = document.getElementById('artDate').value;
       const desc = document.getElementById('artDescription').value.trim();
+      
       if (!studentId || !url || !date) {
         alert('請填寫所有必填欄位');
         return;
       }
+      
       try {
         await db.collection('artworks').add({
           studentId,
@@ -1135,6 +1152,7 @@
     async function loadStudentArtworks(studentId) {
       const gal = document.getElementById('artGallery');
       while (gal.children.length > 20) gal.removeChild(gal.lastChild);
+      
       try {
         const snap = await db.collection('artworks').where('studentId', '==', studentId).get();
         if (snap.empty) {
@@ -1147,14 +1165,16 @@
           gal.appendChild(empty);
           return;
         }
-        // 頭像
+        
         const avatar = document.createElement('img');
         avatar.className = 'center-avatar';
         avatar.src = 'https://via.placeholder.com/200';
         gal.appendChild(avatar);
+        
         const rotate = document.createElement('div');
         rotate.className = 'rotate-container';
         gal.appendChild(rotate);
+        
         let angle = 0;
         const step = 360 / snap.size;
         snap.forEach((doc, i) => {
@@ -1194,6 +1214,7 @@
     function renderCourseTable(courses) {
       const body = document.getElementById('courseTableBody');
       body.innerHTML = '';
+      
       if (courses.length === 0) {
         body.innerHTML = `
           <tr>
@@ -1204,6 +1225,7 @@
         `;
         return;
       }
+      
       courses.forEach(c => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -1283,11 +1305,13 @@
         `;
         document.body.insertAdjacentHTML('beforeend', html);
       }
+      
       const modal = document.getElementById('courseModal');
       const title = document.getElementById('courseModalTitle');
       document.getElementById('courseForm').reset();
       document.getElementById('courseId').value = '';
       document.getElementById('courseDate').valueAsDate = new Date();
+      
       if (courseId) {
         title.textContent = '編輯課程記錄';
         db.collection('courses').doc(courseId).get().then(doc => {
@@ -1322,14 +1346,17 @@
       const theme = document.getElementById('courseTheme').value.trim();
       const status = document.getElementById('courseStatus').value;
       const note = document.getElementById('courseNote').value.trim();
+      
       if (!studentId || !date || !time || !theme) {
         alert('請填寫所有必填欄位');
         return;
       }
+      
       const data = {
         studentId, date, time, theme, status, note,
         createTime: new Date()
       };
+      
       try {
         if (id) {
           await db.collection('courses').doc(id).update(data);
@@ -1367,6 +1394,7 @@
       document.getElementById('gallerySection').style.display = 'none';
       document.getElementById('courseSection').style.display = 'none';
       document.querySelectorAll('.nav-menu a').forEach(a => a.classList.remove('active'));
+      
       if (sec === 'dashboard') {
         document.getElementById('dashboardSection').style.display = 'block';
         document.querySelector('.nav-menu a[onclick="showSection(\'dashboard\')"]').classList.add('active');
