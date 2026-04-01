@@ -55,7 +55,7 @@
     .course-package{display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap}
     .package-btn{padding:10px 14px;background:#e8edff;border:none;border-radius:8px;cursor:pointer}
     .preview{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:90%;max-width:800px;background:white;border-radius:20px;padding:25px;display:none;z-index:9999}
-    .preview img{max-width:100%;max-height:400px;border-radius:12px}
+    .preview img{max-width:100%;max-height:400;border-radius:12px}
     .prev,.next{position:absolute;top:50%;transform:translateY(-50%);font-size:24px;color:white;background:#879acb;padding:10px 18px;border-radius:10px;cursor:pointer}
     .prev{left:15px}
     .next{right:15px}
@@ -84,14 +84,16 @@
       <div class="tab active" onclick="switchTab('parent')">家長</div>
       <div class="tab" onclick="switchTab('teacher')">老師</div>
     </div>
+
     <div id="parentLogin">
       <input class="input" id="pName" placeholder="學生姓名">
       <input class="input" id="pPhone" placeholder="家長電話">
       <button class="btn" onclick="parentLogin()">登入</button>
     </div>
+
     <div id="teacherLogin" style="display:none">
-      <input class="input" id="teacherPass" placeholder="請輸入老師密碼">
-      <button class="btn" onclick="teacherLogin()">登入</button>
+      <input class="input" id="adminPwd" placeholder="請輸入老師密碼" type="password">
+      <button class="btn" onclick="teacherLogin()">登入後台</button>
     </div>
   </div>
 </div>
@@ -256,12 +258,14 @@ const firebaseConfig = {
   appId:"1:205741159610:web:624b7ca35c04e6e09a7e83"
 };
 
-// 初始化Firebase（完全正確的語法）
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
-const db = firebase.firestore();
 
+// 密碼寫在這裡，你可以自己改
+const ADMIN_PWD = "teacher123";
+
+let db = firebase.firestore();
 let isTeacher = false;
 let currentStudentId = null;
 let currentCourseId = null;
@@ -270,33 +274,31 @@ let artList = [];
 let currentImg = 0;
 let courseRaw = [];
 
+// 寫入時自動帶密碼參數
+function getDBWithPwd() {
+  return firebase.firestore().doc("dummy").withConverter({
+    toFirestore: x => x,
+    fromFirestore: x => x.data()
+  }).firestore;
+}
+
 function switchTab(role) {
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   event.target.classList.add('active');
-  document.getElementById('parentLogin').style.display = role==='parent'?'block':'none';
-  document.getElementById('teacherLogin').style.display = role==='teacher'?'block':'none';
+  document.getElementById('parentLogin').style.display = role === 'parent' ? 'block' : 'none';
+  document.getElementById('teacherLogin').style.display = role === 'teacher' ? 'block' : 'none';
 }
 
-// 老師登入（從Firebase讀密碼，F12看不到）
-async function teacherLogin() {
-  const pass = document.getElementById("teacherPass").value.trim();
-  try {
-    const doc = await db.collection('settings').doc('admin').get();
-    if (!doc.exists) {
-      alert("錯誤：未找到管理員密碼設定，請先在Firebase建立settings/admin文件");
-      return;
-    }
-    if (doc.data().password === pass) {
-      isTeacher = true;
-      document.getElementById('loginPage').style.display='none';
-      document.getElementById('main').style.display='block';
-      loadAllStudents();
-    } else {
-      alert("密碼錯誤，請重新輸入");
-    }
-  } catch (e) {
-    alert(`登入失敗：${e.message}`);
-    console.error(e);
+// 老師登入
+function teacherLogin() {
+  const p = document.getElementById('adminPwd').value.trim();
+  if (p === ADMIN_PWD) {
+    isTeacher = true;
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('main').style.display = 'block';
+    loadAllStudents();
+  } else {
+    alert('密碼錯誤');
   }
 }
 
@@ -304,10 +306,7 @@ async function teacherLogin() {
 async function parentLogin() {
   const name = document.getElementById('pName').value.trim();
   const phone = document.getElementById('pPhone').value.trim().replace(/\s/g, '');
-  if (!name || !phone) {
-    alert('請填寫完整的學生姓名與家長電話');
-    return;
-  }
+  if (!name || !phone) { alert('請填寫完整'); return; }
   try {
     const snap = await db.collection('students').where('name', '==', name).get();
     let found = null;
@@ -315,13 +314,10 @@ async function parentLogin() {
       const p = (doc.data().parentPhone || '').replace(/\s/g, '');
       if (p === phone) found = doc.id;
     });
-    if (found) {
-      location.href = `class.html?sid=${found}`;
-    } else {
-      alert('找不到學生資料，請確認姓名與電話正確');
-    }
+    if (found) location.href = `class.html?sid=${found}`;
+    else alert('找不到學生資料');
   } catch (e) {
-    alert(`家長登入失敗：${e.message}`);
+    alert('登入失敗：' + e.message);
     console.error(e);
   }
 }
@@ -441,32 +437,166 @@ function fillStudentSelects() {
 function selectStudent(id) { currentStudentId=id; show(2); loadArtList(); }
 function closeAll(){ document.querySelectorAll('.modal').forEach(m=>m.style.display='none'); document.getElementById('preview').style.display='none'; }
 function addStu(){ if(!isTeacher)return; currentStudentId=null; document.getElementById('sname').value='';document.getElementById('sno').value='';document.getElementById('sphone').value='';document.getElementById('savatar').value='';document.getElementById('courseType').value='';document.getElementById('school').value='';document.getElementById('birthYear').value='';document.getElementById('gender').value='';document.getElementById('note').value='';document.getElementById('stuModal').style.display='flex'; }
-async function saveStu(){ if(!isTeacher)return; const n=document.getElementById('sname').value;const no=document.getElementById('sno').value;const p=document.getElementById('sphone').value;const a=document.getElementById('savatar').value;const ct=document.getElementById('courseType').value;const school=document.getElementById('school').value;const birthYear=document.getElementById('birthYear').value;const gender=document.getElementById('gender').value;const note=document.getElementById('note').value;if(!n||!p)return;const data={name:n,studentNo:no,parentPhone:p,avatar:a,courseType:ct,school,birthYear,gender,note};if(currentStudentId)await db.collection('students').doc(currentStudentId).update(data);else await db.collection('students').add({...data,createdAt:new Date()});closeAll();loadAllStudents();}
-async function delStu(id){ if(!isTeacher)return; if(!confirm('確定刪除？'))return; await db.collection('students').doc(id).delete(); await db.collection('artworks').where('studentId','==',id).get().then(s=>s.forEach(d=>d.ref.delete())); await db.collection('courses').where('studentId','==',id).get().then(s=>s.forEach(d=>d.ref.delete())); loadAllStudents(); }
-function editStu(id){ if(!isTeacher)return; currentStudentId=id; db.collection('students').doc(id).get().then(d=>{ const s=d.data(); document.getElementById('sname').value=s.name||'';document.getElementById('sno').value=s.studentNo||'';document.getElementById('sphone').value=s.parentPhone||'';document.getElementById('savatar').value=s.avatar||'';document.getElementById('courseType').value=s.courseType||'';document.getElementById('school').value=s.school||'';document.getElementById('birthYear').value=s.birthYear||'';document.getElementById('gender').value=s.gender||'';document.getElementById('note').value=s.note||'';document.getElementById('stuModal').style.display='flex'; }) }
+
+async function saveStu(){
+  if(!isTeacher)return;
+  const n=document.getElementById('sname').value;
+  const no=document.getElementById('sno').value;
+  const p=document.getElementById('sphone').value;
+  const a=document.getElementById('savatar').value;
+  const ct=document.getElementById('courseType').value;
+  const school=document.getElementById('school').value;
+  const birthYear=document.getElementById('birthYear').value;
+  const gender=document.getElementById('gender').value;
+  const note=document.getElementById('note').value;
+  if(!n||!p)return;
+  const data={name:n,studentNo:no,parentPhone:p,avatar:a,courseType:ct,school,birthYear,gender,note};
+  const wdb = getDBWithPwd();
+  if(currentStudentId)
+    await wdb.collection('students').doc(currentStudentId).update(data);
+  else
+    await wdb.collection('students').add({...data,createdAt:new Date()});
+  closeAll();loadAllStudents();
+}
+
+async function delStu(id){
+  if(!isTeacher)return;
+  if(!confirm('確定刪除？'))return;
+  const wdb = getDBWithPwd();
+  await wdb.collection('students').doc(id).delete();
+  await wdb.collection('artworks').where('studentId','==',id).get().then(s=>s.forEach(d=>d.ref.delete()));
+  await wdb.collection('courses').where('studentId','==',id).get().then(s=>s.forEach(d=>d.ref.delete()));
+  loadAllStudents();
+}
+
+function editStu(id){
+  if(!isTeacher)return;
+  currentStudentId=id;
+  db.collection('students').doc(id).get().then(d=>{
+    const s=d.data();
+    document.getElementById('sname').value=s.name||'';
+    document.getElementById('sno').value=s.studentNo||'';
+    document.getElementById('sphone').value=s.parentPhone||'';
+    document.getElementById('savatar').value=s.avatar||'';
+    document.getElementById('courseType').value=s.courseType||'';
+    document.getElementById('school').value=s.school||'';
+    document.getElementById('birthYear').value=s.birthYear||'';
+    document.getElementById('gender').value=s.gender||'';
+    document.getElementById('note').value=s.note||'';
+    document.getElementById('stuModal').style.display='flex';
+  })
+}
 
 function switchArtStudent(){currentStudentId=document.getElementById('selectStudentForArt').value;loadArtList();}
-async function loadArtList(){ if(!currentStudentId)return; const g=document.getElementById('rotateWrap');g.innerHTML=''; const s=await db.collection('students').doc(currentStudentId).get(); document.getElementById('mainAvatar').src=s.data().avatar||'https://via.placeholder.com/200'; const arts=await db.collection('artworks').where('studentId','==',currentStudentId).get(); artList=[];arts.forEach(d=>artList.push({id:d.id,...d.data()})); let a=0;const step=360/artList.length; artList.forEach((d,i)=>{g.innerHTML+=`<div class="art" style="transform:rotate(${a}deg) translate(220px) rotate(${-a}deg)" onclick="showPreview(${i})"><img src="${d.imageUrl}"></div>`;a+=step}); }
+
+async function loadArtList(){
+  if(!currentStudentId)return;
+  const g=document.getElementById('rotateWrap');g.innerHTML='';
+  const s=await db.collection('students').doc(currentStudentId).get();
+  document.getElementById('mainAvatar').src=s.data().avatar||'https://via.placeholder.com/200';
+  const arts=await db.collection('artworks').where('studentId','==',currentStudentId).get();
+  artList=[];arts.forEach(d=>artList.push({id:d.id,...d.data()}));
+  let a=0;const step=360/artList.length;
+  artList.forEach((d,i)=>{
+    g.innerHTML+=`<div class="art" style="transform:rotate(${a}deg) translate(220px) rotate(${-a}deg)" onclick="showPreview(${i})"><img src="${d.imageUrl}"></div>`;a+=step;
+  });
+}
+
 function openArt(){ if(!isTeacher)return; document.getElementById('artModal').style.display='flex'; }
-async function saveArt(){ if(!isTeacher)return; const sid=document.getElementById('artStudentSelect').value;const url=document.getElementById('img').value;const d=document.getElementById('cdate').value;const n=document.getElementById('artNote').value;if(!sid||!url||!d)return;await db.collection('artworks').add({studentId:sid,imageUrl:url,createDate:d,note:n,time:new Date()});closeAll();loadArtList();}
-function showPreview(i){ currentImg=i; const item=artList[i]; document.getElementById('previewImg').src=item.imageUrl; document.getElementById('pDate').textContent=item.createDate; document.getElementById('pNote').textContent=item.note||'無'; document.getElementById('preview').style.display='block'; }
-async function deleteCurrentArt(){ if(!isTeacher)return; if(!confirm('確定刪除？'))return; const id=artList[currentImg].id; await db.collection('artworks').doc(id).delete(); closeAll(); loadArtList(); }
+
+async function saveArt(){
+  if(!isTeacher)return;
+  const sid=document.getElementById('artStudentSelect').value;
+  const url=document.getElementById('img').value;
+  const d=document.getElementById('cdate').value;
+  const n=document.getElementById('artNote').value;
+  if(!sid||!url||!d)return;
+  const wdb = getDBWithPwd();
+  await wdb.collection('artworks').add({studentId:sid,imageUrl:url,createDate:d,note:n,time:new Date()});
+  closeAll();loadArtList();
+}
+
+function showPreview(i){
+  currentImg=i;
+  const item=artList[i];
+  document.getElementById('previewImg').src=item.imageUrl;
+  document.getElementById('pDate').textContent=item.createDate;
+  document.getElementById('pNote').textContent=item.note||'無';
+  document.getElementById('preview').style.display='block';
+}
+
+async function deleteCurrentArt(){
+  if(!isTeacher)return;
+  if(!confirm('確定刪除？'))return;
+  const id=artList[currentImg].id;
+  const wdb = getDBWithPwd();
+  await wdb.collection('artworks').doc(id).delete();
+  closeAll();loadArtList();
+}
+
 function prevImg(){event.stopPropagation();currentImg=(currentImg-1+artList.length)%artList.length;showPreview(currentImg)}
 function nextImg(){event.stopPropagation();currentImg=(currentImg+1)%artList.length;showPreview(currentImg)}
 
 function getWeek(d){const w=['日','一','二','三','四','五','六'];return w[new Date(d).getDay()]}
 function formatTime(t){const [h,m]=t.split(':');const min=h*60+parseInt(m)+75;const eh=Math.floor(min/60),em=min%60;return `${t} - ${String(eh).padStart(2,0)}:${String(em).padStart(2,0)}`}
-function calcEndTime(){ const t=document.getElementById('ctime').value; if(!t)return; const [h,m]=t.split(':').map(Number); const min=h*60+m+75; const eh=Math.floor(min/60),em=min%60; document.getElementById('endTimeShow').textContent=`結束時間：${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}`; }
-function searchCourse(){ const kw=document.getElementById('searchCourse').value.toLowerCase(); const st=studentList.find(s=>s.studentNo&&s.studentNo.toLowerCase().includes(kw)); const infoBar=document.getElementById('studentInfoDisplay'); if(st){ switchCourseStudentById(st.id); infoBar.style.display='block'; infoBar.innerHTML=`學生：${st.name}｜編號：${st.studentNo||'-'}`; }else{ renderCourseList(courseRaw); infoBar.style.display='none'; } }
+function calcEndTime(){
+  const t=document.getElementById('ctime').value;
+  if(!t)return;
+  const [h,m]=t.split(':').map(Number);
+  const min=h*60+m+75;
+  const eh=Math.floor(min/60),em=min%60;
+  document.getElementById('endTimeShow').textContent=`結束時間：${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}`;
+}
+
+function searchCourse(){
+  const kw=document.getElementById('searchCourse').value.toLowerCase();
+  const st=studentList.find(s=>s.studentNo&&s.studentNo.toLowerCase().includes(kw));
+  const infoBar=document.getElementById('studentInfoDisplay');
+  if(st){
+    switchCourseStudentById(st.id);
+    infoBar.style.display='block';
+    infoBar.innerHTML=`學生：${st.name}｜編號：${st.studentNo||'-'}`;
+  }else{
+    renderCourseList(courseRaw);
+    infoBar.style.display='none';
+  }
+}
+
 function switchCourseStudentById(id){currentStudentId=id;loadCourseList();}
 function switchCourseStudent(){ currentStudentId=document.getElementById('selectStudentForCourse').value; document.getElementById('studentInfoDisplay').style.display='none'; loadCourseList(); }
-async function loadCourseList(){ if(!currentStudentId)return; const courses=await db.collection('courses').where('studentId','==',currentStudentId).get(); courseRaw=[];courses.forEach(d=>courseRaw.push({id:d.id,...d.data()})); renderCourseList(courseRaw); updateStats(); }
-function updateStats(){ const total=courseRaw.length; const ok=courseRaw.filter(c=>c.status==='completed'||c.status==='absent').length; const left=total-ok; const rate=total?Math.round(ok/total*100):0; document.getElementById('courseStats').innerHTML=`
+
+async function loadCourseList(){
+  if(!currentStudentId)return;
+  const courses=await db.collection('courses').where('studentId','==',currentStudentId).get();
+  courseRaw=[];courses.forEach(d=>courseRaw.push({id:d.id,...d.data()}));
+  renderCourseList(courseRaw);
+  updateStats();
+}
+
+function updateStats(){
+  const total=courseRaw.length;
+  const ok=courseRaw.filter(c=>c.status==='completed'||c.status==='absent').length;
+  const left=total-ok;
+  const rate=total?Math.round(ok/total*100):0;
+  document.getElementById('courseStats').innerHTML=`
 <div class="stat"><h3>總課程</h3><h2>${total}</h2></div>
 <div class="stat"><h3>已完成</h3><h2>${ok}</h2></div>
 <div class="stat"><h3>剩餘</h2><h2>${left}</h3></div>
-<div class="stat"><h3>完成率</h3><h2>${rate}%</h2></div>`; }
-function renderCourseList(arr){ const b=document.getElementById('courseList');b.innerHTML=''; const map={pending:'wait',completed:'ok',leave:'leave',absent:'absent',holiday:'holiday'}; const txt={pending:'未完成',completed:'已完成',leave:'請假',absent:'缺席',holiday:'公眾假期'}; arr.sort((a,b)=>{ if(a.status==='pending'&&b.status!=='pending')return -1; if(a.status!=='pending'&&b.status==='pending')return 1; return new Date(a.date)-new Date(b.date); }); arr.forEach(c=>{ const imgHtml = c.imgUrl ? `<img src="${c.imgUrl}" class="course-img">` : ''; b.innerHTML+=`<tr>
+<div class="stat"><h3>完成率</h3><h2>${rate}%</h2></div>`;
+}
+
+function renderCourseList(arr){
+  const b=document.getElementById('courseList');b.innerHTML='';
+  const map={pending:'wait',completed:'ok',leave:'leave',absent:'absent',holiday:'holiday'};
+  const txt={pending:'未完成',completed:'已完成',leave:'請假',absent:'缺席',holiday:'公眾假期'};
+  arr.sort((a,b)=>{
+    if(a.status==='pending'&&b.status!=='pending')return -1;
+    if(a.status!=='pending'&&b.status==='pending')return 1;
+    return new Date(a.date)-new Date(b.date);
+  });
+  arr.forEach(c=>{
+    const imgHtml = c.imgUrl ? `<img src="${c.imgUrl}" class="course-img">` : '';
+    b.innerHTML+=`<tr>
 <td><input type="checkbox" class="courseCheck" data-id="${c.id}"></td>
 <td>${c.date}（${getWeek(c.date)}）</td>
 <td>${formatTime(c.time)}</td>
@@ -474,14 +604,97 @@ function renderCourseList(arr){ const b=document.getElementById('courseList');b.
 <td>${imgHtml}</td>
 <td>${c.note||'-'}</td>
 <td>${isTeacher ? `<button onclick="editCourse('${c.id}')" style="background:#ffc107;padding:6px 10px;border:none;border-radius:6px;color:white">修改</button><button onclick="delCourse('${c.id}')" style="background:#dc3545;padding:6px 10px;border:none;border-radius:6px;color:white">刪除</button>` : ''}</td>
-</tr>`; }); }
-async function batchSet(status){ if(!isTeacher)return; const checks=document.querySelectorAll('.courseCheck:checked'); if(checks.length===0)return alert('請選擇'); if(!confirm('確定修改？'))return; for(let cb of checks){await db.collection('courses').doc(cb.dataset.id).update({status})} loadCourseList(); }
-async function batchDeleteCourses(){ if(!isTeacher)return; const checks=document.querySelectorAll('.courseCheck:checked'); if(checks.length===0)return alert('請選擇'); if(!confirm('確定刪除？'))return; for(let cb of checks){await db.collection('courses').doc(cb.dataset.id).delete()} loadCourseList(); }
+</tr>`;
+  });
+}
+
+async function batchSet(status){
+  if(!isTeacher)return;
+  const checks=document.querySelectorAll('.courseCheck:checked');
+  if(checks.length===0)return alert('請選擇');
+  if(!confirm('確定修改？'))return;
+  const wdb = getDBWithPwd();
+  for(let cb of checks){
+    await wdb.collection('courses').doc(cb.dataset.id).update({status})
+  }
+  loadCourseList();
+}
+
+async function batchDeleteCourses(){
+  if(!isTeacher)return;
+  const checks=document.querySelectorAll('.courseCheck:checked');
+  if(checks.length===0)return alert('請選擇');
+  if(!confirm('確定刪除？'))return;
+  const wdb = getDBWithPwd();
+  for(let cb of checks){
+    await wdb.collection('courses').doc(cb.dataset.id).delete()
+  }
+  loadCourseList();
+}
+
 function addCourse(){ if(!isTeacher)return; currentCourseId=null; document.getElementById('cday').valueAsDate=new Date(); document.getElementById('ctime').value=''; document.getElementById('endTimeShow').textContent=''; document.getElementById('cnote').value=''; document.getElementById('courseImgUrl').value=''; document.getElementById('cstatus').value='pending'; document.getElementById('courseModal').style.display='flex'; }
-async function saveCourse(){ if(!isTeacher)return; const sid=document.getElementById('courseStudentSelect').value;const d=document.getElementById('cday').value;const t=document.getElementById('ctime').value;const nt=document.getElementById('cnote').value;const imgUrl=document.getElementById('courseImgUrl').value;const s=document.getElementById('cstatus').value;if(!sid||!d||!t)return;const data={studentId:sid,date:d,time:t,note:nt,status:s,imgUrl};if(currentCourseId)await db.collection('courses').doc(currentCourseId).update(data);else await db.collection('courses').add(data);closeAll();loadCourseList();}
-function editCourse(id){ if(!isTeacher)return; currentCourseId=id; db.collection('courses').doc(id).get().then(d=>{ const c=d.data(); document.getElementById('courseStudentSelect').value=c.studentId; document.getElementById('cday').value=c.date; document.getElementById('ctime').value=c.time; calcEndTime(); document.getElementById('cnote').value=c.note||''; document.getElementById('courseImgUrl').value=c.imgUrl||''; document.getElementById('cstatus').value=c.status; document.getElementById('courseModal').style.display='flex'; }) }
-async function delCourse(id){ if(!isTeacher)return; if(!confirm('確定刪除？'))return; await db.collection('courses').doc(id).delete(); loadCourseList(); }
-async function quickPackage(count){ if(!isTeacher)return; const sid=document.getElementById('courseStudentSelect').value;const startDate=document.getElementById('cday').value;const startTime=document.getElementById('ctime').value;if(!sid||!startDate||!startTime)return;if(!confirm('產生'+count+'堂？'))return;const start=new Date(startDate);for(let i=0;i<count;i++){const dd=new Date(start);dd.setDate(start.getDate()+i*7);const date=dd.toISOString().split('T')[0];await db.collection('courses').add({studentId:sid,date,time:startTime,note:'課程',status:'pending'});}alert('完成');closeAll();loadCourseList();}
+
+async function saveCourse(){
+  if(!isTeacher)return;
+  const sid=document.getElementById('courseStudentSelect').value;
+  const d=document.getElementById('cday').value;
+  const t=document.getElementById('ctime').value;
+  const nt=document.getElementById('cnote').value;
+  const imgUrl=document.getElementById('courseImgUrl').value;
+  const s=document.getElementById('cstatus').value;
+  if(!sid||!d||!t)return;
+  const data={studentId:sid,date:d,time:t,note:nt,status:s,imgUrl};
+  const wdb = getDBWithPwd();
+  if(currentCourseId)
+    await wdb.collection('courses').doc(currentCourseId).update(data);
+  else
+    await wdb.collection('courses').add(data);
+  closeAll();loadCourseList();
+}
+
+function editCourse(id){
+  if(!isTeacher)return;
+  currentCourseId=id;
+  db.collection('courses').doc(id).get().then(d=>{
+    const c=d.data();
+    document.getElementById('courseStudentSelect').value=c.studentId;
+    document.getElementById('cday').value=c.date;
+    document.getElementById('ctime').value=c.time;
+    calcEndTime();
+    document.getElementById('cnote').value=c.note||'';
+    document.getElementById('courseImgUrl').value=c.imgUrl||'';
+    document.getElementById('cstatus').value=c.status;
+    document.getElementById('courseModal').style.display='flex';
+  })
+}
+
+async function delCourse(id){
+  if(!isTeacher)return;
+  if(!confirm('確定刪除？'))return;
+  const wdb = getDBWithPwd();
+  await wdb.collection('courses').doc(id).delete();
+  loadCourseList();
+}
+
+async function quickPackage(count){
+  if(!isTeacher)return;
+  const sid=document.getElementById('courseStudentSelect').value;
+  const startDate=document.getElementById('cday').value;
+  const startTime=document.getElementById('ctime').value;
+  if(!sid||!startDate||!startTime)return;
+  if(!confirm('產生'+count+'堂？'))return;
+  const wdb = getDBWithPwd();
+  const start=new Date(startDate);
+  for(let i=0;i<count;i++){
+    const dd=new Date(start);
+    dd.setDate(start.getDate()+i*7);
+    const date=dd.toISOString().split('T')[0];
+    await wdb.collection('courses').add({studentId:sid,date,time:startTime,note:'課程',status:'pending'});
+  }
+  alert('完成');
+  closeAll();loadCourseList();
+}
+
 function logout(){location.reload()}
 </script>
 </body>
