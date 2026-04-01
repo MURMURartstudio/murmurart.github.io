@@ -1,6 +1,31 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
+
+    <!-- 🔥 这是给你准备好的完整版 CDN 代码 -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+  import { getFirestore } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+  import { getAuth } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+
+  // 你的配置（我已经帮你填好了！）
+  const firebaseConfig = {
+    apiKey: "AIzaSyBqUEh-MjMZ5Gj2gaFJpKffrDmvP9l7Slo",
+    authDomain: "murmurart-8f6cc.firebaseapp.com",
+    projectId: "murmurart-8f6cc",
+    storageBucket: "murmurart-8f6cc.firebasestorage.app",
+    messagingSenderId: "205741159610",
+    appId: "1:205741159610:web:624b7ca35c04e6e09a7e83"
+  };
+
+  // 初始化 Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app); // 数据库
+  const auth = getAuth(app);   // 登录
+
+  console.log("✅ Firebase 连接成功！");
+</script>
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MURMUR ART - 家長專區</title>
