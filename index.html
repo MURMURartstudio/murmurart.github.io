@@ -1,6 +1,29 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
+    <script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyBqUEh-MjMZ5Gj2gaFJpKffrDmvP9l7Slo",
+    authDomain: "murmurart-8f6cc.firebaseapp.com",
+    projectId: "murmurart-8f6cc",
+    storageBucket: "murmurart-8f6cc.firebasestorage.app",
+    messagingSenderId: "205741159610",
+    appId: "1:205741159610:web:624b7ca35c04e6e09a7e83",
+    measurementId: "G-LRSB35J1KJ"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MURMUR ART - 學生作品</title>
