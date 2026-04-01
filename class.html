@@ -30,12 +30,14 @@
     .wait{background:#fff3cd;color:#ffc107}
     .leave{background:#f8d7da;color:#dc3545}
     .absent{background:#e9ecef;color:#6c757d}
+    .holiday{background:#d1ecf1;color:#17a2b8}
     .preview{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:90%;max-width:700px;background:white;border-radius:20px;padding:25px;display:none;z-index:9999;box-shadow:0 20px 60px #00000040}
     .preview img{max-width:100%;max-height:400px;border-radius:12px}
     .prev,.next{position:absolute;top:50%;transform:translateY(-50%);font-size:22px;color:white;background:#879acb;padding:10px 16px;border-radius:10px;cursor:pointer}
     .prev{left:15px}
     .next{right:15px}
-    .close{position:absolute;top:18px;right:18px;font-size:22px;cursor:pointer;color:#777}
+    .close{position:absolute;top:18px;right:18px;font-size:22px;cursor-pointer;color:#777}
+    .reminder{background:#fff3cd;color:#ff9800;padding:12px;border-radius:12px;text-align:center;margin-bottom:15px;font-weight:bold}
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -52,6 +54,7 @@
   </div>
 </div>
 <div class="container">
+  <div id="reminderBox" style="display:none;" class="reminder">⚠️ 課程即將用罄，仅剩2節，記得續課哦！</div>
   <div id="p1">
     <h2 style="text-align:center;color:#879acb;margin:20px 0">🎨 學生作品</h2>
     <div class="gallery">
@@ -121,15 +124,19 @@ function showArt(i){currentImg=i;document.getElementById('previewImg').src=artLi
 async function loadCourse(){
   const list=document.getElementById('courseList');list.innerHTML='';
   const res=await db.collection('courses').where('studentId','==',uid).get();
-  const map={pending:"wait",completed:"ok",leave:"leave",absent:"absent"};
-  const name={pending:"⏳ 未完成",completed:"✔️ 已完成",leave:"🏖️ 請假",absent:"🚫 缺席"};
+  const map={pending:"wait",completed:"ok",leave:"leave",absent:"absent",holiday:"holiday"};
+  const name={pending:"⏳ 未完成",completed:"✔️ 已完成",leave:"🏖️ 請假",absent:"🚫 缺席",holiday:"🌧️ 公眾假期"};
   let arr=[];res.forEach(d=>arr.push({id:d.id,...d.data()}));
   
   const total=arr.length;
-  const completed=arr.filter(x=>x.status==='completed'||x.status==='leave').length;
+  const completed=arr.filter(x=>x.status==='completed'||x.status==='absent'||x.status==='holiday').length;
   const left=total-completed;
   const rate=total>0?Math.round(completed/total*100):0;
   
+  if(left <= 2){
+    document.getElementById('reminderBox').style.display='block';
+  }
+
   document.getElementById('info').innerHTML=`
   <div class="info-item"><h3>📊 總課程</h3><h2>${total}</h2></div>
   <div class="info-item"><h3>✅ 已完成</h3><h2>${completed}</h2></div>
@@ -137,7 +144,12 @@ async function loadCourse(){
   <div class="info-item"><h3>🎯 完成率</h3><h2>${rate}%</h2></div>
   `;
 
-  arr.sort((a,b)=>new Date(a.date)-new Date(b.date));
+  arr.sort((a,b)=>{
+    if(a.status==='pending' && b.status!=='pending') return -1;
+    if(a.status!=='pending' && b.status==='pending') return 1;
+    return new Date(a.date)-new Date(b.date);
+  });
+
   arr.forEach(c=>{
     list.innerHTML+=`<tr>
       <td>${c.date}（${getWeek(c.date)}）</td>
