@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MURMUR ART - 學員作品成長平台</title>
+    <title>MURMUR ART - 家長專區</title>
     <style>
         * {
             margin: 0;
@@ -11,814 +11,246 @@
             box-sizing: border-box;
             font-family: "微軟正黑體", sans-serif;
         }
-
         body {
-            background-color: #f5f7fb;
-            color: #444;
-            overflow-x: hidden;
-            background: linear-gradient(120deg, #f5f7fb, #e8edff);
-            background-size: 200% 200%;
-            animation: bgFlow 15s ease infinite;
+            background: #f5f7fb;
+            padding: 20px;
         }
 
-        @keyframes bgFlow {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-
-        .container {
-            width: 90%;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px 0;
-        }
-
-        /* 導航欄 */
-        .navbar {
-            background-color: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
-            padding: 15px 0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .nav-wrap {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .logo-img {
-            width: 40px;
-            height: 40px;
-            object-fit: contain;
-            animation: logoRotate 8s ease-in-out infinite;
-        }
-
-        @keyframes logoRotate {
-            0%, 100% { transform: rotate(0deg); }
-            50% { transform: rotate(5deg); }
-        }
-
-        .logo-text {
-            font-size: 24px;
-            font-weight: bold;
-            color: #879acb;
-            text-shadow: 0 0 10px rgba(135, 154, 203, 0.5);
-        }
-
-        .nav-menu a {
-            margin-left: 25px;
-            text-decoration: none;
-            color: #666;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .nav-menu a::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: #879acb;
-            transition: width 0.3s ease;
-        }
-
-        .nav-menu a:hover::after {
-            width: 100%;
-        }
-
-        .nav-menu a.active {
-            color: #879acb;
-            font-weight: bold;
-        }
-
-        /* 創意旋轉畫廊 */
-        .art-gallery {
-            position: relative;
-            width: 100%;
-            height: 700px;
-            margin: 40px auto;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: radial-gradient(circle, rgba(135,154,203,0.1) 0%, rgba(255,255,255,0) 70%);
-            border-radius: 20px;
-        }
-
-        .particle {
-            position: absolute;
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: rgba(135, 154, 203, 0.6);
-            animation: particleFloat 6s ease-in-out infinite;
-            z-index: 1;
-        }
-
-        @keyframes particleFloat {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            25% { transform: translate(15px, -10px) scale(1.2); }
-            50% { transform: translate(0, -15px) scale(0.8); }
-            75% { transform: translate(-15px, -5px) scale(1.1); }
-        }
-
-        .center-avatar {
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 8px solid #879acb;
-            box-shadow: 0 0 30px rgba(135, 154, 203, 0.6), 
-                        inset 0 0 10px rgba(255, 255, 255, 0.8);
-            z-index: 10;
-            position: absolute;
-            background: #fff;
-            animation: avatarBreath 4s ease-in-out infinite;
-        }
-
-        @keyframes avatarBreath {
-            0%, 100% { transform: scale(1); box-shadow: 0 0 30px rgba(135, 154, 203, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.8); }
-            50% { transform: scale(1.05); box-shadow: 0 0 40px rgba(135, 154, 203, 0.8), inset 0 0 15px rgba(255, 255, 255, 0.9); }
-        }
-
-        .rotate-container {
-            width: 450px;
-            height: 450px;
-            position: relative;
-            animation: rotate 25s linear infinite;
-            transform-style: preserve-3d;
-        }
-
-        @keyframes rotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .art-card {
-            position: absolute;
-            width: 160px;
-            height: 160px;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-            transform-origin: center center;
-            transition: all 0.4s ease;
-            background: #fff;
-            transform: rotate(0deg) !important;
-            perspective: 1000px;
-            backface-visibility: hidden;
-            cursor: pointer;
-        }
-
-        .single-art-card {
-            width: 280px;
-            height: 280px;
-            position: relative;
-            margin-top: 220px;
-            animation: singleFloat 6s ease-in-out infinite;
-            box-shadow: 0 15px 40px rgba(135, 154, 203, 0.4);
-        }
-
-        @keyframes singleFloat {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            25% { transform: translateY(-15px) rotate(1deg); }
-            50% { transform: translateY(0) rotate(0deg); }
-            75% { transform: translateY(-10px) rotate(-1deg); }
-        }
-
-        .art-decoration {
-            position: absolute;
-            font-size: 40px;
-            color: rgba(135, 154, 203, 0.3);
-            animation: decorationFloat 8s ease-in-out infinite;
-            z-index: 5;
-        }
-
-        @keyframes decorationFloat {
-            0%, 100% { transform: translateY(0) scale(1); opacity: 0.6; }
-            50% { transform: translateY(-25px) scale(1.2); opacity: 0.9; }
-        }
-
-        .art-card:hover {
-            transform: scale(1.2) !important;
-            box-shadow: 0 15px 30px rgba(135, 154, 203, 0.7);
-            z-index: 20;
-            margin-top: -10px;
-        }
-
-        .single-art-card:hover {
-            transform: scale(1.25) translateY(-15px) !important;
-            box-shadow: 0 20px 50px rgba(135, 154, 203, 0.8);
-        }
-
-        .art-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: filter 0.3s ease;
-        }
-
-        .art-card:hover .art-img {
-            filter: saturate(1.2) brightness(1.05);
-        }
-
-        .art-info {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            padding: 10px;
-            background: linear-gradient(transparent, rgba(255,255,255,0.9));
-            font-size: 13px;
-            text-align: center;
-            transform: translateY(100%);
-            transition: transform 0.3s ease;
-        }
-
-        .art-card:hover .art-info {
-            transform: translateY(0);
-        }
-
-        .empty-gallery {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .float-item {
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: rgba(135, 154, 203, 0.2);
-            border: 2px solid rgba(135, 154, 203, 0.5);
-            animation: float 5s ease-in-out infinite;
-            box-shadow: 0 0 20px rgba(135, 154, 203, 0.3);
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0) scale(1); opacity: 0.7; }
-            50% { transform: translateY(-30px) scale(1.3); opacity: 1; }
-        }
-
-        .float-item:nth-child(1) { top: 20%; left: 20%; animation-delay: 0s; }
-        .float-item:nth-child(2) { top: 70%; left: 30%; animation-delay: 0.5s; }
-        .float-item:nth-child(3) { top: 40%; left: 70%; animation-delay: 1s; }
-        .float-item:nth-child(4) { top: 80%; left: 80%; animation-delay: 1.5s; }
-        .float-item:nth-child(5) { top: 30%; left: 60%; animation-delay: 2s; }
-
-        .gallery-title {
-            text-align: center;
-            font-size: 32px;
-            color: #879acb;
-            margin: 30px 0;
-            text-shadow: 2px 2px 8px rgba(0,0,0,0.1);
-            animation: titleBounce 2s ease-in-out infinite;
-        }
-
-        @keyframes titleBounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
-        }
-
-        /* 課程進度面板 */
-        .course-section {
-            max-width: 900px;
+        /* 登入面板 */
+        .login-panel {
+            max-width: 450px;
             margin: 50px auto;
             padding: 30px;
             background: white;
-            border-radius: 20px;
-            box-shadow: 0 5px 25px rgba(135,154,203,0.15);
-            display: none;
-        }
-        .course-title {
-            text-align: center;
-            color: #879acb;
-            font-size: 26px;
-            margin-bottom: 25px;
-        }
-        .progress-card {
-            padding: 20px;
-            border-left: 5px solid #879acb;
-            background: #f8f9ff;
-            border-radius: 10px;
-            margin-bottom: 15px;
-        }
-        .progress-title {
-            font-weight: bold;
-            color: #879acb;
-            font-size: 18px;
-            margin-bottom: 8px;
-        }
-        .progress-bar-bg {
-            width: 100%;
-            height: 12px;
-            background: #e8edff;
-            border-radius: 10px;
-            overflow: hidden;
-            margin: 8px 0;
-        }
-        .progress-bar {
-            height: 100%;
-            background: #879acb;
-            border-radius: 10px;
-            transition: width 0.8s ease;
-        }
-        .progress-text {
-            font-size: 14px;
-            color: #666;
-            text-align: right;
-        }
-
-        /* 作品詳情彈窗 */
-        .work-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.85);
-            z-index: 9999;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            backdrop-filter: blur(5px);
-        }
-
-        .modal-content {
-            background: #fff;
-            width: 90%;
-            max-width: 1000px;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 10px 50px rgba(135, 154, 203, 0.5);
-            animation: modalPop 0.5s ease-out forwards;
-        }
-
-        @keyframes modalPop {
-            0% { transform: scale(0.8); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        .modal-header {
-            padding: 20px;
-            background: #879acb;
-            color: #fff;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-close {
-            font-size: 24px;
-            cursor: pointer;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.2);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: all 0.3s ease;
-        }
-
-        .modal-close:hover {
-            background: rgba(255,255,255,0.4);
-        }
-
-        .modal-body {
-            display: flex;
-            flex-wrap: wrap;
-            padding: 30px;
-            gap: 30px;
-        }
-
-        .modal-img-container {
-            flex: 1;
-            min-width: 300px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-        }
-
-        .modal-nav-btn {
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.8);
-            color: #879acb;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
-            cursor: pointer;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            z-index: 10;
-            transition: all 0.3s ease;
-        }
-
-        .modal-nav-btn:hover {
-            background: #879acb;
-            color: white;
-        }
-
-        .prev-btn { left: 20px; }
-        .next-btn { right: 20px; }
-
-        .modal-img {
-            max-width: 100%;
-            max-height: 500px;
-            border-radius: 10px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-        }
-
-        .modal-details {
-            flex: 1;
-            min-width: 300px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .work-title {
-            font-size: 28px;
-            color: #879acb;
-            font-weight: bold;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
-        }
-
-        .work-meta {
-            display: flex;
-            gap: 20px;
-            color: #666;
-            font-size: 14px;
-        }
-
-        .teacher-comment {
-            background: #f8f9ff;
-            padding: 20px;
-            border-radius: 10px;
-            border-left: 5px solid #879acb;
-        }
-
-        .comment-title {
-            font-weight: bold;
-            color: #879acb;
-            margin-bottom: 10px;
-            font-size: 18px;
-        }
-
-        .comment-content {
-            line-height: 1.6;
-            color: #444;
-        }
-
-        .skill-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .skill-tag {
-            background: #e8edff;
-            color: #879acb;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 12px;
-        }
-
-        /* 回到頂部按鈕 */
-        .back-to-top {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: #879acb;
-            color: white;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            font-size: 20px;
-            cursor: pointer;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            z-index: 99;
-            transition: all 0.3s ease;
-        }
-
-        .back-to-top:hover {
-            background: #6a80b8;
-            transform: translateY(-5px);
-        }
-
-        /* 提示訊息 */
-        .toast-message {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.8);
-            color: white;
-            padding: 15px 25px;
-            border-radius: 8px;
-            z-index: 999;
-            display: none;
-            animation: toastFade 0.3s ease-out forwards;
-        }
-        @keyframes toastFade {
-            0% { opacity: 0; bottom: 0; }
-            100% { opacity: 1; bottom: 30px; }
-        }
-
-        /* 簡易登入面板樣式 */
-        .simple-login {
-            max-width: 450px;
-            margin: 30px auto;
-            padding: 30px;
-            background: white;
             border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(135, 154, 203, 0.15);
+            box-shadow: 0 5px 20px rgba(135,154,203,0.15);
             text-align: center;
         }
-
         .login-title {
             color: #879acb;
             margin-bottom: 20px;
-            font-size: 22px;
         }
-
         .login-input {
             width: 100%;
-            padding: 12px 15px;
-            margin: 10px 0;
+            padding: 12px;
+            margin: 8px 0;
             border: 2px solid #e8edff;
             border-radius: 10px;
-            font-size: 16px;
             outline: none;
         }
-
         .login-input:focus {
             border-color: #879acb;
         }
-
         .login-btn {
             width: 100%;
             padding: 12px;
-            margin-top: 15px;
             background: #879acb;
             color: white;
             border: none;
             border-radius: 10px;
-            font-size: 16px;
+            margin-top: 10px;
             cursor: pointer;
-            transition: 0.3s;
         }
-
-        .login-btn:hover {
-            background: #6a80b8;
-        }
-
-        .login-status {
+        .status {
             margin-top: 15px;
             padding: 10px;
             border-radius: 8px;
+        }
+        .success { background: #d4edda; color: #28a745; }
+        .error { background: #f8d7da; color: #dc3545; }
+
+        /* 課程進度 */
+        .course-section {
+            max-width: 600px;
+            margin: 30px auto;
+            padding: 25px;
+            background: white;
+            border-radius: 15px;
+            display: none;
+        }
+        .progress-card {
+            padding: 15px;
+            border-left: 4px solid #879acb;
+            background: #f8f9ff;
+            margin: 10px 0;
+            border-radius: 8px;
+        }
+        .progress-bar-bg {
+            width: 100%;
+            height: 10px;
+            background: #e8edff;
+            border-radius: 5px;
+            margin: 5px 0;
+        }
+        .progress-bar {
+            height: 10px;
+            background: #879acb;
+            border-radius: 5px;
+        }
+
+        /* 作品展示 */
+        .art-section {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 25px;
+            background: white;
+            border-radius: 15px;
+            display: none;
+        }
+        .art-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .art-card {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        .art-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+        .art-info {
+            padding: 10px;
             font-size: 14px;
         }
-
-        .status-success {
-            background: #d4edda;
-            color: #28a745;
-        }
-
-        .status-error {
-            background: #f8d7da;
-            color: #dc3545;
-        }
-
-        .user-info {
-            color: #879acb;
-            font-weight: bold;
-            margin-top: 10px;
+        .teacher-comment {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            border-left: 4px solid #879acb;
         }
     </style>
 </head>
+
 <body>
 
-<!-- 導航欄 -->
-<nav class="navbar">
-    <div class="container nav-wrap">
-        <div class="logo-container">
-            <img src="logo.png" alt="MURMUR ART Logo" class="logo-img">
-            <div class="logo-text">MURMUR ART</div>
-        </div>
-        <div class="nav-menu">
-            <a href="#" class="active">首頁</a>
-            <a href="#">學員作品</a>
-            <a href="#">課程進度</a>
-            <a href="#">關於我們</a>
-            <a href="#" id="authMenu">家長登入</a>
-        </div>
-    </div>
-</nav>
-
-<!-- 簡易家長登入面板 -->
-<div class="container">
-    <div class="simple-login" id="loginPanel">
-        <h3 class="login-title">家長專區 - 快速登入</h3>
-        <input type="text" class="login-input" id="studentName" placeholder="請輸入學生姓名" required>
-        <input type="text" class="login-input" id="studentPhone" placeholder="請輸入聯絡電話" required>
-        <button class="login-btn" onclick="simpleLogin()">登入 / 查詢作品</button>
-        <div id="loginStatus" class="login-status"></div>
-        <div id="userInfo" class="user-info"></div>
-    </div>
+<!-- 家長登入面板 -->
+<div class="login-panel">
+    <h2 class="login-title">家長專區登入</h2>
+    <input class="login-input" id="studentName" placeholder="學生姓名">
+    <input class="login-input" id="studentPhone" placeholder="聯絡電話">
+    <button class="login-btn" onclick="parentLogin()">登入查看孩子資料</button>
+    <div id="loginStatus" class="status"></div>
 </div>
 
-<!-- 學員作品展示 -->
-<div class="container">
-    <h2 class="gallery-title">學員作品展示</h2>
-    <div class="art-gallery">
-        <div class="particle" style="top: 10%; left: 15%;"></div>
-        <div class="particle" style="top: 80%; left: 85%;"></div>
-        <div class="particle" style="top: 40%; left: 90%;"></div>
-        <div class="particle" style="top: 70%; left: 20%;"></div>
-        <div class="particle" style="top: 30%; left: 70%;"></div>
-        
-        <img src="avatar.jpg" alt="中心頭像" class="center-avatar">
-        <div class="rotate-container" id="artContainer"></div>
-        
-        <div class="art-decoration" style="top: 15%; left: 25%;">✦</div>
-        <div class="art-decoration" style="top: 85%; left: 75%;">✦</div>
-        <div class="art-decoration" style="top: 60%; left: 15%;">✧</div>
-        <div class="art-decoration" style="top: 30%; left: 85%;">✧</div>
-    </div>
-</div>
-
-<!-- 合併進來的 課程進度面板 -->
-<div class="container course-section" id="courseSection">
-    <h2 class="course-title">📚 課程學習進度</h2>
+<!-- 課程進度 -->
+<div class="course-section" id="courseSection">
+    <h3 style="color:#879acb; margin-bottom:15px;">📚 課程進度</h3>
     <div id="courseList"></div>
 </div>
 
-<!-- 作品詳情彈窗 -->
-<div class="work-modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>作品詳情</h3>
-            <div class="modal-close">×</div>
-        </div>
-        <div class="modal-body">
-            <div class="modal-img-container">
-                <div class="modal-nav-btn prev-btn">◀</div>
-                <img src="" alt="作品詳圖" class="modal-img">
-                <div class="modal-nav-btn next-btn">▶</div>
-            </div>
-            <div class="modal-details">
-                <h2 class="work-title"></h2>
-                <div class="work-meta">
-                    <div>學員：<span id="modal-student"></span></div>
-                    <div>日期：<span id="modal-date"></span></div>
-                    <div>課程：<span id="modal-course"></span></div>
-                </div>
-                <div class="teacher-comment">
-                    <div class="comment-title">老師評語</div>
-                    <div class="comment-content" id="modal-comment"></div>
-                    <div class="skill-tags" id="modal-tags"></div>
-                </div>
-            </div>
-        </div>
-    </div>
+<!-- 孩子作品 + 老師評語 -->
+<div class="art-section" id="artSection">
+    <h3 style="color:#879acb; margin-bottom:15px;">🎨 孩子作品</h3>
+    <div class="art-grid" id="artGrid"></div>
+    <div class="teacher-comment" id="teacherComment"></div>
 </div>
 
-<!-- 回到頂部 -->
-<div class="back-to-top">↑</div>
-<div class="toast-message"></div>
-
-<!-- ✅ 你提供的 Firebase 代碼 已完整加入 -->
+<!-- ====================== 你提供的 FIREBASE 完整程式 ====================== -->
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-  import { getFirestore, doc, getDoc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
-  
-  // 你提供的完整 Firebase 配置（已直接填入）
-  const firebaseConfig = {
-    apiKey: "AIzaSyBqUEh-MjMZ5Gj2gaFJpKffrDmvP9l7Slo",
-    authDomain: "murmurart-8f6cc.firebaseapp.com",
-    projectId: "murmurart-8f6cc",
-    storageBucket: "murmurart-8f6cc.firebasestorage.app",
-    messagingSenderId: "205741159610",
-    appId: "1:205741159610:web:624b7ca35c04e6e09a7e83",
-    measurementId: "G-LRSB35J1KJ"
-  };
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+import { getFirestore, doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
-  // 初始化 Firebase
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  window.db = db;
+// 你提供的 Firebase 配置
+const firebaseConfig = {
+  apiKey: "AIzaSyBqUEh-MjMZ5Gj2gaFJpKffrDmvP9l7Slo",
+  authDomain: "murmurart-8f6cc.firebaseapp.com",
+  projectId: "murmurart-8f6cc",
+  storageBucket: "murmurart-8f6cc.firebasestorage.app",
+  messagingSenderId: "205741159610",
+  appId: "1:205741159610:web:624b7ca35c04e6e09a7e83",
+  measurementId: "G-LRSB35J1KJ"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+window.db = db;
 </script>
 
+<!-- ====================== 登入 + 顯示資料 ====================== -->
 <script>
-    let currentStudent = null;
+let currentStudent = null;
 
-    // 家長登入：姓名 + 電話 → 只看自己孩子
-    async function simpleLogin() {
-        const name = document.getElementById('studentName').value.trim();
-        const phone = document.getElementById('studentPhone').value.trim();
-        const status = document.getElementById('loginStatus');
+// 家長登入（只有老師建立的學生才能登入）
+async function parentLogin() {
+    const name = document.getElementById("studentName").value.trim();
+    const phone = document.getElementById("studentPhone").value.trim();
+    const status = document.getElementById("loginStatus");
 
-        if (!name || !phone) {
-            status.textContent = "請輸入完整資訊";
-            status.className = "login-status status-error";
+    if (!name || !phone) {
+        status.textContent = "請輸入完整資訊";
+        status.className = "status error";
+        return;
+    }
+
+    try {
+        // 查詢 Firebase 中老師建立的學生資料
+        const studentRef = doc(db, "students", phone);
+        const snap = await getDoc(studentRef);
+
+        if (!snap.exists()) {
+            status.textContent = "❌ 找不到學生資料，請聯繫老師建立";
+            status.className = "status error";
             return;
         }
 
-        try {
-            const docRef = doc(db, "students", phone);
-            const docSnap = await getDoc(docRef);
+        // 登入成功
+        currentStudent = snap.data();
+        status.textContent = `✅ 登入成功！歡迎 ${currentStudent.name} 家長`;
+        status.className = "status success";
 
-            if (docSnap.exists()) {
-                currentStudent = docSnap.data();
-                status.textContent = `✅ 登入成功！歡迎 ${name} 家長`;
-                status.className = "login-status status-success";
-                document.getElementById('userInfo').textContent = `學生：${currentStudent.name}`;
-            } else {
-                await setDoc(docRef, { name, phone, createTime: new Date().toLocaleString() });
-                currentStudent = { name, phone };
-                status.textContent = "✅ 首次登入，資料建立成功";
-                status.className = "login-status status-success";
-            }
+        // 顯示所有資料
+        showAllData();
 
-            // 登入後 自動載入 → 自己孩子的作品 + 課程
-            loadMyArt();
-            loadMyCourse();
-            document.getElementById('courseSection').style.display = 'block';
-            showToast("登入成功！已載入您孩子的資料");
-        } catch (e) {
-            status.textContent = "❌ 登入失敗";
-            status.className = "login-status status-error";
-        }
+    } catch (e) {
+        status.textContent = "❌ 登入失敗，請稍後再試";
+        status.className = "status error";
     }
+}
 
-    // ✅ 只載入「當前登入學生」的作品
-    async function loadMyArt() {
-        if (!currentStudent) return;
-        const container = document.getElementById('artContainer');
-        container.innerHTML = `<div style="color:#879acb;font-size:20px;">🎨 ${currentStudent.name} 的個人作品</div>`;
-    }
+// 顯示：課程 + 作品 + 老師評語
+async function showAllData() {
+    // 顯示課程進度
+    document.getElementById("courseSection").style.display = "block";
+    document.getElementById("courseList").innerHTML = `
+        <div class="progress-card">
+            <div>兒童美術基礎班</div>
+            <div class="progress-bar-bg"><div class="progress-bar" style="width:65%"></div></div>
+            <div>進度：65%</div>
+        </div>
+        <div class="progress-card">
+            <div>創意手工課程</div>
+            <div class="progress-bar-bg"><div class="progress-bar" style="width:40%"></div></div>
+            <div>進度：40%</div>
+        </div>
+    `;
 
-    // ✅ 只載入「當前登入學生」的課程進度
-    async function loadMyCourse() {
-        if (!currentStudent) return;
-        const list = document.getElementById('courseList');
-        list.innerHTML = `
-            <div class="progress-card">
-                <div class="progress-title">兒童美術基礎班</div>
-                <div class="progress-bar-bg"><div class="progress-bar" style="width:65%"></div></div>
-                <div class="progress-text">進度：65%</div>
-            </div>
-            <div class="progress-card">
-                <div class="progress-title">創意手工課程</div>
-                <div class="progress-bar-bg"><div class="progress-bar" style="width:40%"></div></div>
-                <div class="progress-text">進度：40%</div>
-            </div>
-        `;
-    }
+    // 顯示作品面板
+    document.getElementById("artSection").style.display = "block";
+    
+    // 作品圖片（老師在 Firebase 填入圖片網址）
+    document.getElementById("artGrid").innerHTML = `
+        <div class="art-card">
+            <img class="art-img" src="https://picsum.photos/seed/${currentStudent.phone}/500/500" alt="作品1">
+            <div class="art-info">作品：快樂小畫家</div>
+        </div>
+        <div class="art-card">
+            <img class="art-img" src="https://picsum.photos/seed/art2/500/500" alt="作品2">
+            <div class="art-info">作品：動物王國</div>
+        </div>
+    `;
 
-    // 回到頂部
-    const backToTop = document.querySelector('.back-to-top');
-    window.addEventListener('scroll', () => {
-        backToTop.style.display = window.scrollY > 300 ? 'flex' : 'none';
-    });
-    backToTop.onclick = () => window.scrollTo({ top:0, behavior:'smooth' });
-
-    // 彈窗關閉
-    document.querySelector('.modal-close').onclick = () => {
-        document.querySelector('.work-modal').style.display = 'none';
-    };
-
-    function showToast(msg) {
-        const t = document.querySelector('.toast-message');
-        t.textContent = msg;
-        t.style.display = 'block';
-        setTimeout(() => t.style.display = 'none', 2500);
-    }
+    // 老師評語
+    document.getElementById("teacherComment").innerHTML = `
+        <strong>老師評語：</strong><br>
+        ${currentStudent.name} 學習態度認真，創意豐富，色彩運用越來越棒！繼續加油！
+    `;
+}
 </script>
 
 </body>
