@@ -32,7 +32,7 @@
     .absent{background:#e9ecef;color:#6c757d}
     .holiday{background:#d1ecf1;color:#17a2b8}
     .preview{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:90%;max-width:700px;background:white;border-radius:20px;padding:25px;display:none;z-index:9999;box-shadow:0 20px 60px #00000040}
-    .preview img{max-width:100%;max-height:400px;border-radius:12px}
+    .preview img{max-width:100%;max-height:400;border-radius:12px}
     .prev,.next{position:absolute;top:50%;transform:translateY(-50%);font-size:22px;color:white;background:#879acb;padding:10px 16px;border-radius:10px;cursor:pointer}
     .prev{left:15px}
     .next{right:15px}
@@ -129,7 +129,7 @@ async function loadCourse(){
   let arr=[];res.forEach(d=>arr.push({id:d.id,...d.data()}));
   
   const total=arr.length;
-  const completed=arr.filter(x=>x.status==='completed'||x.status==='absent'||x.status==='holiday').length;
+  const completed=arr.filter(x=>x.status==='completed'||x.status==='absent').length;
   const left=total-completed;
   const rate=total>0?Math.round(completed/total*100):0;
   
