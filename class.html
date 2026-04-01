@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MURMUR ART - 家長專區</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "微軟正黑體", sans-serif;
+        }
+        body {
+            background: #f5f7fb;
+            padding: 20px;
+        }
+        .login-panel {
+            max-width: 450px;
+            margin: 50px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(135,154,203,0.15);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .login-title {
+            color: #879acb;
+            margin-bottom: 20px;
+        }
+        .login-input {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 2px solid #e8edff;
+            border-radius: 10px;
+            outline: none;
+        }
+        .login-input:focus {
+            border-color: #879acb;
+        }
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: #879acb;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            margin-top: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .login-btn:hover {
+            background: #6a80b8;
+        }
+        .status {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .success { background: #d4edda; color: #28a745; }
+        .error { background: #f8d7da; color: #dc3545; }
+        
+        /* 作品展示区（优先显示） */
+        .art-section {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 25px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.05);
+            display: none;
+        }
+        .art-section h3 {
+            color:#879acb; 
+            margin-bottom:20px;
+            padding-bottom:10px;
+            border-bottom: 2px solid #f0f4ff;
+        }
+        .art-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+        .art-card {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .art-card:hover {
+            transform: translateY(-5px);
+        }
+        .art-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+        .art-info {
+            padding: 10px;
+            font-size: 14px;
+            background: #f8f9ff;
+        }
+        .teacher-comment {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 4px solid #879acb;
+        }
+        
+        /* 优化后的课程进度区（完整样式） */
+        .course-section {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 25px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.05);
+            display: none;
+        }
+        .course-section h3 {
+            color:#879acb; 
+            margin-bottom:20px;
+            padding-bottom:10px;
+            border-bottom: 2px solid #f0f4ff;
+        }
+        /* 课程卡片容器 */
+        .course-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        /* 单个课程卡片 */
+        .course-card {
+            background: #f8f9ff;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #e8edff;
+            transition: all 0.3s ease;
+        }
+        .course-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(135,154,203,0.1);
+        }
+        .course-card h4 {
+            color: #4a5a88;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+        /* 进度条样式 */
+        .progress-container {
+            margin: 15px 0;
+        }
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #666;
+        }
+        .progress-bar-bg {
+            width: 100%;
+            height: 10px;
+            background: #e8edff;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #879acb, #6a80b8);
+            border-radius: 20px;
+            transition: width 0.8s ease;
+            position: relative;
+        }
+        /* 课程详情文本 */
+        .course-details {
+            margin-top: 12px;
+            font-size: 13px;
+            color: #777;
+            line-height: 1.5;
+        }
+        .course-details span {
+            color: #879acb;
+            font-weight: bold;
+        }
+        /* 已完成/未完成标签 */
+        .course-tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+        .tag-completed {
+            background: #d4edda;
+            color: #28a745;
+        }
+        .tag-progress {
+            background: #fff3cd;
+            color: #ffc107;
+        }
+        
+        /* 隐藏元素 */
+        .hidden {
+            display: none !important;
+        }
+        
+        /* 老师入口链接 */
+        .teacher-link {
+            text-align: center;
+            margin: 20px 0;
+            display: none;
+        }
+        .teacher-link a {
+            color: #879acb;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .teacher-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- 家长登录面板 -->
+<div class="login-panel" id="loginPanel">
+    <h2 class="login-title">家長專區登入</h2>
+    <input class="login-input" id="studentName" placeholder="學生姓名">
+    <input class="login-input" id="studentPhone" placeholder="聯絡電話">
+    <button class="login-btn" onclick="parentLogin()">登入查看孩子資料</button>
+    <div id="loginStatus" class="status"></div>
+</div>
+
+<!-- 老师入口（登录后显示） -->
+<div class="teacher-link" id="teacherLink">
+    <a href="class.html" target="_blank">👩‍🏫 老師管理後台</a>
+</div>
+
+<!-- 孩子作品（优先显示） -->
+<div class="art-section" id="artSection">
+    <h3>🎨 孩子作品</h3>
+    <div class="art-grid" id="artGrid"></div>
+    <div class="teacher-comment" id="teacherComment"></div>
+</div>
+
+<!-- 优化后的课程进度区 -->
+<div class="course-section" id="courseSection">
+    <h3>📚 課程進度</h3>
+    <div id="courseList" class="course-container"></div>
+</div>
+
+<!-- Firebase 核心代码 -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+import { getStorage, ref, listAll, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-storage.js";
+
+// Firebase 配置
+const firebaseConfig = {
+  apiKey: "AIzaSyBqUEh-MjMZ5Gj2gaFJpKffrDmvP9l7Slo",
+  authDomain: "murmurart-8f6cc.firebaseapp.com",
+  projectId: "murmurart-8f6cc",
+  storageBucket: "murmurart-8f6cc.firebasestorage.app",
+  messagingSenderId: "205741159610",
+  appId: "1:205741159610:web:624b7ca35c04e6e09a7e83",
+  measurementId: "G-LRSB35J1KJ"
+};
+
+// 初始化
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const storage = getStorage(app);
+let currentStudent = null;
+
+// 家长登录函数
+window.parentLogin = async function() {
+    const name = document.getElementById("studentName").value.trim();
+    const phone = document.getElementById("studentPhone").value.trim();
+    const status = document.getElementById("loginStatus");
+
+    status.textContent = "";
+    status.className = "status";
+
+    if (!name || !phone) {
+        status.textContent = "請輸入完整資訊";
+        status.className = "status error";
+        return;
+    }
+
+    try {
+        // 查询学生数据
+        const studentRef = doc(db, "students", phone);
+        const snap = await getDoc(studentRef);
+
+        if (!snap.exists()) {
+            status.textContent = "❌ 找不到學生資料，請聯繫老師";
+            status.className = "status error";
+            return;
+        }
+
+        const studentData = snap.data();
+        if (studentData.name !== name) {
+            status.textContent = "❌ 姓名與電話不匹配";
+            status.className = "status error";
+            return;
+        }
+
+        // 登录成功 - 隐藏登录框
+        currentStudent = studentData;
+        document.getElementById("loginPanel").classList.add("hidden");
+        document.getElementById("teacherLink").style.display = "block";
+        status.textContent = `✅ 登入成功！歡迎 ${currentStudent.name} 家長`;
+        status.className = "status success";
+        
+        // 显示数据
+        await showAllData();
+
+    } catch (e) {
+        console.error("登录错误：", e);
+        status.textContent = `❌ 登入失敗：${e.message.substring(0, 50)}`;
+        status.className = "status error";
+    }
+};
+
+// 显示所有数据
+async function showAllData() {
+    // 显示作品和课程区域
+    document.getElementById("artSection").style.display = "block";
+    document.getElementById("courseSection").style.display = "block";
+
+    // 加载学生作品（从Storage读取）
+    await loadStudentArtworks(currentStudent.phone);
+
+    // 渲染完整的课程进度（整合后的样式）
+    renderCourseProgress(currentStudent);
+
+    // 显示老师评语
+    document.getElementById("teacherComment").innerHTML = `
+        <strong>👩‍🏫 老師評語：</strong><br>
+        ${currentStudent.comment || `${currentStudent.name} 學習態度認真，創意豐富，色彩運用越來越棒！繼續加油！`}
+    `;
+}
+
+// 渲染完整的课程进度
+function renderCourseProgress(studentData) {
+    const courseList = document.getElementById("courseList");
+    
+    // 课程数据（可根据实际需求扩展）
+    const courses = [
+        {
+            name: "兒童美術基礎班",
+            progress: studentData.courseProgress || 65,
+            totalLessons: 20,
+            finishedLessons: studentData.finishedCourses || 13,
+            description: "學習基礎色彩搭配、線條描繪、構圖技巧，培養美術基礎能力",
+            status: studentData.courseProgress >= 100 ? "completed" : "progress"
+        },
+        {
+            name: "創意手工課程",
+            progress: studentData.handcraftProgress || 40,
+            totalLessons: 10,
+            finishedLessons: studentData.finishedHandcraft || 4,
+            description: "運用多種材料進行立體創作，鍛鍊手眼協調與空間思維",
+            status: studentData.handcraftProgress >= 100 ? "completed" : "progress"
+        },
+        {
+            name: "水彩創作課程",
+            progress: studentData.watercolorProgress || 25,
+            totalLessons: 12,
+            finishedLessons: studentData.finishedWatercolor || 3,
+            description: "學習水彩暈染、層疊技巧，創作富有層次感的水彩作品",
+            status: studentData.watercolorProgress >= 100 ? "completed" : "progress"
+        }
+    ];
+
+    // 生成课程卡片HTML
+    let courseHTML = "";
+    courses.forEach(course => {
+        const statusText = course.status === "completed" ? "已完成" : "學習中";
+        const tagClass = course.status === "completed" ? "tag-completed" : "tag-progress";
+        
+        courseHTML += `
+            <div class="course-card">
+                <h4>${course.name}</h4>
+                <div class="progress-container">
+                    <div class="progress-label">
+                        <span>完成進度</span>
+                        <span>${course.progress}%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar" style="width:${course.progress}%"></div>
+                    </div>
+                </div>
+                <div class="course-details">
+                    <div>已完成：<span>${course.finishedLessons}</span> 課</div>
+                    <div>總課程：<span>${course.totalLessons}</span> 課</div>
+                    <div>課程說明：${course.description}</div>
+                </div>
+                <div class="course-tag ${tagClass}">${statusText}</div>
+            </div>
+        `;
+    });
+
+    courseList.innerHTML = courseHTML;
+}
+
+// 加载学生作品（从Firebase Storage读取）
+async function loadStudentArtworks(studentPhone) {
+    const artGrid = document.getElementById("artGrid");
+    artGrid.innerHTML = '<div style="text-align:center; padding:20px;">加載作品中...</div>';
+
+    try {
+        // 读取对应学生的作品文件夹
+        const artRef = ref(storage, `artworks/${studentPhone}/`);
+        const result = await listAll(artRef);
+        
+        if (result.items.length === 0) {
+            artGrid.innerHTML = '<div style="text-align:center; padding:20px; color:#666;">暫無作品記錄</div>';
+            return;
+        }
+
+        // 加载所有作品图片
+        let artHTML = '';
+        for (const itemRef of result.items) {
+            const url = await getDownloadURL(itemRef);
+            const fileName = itemRef.name.replace(/\.[^/.]+$/, ""); // 去掉扩展名
+            artHTML += `
+                <div class="art-card">
+                    <img class="art-img" src="${url}" alt="${fileName}">
+                    <div class="art-info">作品：${fileName}</div>
+                </div>
+            `;
+        }
+        artGrid.innerHTML = artHTML;
+
+    } catch (e) {
+        console.error("加载作品失败：", e);
+        artGrid.innerHTML = '<div style="text-align:center; padding:20px; color:#dc3545;">加載作品失敗</div>';
+    }
+}
+
+console.log("✅ 家长端初始化完成");
+</script>
+
+</body>
+</html>
