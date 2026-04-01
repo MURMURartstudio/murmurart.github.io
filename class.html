@@ -15,16 +15,22 @@
     .avatar{width:180px;height:180px;border-radius:50%;border:6px solid #879acb;position:absolute;z-index:10}
     .rotate{width:400px;height:400px;position:relative;animation:r 25s linear infinite}
     @keyframes r{100%{transform:rotate(360deg)}}
-    .art{position:absolute;width:150px;height:150px;border-radius:12px;overflow:hidden}
+    .art{position:absolute;width:150px;height:150px;border-radius:12px;overflow:hidden;cursor:pointer}
     .art img{width:100%;height:100%;object-fit:cover}
     .container{width:90%;max-width:1200px;margin:0 auto}
-    table{width:100%;background:white;border-radius:15px;overflow:hidden}
-    th{background:#879acb;color:white;padding:12px}
-    td{padding:12px;border-bottom:1px solid #e8edff}
-    .badge{padding:5px 10px;border-radius:20px;font-size:12px}
+    .info{background:white;padding:20px;border-radius:15px;margin-bottom:20px;display:flex;justify-content:space-between;text-align:center}
+    .info-item{flex:1}
+    .info-item h3{color:#879acb}
+    .course-card{background:white;padding:16px;border-radius:12px;margin-bottom:10px}
+    .badge{padding:6px 12px;border-radius:20px;font-size:12px}
     .ok{background:#d4edda;color:#28a745}
     .wait{background:#fff3cd;color:#ffc107}
     .leave{background:#f8d7da;color:#dc3545}
+    .preview{position:fixed;top:0;left:0;width:100%;height:100%;background:#000000ee;display:none;justify-content:center;align-items:center;z-index:9999}
+    .preview img{max-width:90%;max-height:90%;border-radius:10px}
+    .prev,.next{position:absolute;top:50%;transform:translateY(-50%);font-size:30px;color:white;background:#879acb;padding:10px 20px;border-radius:10px;cursor:pointer}
+    .prev{left:20px}
+    .next{right:20px}
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -48,13 +54,18 @@
       <div class="rotate" id="r"></div>
     </div>
   </div>
+
   <div id="p2" style="display:none">
     <h2 style="text-align:center;color:#879acb;margin:20px 0">📋 課程進度</h2>
-    <table>
-      <thead><tr><th>日期</th><th>時間</th><th>主題</th><th>狀態</th></tr></thead>
-      <tbody id="list"></tbody>
-    </table>
+    <div class="info" id="info"></div>
+    <div id="courseList"></div>
   </div>
+</div>
+
+<div class="preview" id="preview" onclick="closePrev()">
+  <div class="prev" onclick="prevImg()">&lt;</div>
+  <img id="previewImg">
+  <div class="next" onclick="nextImg()">&gt;</div>
 </div>
 
 <script>
@@ -63,8 +74,10 @@ if(!firebase.apps.length)firebase.initializeApp(cfg);
 const db=firebase.firestore();
 const params=new URLSearchParams(location.search);
 const uid=params.get('sid');
-
 if(!uid)location.href='index.html';
+
+let artList=[];
+let currentImg=0;
 
 window.onload=()=>{loadArt();loadCourse();sh(1)}
 
@@ -73,25 +86,51 @@ function sh(x){
   document.getElementById('p2').style.display=x==2?'block':'none';
 }
 
+function closePrev(){document.getElementById('preview').style.display='none'}
+function prevImg(){event.stopPropagation();currentImg=(currentImg-1+artList.length)%artList.length;document.getElementById('previewImg').src=artList[currentImg].imageUrl}
+function nextImg(){event.stopPropagation();currentImg=(currentImg+1)%artList.length;document.getElementById('previewImg').src=artList[currentImg].imageUrl}
+
 async function loadArt(){
   const wrap=document.getElementById('r');wrap.innerHTML='';
+  const s=await db.collection('students').doc(uid).get();
+  document.getElementById('avt').src=s.data().avatar||'https://via.placeholder.com/200';
   const res=await db.collection('artworks').where('studentId','==',uid).get();
-  let a=0;const step=360/res.size;
-  res.forEach(d=>{
-    const art=d.data();
-    wrap.innerHTML+=`<div class="art" style="transform:rotate(${a}deg) translate(200px) rotate(${-a}deg)"><img src="${art.imageUrl}"></div>`;
+  artList=[];res.forEach(d=>artList.push({...d.data()}));
+  let a=0;const step=360/artList.length;
+  artList.forEach((d,i)=>{
+    wrap.innerHTML+=`<div class="art" style="transform:rotate(${a}deg) translate(200px) rotate(${-a}deg)" onclick="showPrev(${i})"><img src="${d.imageUrl}"></div>`;
     a+=step;
   })
 }
+function showPrev(i){currentImg=i;document.getElementById('previewImg').src=artList[i].imageUrl;document.getElementById('preview').style.display='flex'}
 
 async function loadCourse(){
-  const b=document.getElementById('list');b.innerHTML='';
-  const r=await db.collection('courses').where('studentId','==',uid).get();
+  const list=document.getElementById('courseList');list.innerHTML='';
+  const res=await db.collection('courses').where('studentId','==',uid).get();
   const map={pending:"wait",completed:"ok",leave:"leave"};
   const name={pending:"未完成",completed:"已完成",leave:"請假"};
-  r.forEach(d=>{
-    const c=d.data();
-    b.innerHTML+=`<tr><td>${c.date}</td><td>${c.time}</td><td>${c.theme}</td><td><span class="badge ${map[c.status]}">${name[c.status]}</span></td></tr>`;
+  let arr=[];res.forEach(d=>arr.push({id:d.id,...d.data()}));
+  
+  const total=arr.length;
+  const completed=arr.filter(x=>x.status==='completed').length;
+  const left=total-completed;
+  const rate=total>0?Math.round(completed/total*100):0;
+  
+  document.getElementById('info').innerHTML=`
+  <div class="info-item"><h3>總課程</h3><h2>${total}</h2></div>
+  <div class="info-item"><h3>已完成</h3><h2>${completed}</h2></div>
+  <div class="info-item"><h3>剩餘</h3><h2>${left}</h2></div>
+  <div class="info-item"><h3>完成率</h3><h2>${rate}%</h2></div>
+  `;
+
+  arr.sort((a,b)=>{
+    if(a.status==='completed')return -1;
+    if(b.status==='completed')return 1;
+    return new Date(a.date)-new Date(b.date);
+  });
+  
+  arr.forEach(c=>{
+    list.innerHTML+=`<div class="course-card"><div style="display:flex;justify-content:space-between"><div>${c.date} ${c.time}</div><span class="badge ${map[c.status]}">${name[c.status]}</span></div><div style="margin-top:5px">${c.note||'無備註'}</div></div>`;
   })
 }
 </script>
