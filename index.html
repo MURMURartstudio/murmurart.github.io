@@ -142,11 +142,12 @@
     <div class="teacher-comment" id="teacherComment"></div>
 </div>
 
-<!-- ====================== 唯一一段 Firebase 程式 ====================== -->
+<!-- 修复：把所有代码放在同一个 module 里 -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
+// 初始化 Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyBqUEh-MjMZ5Gj2gaFJpKffrDmvP9l7Slo",
   authDomain: "murmurart-8f6cc.firebaseapp.com",
@@ -159,17 +160,21 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-window.db = db;
-</script>
 
-<script>
+// 全局变量
 let currentStudent = null;
 
-async function parentLogin() {
+// 登录函数（放到 module 里）
+window.parentLogin = async function() {
     const name = document.getElementById("studentName").value.trim();
     const phone = document.getElementById("studentPhone").value.trim();
     const status = document.getElementById("loginStatus");
 
+    // 清空状态
+    status.textContent = "";
+    status.className = "status";
+
+    // 验证输入
     if (!name || !phone) {
         status.textContent = "請輸入完整資訊";
         status.className = "status error";
@@ -177,50 +182,78 @@ async function parentLogin() {
     }
 
     try {
+        // 查詢學生資料（重点：phone 是字符串，和你的 Document ID 一致）
         const studentRef = doc(db, "students", phone);
         const snap = await getDoc(studentRef);
 
+        // 检查是否存在
         if (!snap.exists()) {
             status.textContent = "❌ 找不到學生資料，請聯繫老師";
             status.className = "status error";
             return;
         }
 
-        currentStudent = snap.data();
+        // 检查姓名是否匹配
+        const studentData = snap.data();
+        if (studentData.name !== name) {
+            status.textContent = "❌ 姓名與電話不匹配";
+            status.className = "status error";
+            return;
+        }
+
+        // 登录成功
+        currentStudent = studentData;
         status.textContent = `✅ 登入成功！歡迎 ${currentStudent.name} 家長`;
         status.className = "status success";
         showAllData();
 
     } catch (e) {
-        status.textContent = "❌ 登入失敗";
+        console.error("登录错误：", e); // 方便排查
+        status.textContent = `❌ 登入失敗：${e.message}`;
         status.className = "status error";
     }
-}
+};
 
+// 显示数据函数
 function showAllData() {
     document.getElementById("courseSection").style.display = "block";
     document.getElementById("artSection").style.display = "block";
 
+    // 課程進度
     document.getElementById("courseList").innerHTML = `
         <div class="progress-card">
             <div>兒童美術基礎班</div>
             <div class="progress-bar-bg"><div class="progress-bar" style="width:65%"></div></div>
             <div>進度：65%</div>
         </div>
-    `;
-
-    document.getElementById("artGrid").innerHTML = `
-        <div class="art-card">
-            <img class="art-img" src="https://picsum.photos/seed/${currentStudent.phone}/500/500">
-            <div class="art-info">作品：快樂小畫家</div>
+        <div class="progress-card">
+            <div>創意手工課程</div>
+            <div class="progress-bar-bg"><div class="progress-bar" style="width:40%"></div></div>
+            <div>進度：40%</div>
         </div>
     `;
 
+    // 作品展示
+    document.getElementById("artGrid").innerHTML = `
+        <div class="art-card">
+            <img class="art-img" src="https://picsum.photos/seed/${currentStudent.phone}/500/500" alt="作品1">
+            <div class="art-info">作品：快樂小畫家</div>
+        </div>
+        <div class="art-card">
+            <img class="art-img" src="https://picsum.photos/seed/art2/500/500" alt="作品2">
+            <div class="art-info">作品：動物王國</div>
+        </div>
+    `;
+
+    // 老師評語
     document.getElementById("teacherComment").innerHTML = `
         <strong>老師評語：</strong><br>
-        ${currentStudent.comment || '表現優秀，繼續加油！'}
+        ${currentStudent.comment || `${currentStudent.name} 學習態度認真，創意豐富，繼續加油！`}
     `;
 }
+
+// 初始化完成提示
+console.log("✅ Firebase 初始化完成，可登录");
 </script>
 
 </body>
