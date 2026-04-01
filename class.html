@@ -6,107 +6,185 @@
   <link rel="icon" href="favicon.png">
   <title>MURMUR ART 課程進度</title>
   <style>
-    *{margin:0;padding:0;box-sizing:border-box;font-family:微軟正黑體,"Noto Sans TC"}
-    body{background:linear-gradient(120deg,#fdfbf7,#f0e9ff);color:#444;padding:20px}
-    .container{max-width:800px;margin:0 auto}
-    .card{background:white;border-radius:20px;padding:25px;margin-bottom:20px;box-shadow:0 4px 12px rgba(0,0,0,0.05)}
-    .avatar{width:100px;height:100px;border-radius:50%;border:5px solid #879acb}
-    .badge{padding:6px 12px;border-radius:20px;font-size:12px;margin-right:5px}
+    *{margin:0;padding:0;box-sizing:border-box;font-family:微軟正黑體,"Noto Sans TC";transition:all 0.25s ease}
+    body{background:linear-gradient(120deg,#fdfbf7,#f0e9ff);color:#444}
+    .container{width:90%;max-width:1200px;margin:0 auto}
+    .navbar{background:rgba(255,255,255,.95);backdrop-filter:blur(12px);padding:16px 0;position:sticky;top:0;z-index:99}
+    .nav{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+    .logo{font-size:26px;color:#879acb;font-weight:bold}
+    .menu{display:flex;gap:16px}
+    .menu a{color:#555;text-decoration:none;cursor:pointer;padding:4px 2px}
+    .menu a:hover{color:#879acb}
+    .card{background:white;border-radius:24px;padding:30px;margin:20px 0;box-shadow:0 4px 12px #0000000a}
+    .avatar{width:120px;height:120px;border-radius:50%;border:6px solid #879acb;display:block;margin:0 auto}
+    .stats{background:white;padding:20px;border-radius:16px;display:flex;gap:15px;text-align:center;margin:15px 0}
+    .stat{flex:1}
+    table{width:100%;background:white;border-radius:16px;overflow:hidden;margin-top:20px}
+    th{background:#879acb;color:white;padding:16px;text-align:left}
+    td{padding:16px;border-bottom:1px solid #e8edff}
+    .badge{padding:7px 13px;border-radius:20px;font-size:13px}
     .ok{background:#d4edda;color:#28a745}
     .wait{background:#fff3cd;color:#ffc107}
     .leave{background:#f8d7da;color:#dc3545}
-    .holiday{background:#d1ecf1;color:#17a2b8}
     .absent{background:#e9ecef;color:#6c757d}
-    .stats{display:flex;gap:15px;margin:15px 0}
-    .stat{flex:1;background:#f8f9ff;padding:15px;border-radius:12px;text-align:center}
-    table{width:100%;border-collapse:collapse;background:white;border-radius:12px;overflow:hidden}
-    th{background:#879acb;color:white;padding:12px;text-align:left}
-    td{padding:12px;border-bottom:1px solid #eee}
-    .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:20px}
-    .art{border-radius:12px;overflow:hidden}
-    .art img{width:100%;height:160px;object-fit:cover}
-    .title{color:#879acb;margin-bottom:10px}
+    .holiday{background:#d1ecf1;color:#17a2b8}
+    .gallery{position:relative;width:100%;height:500px;display:flex;justify-content:center;align-items:center;margin:30px 0}
+    .round-ava{width:180px;height:180px;border-radius:50%;border:8px solid #879acb;position:absolute;z-index:10}
+    .rotate{width:400px;height:400px;position:relative;animation:r 25s linear infinite}
+    @keyframes r{100%{transform:rotate(360deg)}}
+    .art{position:absolute;width:140px;height:140px;border-radius:14px;overflow:hidden;box-shadow:0 8px 20px #00000020;cursor:pointer}
+    .art img{width:100%;height:100%;object-fit:cover}
+    .title{font-size:20px;color:#879acb;margin-bottom:15px;font-weight:bold}
+    .center{text-align:center;margin-bottom:20px}
+    .preview{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:90%;max-width:800px;background:white;border-radius:20px;padding:25px;display:none;z-index:9999}
+    .preview img{max-width:100%;max-height:500px;border-radius:12px}
+    .prev,.next{position:absolute;top:50%;transform:translateY(-50%);font-size:24px;color:white;background:#879acb;padding:10px 18px;border-radius:10px;cursor:pointer}
+    .prev{left:15px}
+    .next{right:15px}
+    .close{position:absolute;top:18px;right:18px;font-size:22px;cursor:pointer;color:#777}
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
+
+<div class="navbar">
+  <div class="container nav">
+    <div class="logo">🎨 MURMUR ART</div>
+    <div class="menu">
+      <a onclick="showPage(1)">📊 課程進度</a>
+      <a onclick="showPage(2)">🎨 學生作品</a>
+    </div>
+  </div>
+</div>
+
 <div class="container">
-  <div class="card" style="text-align:center">
+  <div class="card center">
     <img id="avatar" class="avatar">
-    <h2 id="name" style="margin:10px 0"></h2>
-    <p id="phone"></p>
+    <h2 id="name" style="margin-top:15px"></h2>
+    <p id="phone" style="margin-top:5px;color:#666"></p>
   </div>
 
-  <div class="card">
-    <h3 class="title">課程進度</h3>
+  <!-- 課程進度頁 -->
+  <div id="page1" class="card">
+    <div class="title">📊 課程進度</div>
     <div class="stats" id="stats"></div>
     <table>
       <thead>
-        <tr><th>日期</th><th>時間</th><th>狀態</th><th>備註</th></tr>
+        <tr>
+          <th>日期</th>
+          <th>時間</th>
+          <th>狀態</th>
+          <th>備註</th>
+        </tr>
       </thead>
       <tbody id="courseList"></tbody>
     </table>
   </div>
 
-  <div class="card">
-    <h3 class="title">作品</h3>
-    <div class="gallery" id="artList"></div>
+  <!-- 作品頁 -->
+  <div id="page2" class="card" style="display:none">
+    <div class="title">🎨 學生作品</div>
+    <div class="gallery">
+      <img class="round-ava" id="ava">
+      <div class="rotate" id="rot"></div>
+    </div>
   </div>
+</div>
+
+<!-- 預覽大圖 -->
+<div class="preview" id="preview">
+  <span class="close" onclick="closePreview()">&times;</span>
+  <div class="prev" onclick="prevImg()">&lt;</div>
+  <img id="pImg">
+  <div class="next" onclick="nextImg()">&gt;</div>
 </div>
 
 <script>
 const firebaseConfig = {
   apiKey:"AIzaSyBqUEh-MjMZ5Gj2gaFJpKffrDmvP9l7Slo",
   authDomain:"murmurart-8f6cc.firebaseapp.com",
-  projectId:"murmurart-8f6cc"
+  projectId:"murmurart-8f6cc",
+  messagingSenderId:"205741159610",
+  appId:"1:205741159610:web:624b7ca35c04e6e09a7e83"
 };
+
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const params = new URLSearchParams(location.search);
 const sid = params.get('sid');
 
+let arts = [];
+let currentIdx = 0;
+
+function getWeek(d){const w=['日','一','二','三','四','五','六'];return w[new Date(d).getDay()]}
+function formatTime(t){if(!t)return'';const [h,m]=t.split(':');const min=h*60+parseInt(m)+75;const eh=Math.floor(min/60),em=min%60;return `${t} - ${String(eh).padStart(2,0)}:${String(em).padStart(2,0)}`;}
+
+function showPage(n){
+  document.getElementById('page1').style.display = n===1 ? 'block' : 'none';
+  document.getElementById('page2').style.display = n===2 ? 'block' : 'none';
+}
+
 async function load(){
   const stu = await db.collection('students').doc(sid).get();
   const s = stu.data();
-  document.getElementById('name').innerText = s.name;
-  document.getElementById('phone').innerText = s.parentPhone;
-  document.getElementById('avatar').src = s.avatar || 'https://via.placeholder.com/100';
+  document.getElementById('name').innerText = s.name || '未設定';
+  document.getElementById('phone').innerText = s.parentPhone || '未設定';
+  document.getElementById('avatar').src = s.avatar || 'https://via.placeholder.com/120';
+  document.getElementById('ava').src = s.avatar || 'https://via.placeholder.com/180';
 
+  // 載入課程
   const courses = await db.collection('courses').where('studentId','==',sid).get();
   const list = [];
   courses.forEach(d => list.push({id:d.id,...d.data()}));
-  
+
   const valid = list.filter(c => !['leave','holiday'].includes(c.status));
   const total = valid.length;
   const ok = valid.filter(c => c.status === 'completed' || c.status === 'absent').length;
   const left = total - ok;
 
   document.getElementById('stats').innerHTML = `
-<div class="stat"><h4>總課</h4><h2>${total}</h2></div>
-<div class="stat"><h4>已完成</h4><h2>${ok}</h2></div>
-<div class="stat"><h4>剩餘</h4><h2>${left}</h2></div>
+<div class="stat"><h3>總課程</h3><h2>${total}</h2></div>
+<div class="stat"><h3>已完成</h3><h2>${ok}</h2></div>
+<div class="stat"><h3>剩餘</h3><h2>${left}</h2></div>
 `;
 
   const tbody = document.getElementById('courseList');
   const map = {pending:'wait',completed:'ok',leave:'leave',holiday:'holiday',absent:'absent'};
   const txt = {pending:'未完成',completed:'已完成',leave:'請假',holiday:'公眾假期',absent:'缺席'};
+  list.sort((a,b)=>new Date(a.date)-new Date(b.date));
   list.forEach(c => {
     tbody.innerHTML += `<tr>
-<td>${c.date}</td>
-<td>${c.time}</td>
+<td>${c.date}（${getWeek(c.date)}）</td>
+<td>${formatTime(c.time)}</td>
 <td><span class="badge ${map[c.status]}">${txt[c.status]}</span></td>
-<td>${c.note || ''}</td>
+<td>${c.note || '-'}</td>
 </tr>`;
   });
 
-  const arts = await db.collection('artworks').where('studentId','==',sid).get();
-  const artHtml = document.getElementById('artList');
-  arts.forEach(d => {
-    const a = d.data();
-    artHtml.innerHTML += `<div class="art"><img src="${a.imageUrl}"></div>`;
+  // 載入旋轉作品
+  const artsSnap = await db.collection('artworks').where('studentId','==',sid).get();
+  arts = [];
+  const rot = document.getElementById('rot');
+  rot.innerHTML = '';
+  artsSnap.forEach(d => arts.push({id:d.id,...d.data()}));
+  let angle = 0;
+  const step = 360 / arts.length;
+  arts.forEach((item,i) => {
+    rot.innerHTML += `<div class="art" style="transform:rotate(${angle}deg) translate(200px) rotate(${-angle}deg)" onclick="view(${i})"><img src="${item.imageUrl}"></div>`;
+    angle += step;
   });
 }
+
+function view(i){
+  currentIdx = i;
+  document.getElementById('pImg').src = arts[i].imageUrl;
+  document.getElementById('preview').style.display = 'block';
+}
+function closePreview(){ document.getElementById('preview').style.display = 'none'; }
+function prevImg(){ currentIdx = (currentIdx - 1 + arts.length) % arts.length; view(currentIdx); }
+function nextImg(){ currentIdx = (currentIdx + 1) % arts.length; view(currentIdx); }
+
 load();
 </script>
 </body>
