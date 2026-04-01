@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MURMUR ART - 登入頁</title>
+  <title>MURMUR ART ✨</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;font-family:微軟正黑體;transition:all 0.25s ease}
-    body{background:linear-gradient(120deg,#f5f7fb,#e8edff);background-size:200% 200%;animation:bg 15s infinite;color:#444}
+    body{background:linear-gradient(120deg,#f5f7fb,#e8edff);background-size:200% 200%;animation:bg 16s infinite;color:#444}
     @keyframes bg{0%{background-position:0 50%}50%{background-position:100% 50%}100%{background-position:0 50%}}
     .container{width:90%;max-width:1200px;margin:0 auto;padding:20px 0}
     .login{display:flex;justify-content:center;align-items:center;height:100vh;padding:20px}
@@ -40,7 +40,7 @@
     .art img{width:100%;height:100%;object-fit:cover}
     .modal{position:fixed;top:0;left:0;width:100%;height:100%;background:#000000dd;display:none;justify-content:center;align-items:center;padding:20px;z-index:999}
     .modal .box{background:white;border-radius:20px;padding:35px;max-width:520px;width:100%;position:relative}
-    .close{position:absolute;top:18px;right:18px;font-size:22px;cursor:pointer;color:#777}
+    .close{position:absolute;top:18px;right:18px;font-size:22px;cursor-pointer;color:#777}
     .add{position:fixed;bottom:35px;right:35px;width:65px;height:65px;border-radius:50%;background:#879acb;color:white;font-size:28px;display:flex;align-items:center;justify-content:center;cursor:pointer}
     .add:hover{transform:scale(1.08);box-shadow:0 8px 20px #879acb60}
     table{width:100%;background:white;border-radius:16px;overflow:hidden;margin-top:20px;box-shadow:0 5px 15px #00000010}
@@ -50,6 +50,7 @@
     .ok{background:#d4edda;color:#28a745}
     .wait{background:#fff3cd;color:#ffc107}
     .leave{background:#f8d7da;color:#dc3545}
+    .absent{background:#e9ecef;color:#6c757d}
     .course-package{display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap}
     .package-btn{padding:10px 14px;background:#e8edff;border:none;border-radius:8px;cursor:pointer}
     .package-btn.active{background:#879acb;color:white}
@@ -61,6 +62,10 @@
     .search{width:100%;padding:12px;border:2px solid #e8edff;border-radius:12px;margin-bottom:15px}
     .art-info{margin-top:15px;text-align:left}
     .art-info p{margin:5px 0;color:#555}
+    .stats{background:white;padding:20px;border-radius:16px;display:flex;gap:15px;text-align:center;margin:15px 0;box-shadow:0 5px 15px #00000010}
+    .stat{flex:1}
+    .check-btn{background:#28a745;color:white;padding:8px 12px;border:none;border-radius:8px;margin-right:5px}
+    .batch-bar{margin:10px 0;padding:10px;background:#f8f9ff;border-radius:12px}
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -69,10 +74,10 @@
 
 <div id="loginPage" class="login">
   <div class="card">
-    <div class="title">MURMUR ART 登入</div>
+    <div class="title">✨ MURMUR ART 登入</div>
     <div class="tabs">
-      <div class="tab active" onclick="switchTab('parent')">家長</div>
-      <div class="tab" onclick="switchTab('teacher')">老師</div>
+      <div class="tab active" onclick="switchTab('parent')">👨‍👩‍👧‍👦 家長</div>
+      <div class="tab" onclick="switchTab('teacher')">👩‍🏫 老師</div>
     </div>
 
     <div id="parentLogin">
@@ -91,12 +96,12 @@
 <div id="main" style="display:none">
   <div class="navbar">
     <div class="container nav">
-      <div class="logo">MURMUR ART - 老師後台</div>
+      <div class="logo">🎨 MURMUR ART - 老師後台</div>
       <div class="menu">
-        <a onclick="show(1)">學生管理</a>
-        <a onclick="show(2)">作品管理</a>
-        <a onclick="show(3)">課程管理</a>
-        <a onclick="logout()">登出</a>
+        <a onclick="show(1)">👩‍🎓 學生管理</a>
+        <a onclick="show(2)">🖼️ 作品管理</a>
+        <a onclick="show(3)">📅 課程管理</a>
+        <a onclick="logout()">🚪 登出</a>
       </div>
     </div>
   </div>
@@ -110,7 +115,7 @@
     </div>
 
     <div id="page2" style="display:none">
-      <h2 style="color:#879acb;margin-bottom:10px">🎨 作品管理</h2>
+      <h2 style="color:#879acb;margin-bottom:10px">🖼️ 作品管理</h2>
       <select class="input" id="selectStudentForArt" onchange="switchArtStudent()"></select>
       <div class="gallery" id="gallery">
         <img class="avatar" id="mainAvatar" src="https://via.placeholder.com/200">
@@ -122,14 +127,26 @@
     <div id="page3" style="display:none">
       <h2 style="color:#879acb;margin-bottom:10px">📅 課程管理</h2>
       <select class="input" id="selectStudentForCourse" onchange="switchCourseStudent()"></select>
+      <input class="search" id="searchCourse" placeholder="🔍 搜尋學生編號" oninput="searchCourse()">
       <button class="btn" style="width:auto;padding:8px 15px" onclick="addCourse()">+ 新增 / 產生課程</button>
+      
+      <div class="stats" id="courseStats"></div>
+      
+      <div class="batch-bar">
+        <small>🔄 批量操作：</small>
+        <button class="check-btn" onclick="batchSet('completed')">✔️ 標記已完成</button>
+        <button class="check-btn" onclick="batchSet('leave')">🏖️ 請假</button>
+        <button class="check-btn" onclick="batchSet('absent')">🚫 缺席</button>
+      </div>
+
       <table>
         <thead>
           <tr>
+            <th><input type="checkbox" id="checkAll"></th>
             <th>日期</th>
             <th>時間</th>
             <th>狀態</th>
-            <th>備註</th>
+            <th>備註/補課</th>
             <th>操作</th>
           </tr>
         </thead>
@@ -142,7 +159,7 @@
 <div class="modal" id="stuModal">
   <div class="box">
     <span class="close" onclick="closeAll()">&times;</span>
-    <h3>學生資料</h3>
+    <h3>👤 學生資料</h3>
     <input class="input" id="sname" placeholder="姓名">
     <input class="input" id="sno" placeholder="學生編號">
     <input class="input" id="sphone" placeholder="家長電話">
@@ -154,7 +171,7 @@
 <div class="modal" id="artModal">
   <div class="box">
     <span class="close" onclick="closeAll()">&times;</span>
-    <h3>上傳作品</h3>
+    <h3>🖼️ 上傳作品</h3>
     <select class="input" id="artStudentSelect"></select>
     <input class="input" id="img" placeholder="圖片網址">
     <input class="input" id="cdate" type="date">
@@ -166,19 +183,20 @@
 <div class="modal" id="courseModal">
   <div class="box">
     <span class="close" onclick="closeAll()">&times;</span>
-    <h3>課程</h3>
+    <h3>📅 課程</h3>
     <select class="input" id="courseStudentSelect"></select>
     <input class="input" type="date" id="cday">
     <input class="input" type="time" step="300" id="ctime" onchange="calcEndTime()">
     <div id="endTimeShow" style="margin:-10px 0 15px;color:#879acb"></div>
-    <textarea class="input" id="cnote" placeholder="備註"></textarea>
+    <textarea class="input" id="cnote" placeholder="備註 / 補課時間"></textarea>
     <select class="input" id="cstatus">
-      <option>pending</option>
-      <option>completed</option>
-      <option>leave</option>
+      <option value="pending">⏳ 未完成</option>
+      <option value="completed">✔️ 已完成</option>
+      <option value="leave">🏖️ 請假</option>
+      <option value="absent">🚫 缺席</option>
     </select>
     <div style="margin-top:10px">
-      <small>一鍵產生課程：</small>
+      <small>🔄 一鍵產生課程：</small>
       <div class="course-package">
         <div class="package-btn" onclick="quickPackage(4)">4堂</div>
         <div class="package-btn" onclick="quickPackage(12)">12堂</div>
@@ -194,8 +212,9 @@
   <div class="prev" onclick="prevImg()">&lt;</div>
   <img id="previewImg">
   <div class="art-info">
-    <p><strong>日期：</strong><span id="pDate"></span></p>
-    <p><strong>備註：</strong><span id="pNote"></span></p>
+    <p><strong>🗓️ 日期：</strong><span id="pDate"></span></p>
+    <p><strong>📝 備註：</strong><span id="pNote"></span></p>
+    <button class="btn" style="background:#dc3545" onclick="deleteCurrentArt()">🗑️ 刪除作品</button>
   </div>
   <div class="next" onclick="nextImg()">&gt;</div>
 </div>
@@ -210,6 +229,7 @@ let currentCourseId = null;
 let studentList = [];
 let artList = [];
 let currentImg = 0;
+let courseRaw = [];
 
 function switchTab(role) {
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
@@ -336,9 +356,17 @@ function showPreview(i){
   document.getElementById('pNote').textContent=item.note||'無';
   document.getElementById('preview').style.display='block';
 }
+async function deleteCurrentArt(){
+  if(!confirm('確定刪除作品？'))return;
+  const id=artList[currentImg].id;
+  await db.collection('artworks').doc(id).delete();
+  closeAll();loadArtList();
+}
 function prevImg(){event.stopPropagation();currentImg=(currentImg-1+artList.length)%artList.length;showPreview(currentImg)}
 function nextImg(){event.stopPropagation();currentImg=(currentImg+1)%artList.length;showPreview(currentImg)}
 
+function getWeek(d){const w=['日','一','二','三','四','五','六'];return w[new Date(d).getDay()]}
+function formatTime(t){const [h,m]=t.split(':');const min=h*60+parseInt(m)+75;const eh=Math.floor(min/60),em=min%60;return `${t} - ${String(eh).padStart(2,0)}:${String(em).padStart(2,0)}`}
 function calcEndTime(){
   const t=document.getElementById('ctime').value;
   if(!t)return;
@@ -348,22 +376,63 @@ function calcEndTime(){
   document.getElementById('endTimeShow').textContent=`結束時間：${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}`;
 }
 
+function searchCourse(){
+  const kw=document.getElementById('searchCourse').value.toLowerCase();
+  const st=studentList.find(s=>s.studentNo&&s.studentNo.toLowerCase().includes(kw));
+  if(st)switchCourseStudentById(st.id);
+  else renderCourseList(courseRaw);
+}
+function switchCourseStudentById(id){currentStudentId=id;loadCourseList();}
 function switchCourseStudent(){currentStudentId=document.getElementById('selectStudentForCourse').value;loadCourseList();}
+
 async function loadCourseList(){
   if(!currentStudentId)return;
-  const b=document.getElementById('courseList');b.innerHTML='';
   const courses=await db.collection('courses').where('studentId','==',currentStudentId).get();
-  const t={pending:'wait',completed:'ok',leave:'leave'},n={pending:'未完成',completed:'已完成',leave:'請假'};
-  let arr=[];courses.forEach(d=>arr.push({id:d.id,...d.data()}));
-  arr.sort((a,b)=>{
-    if(a.status==='completed')return -1;
-    if(b.status==='completed')return 1;
-    return new Date(a.date)-new Date(b.date);
-  });
-  arr.forEach(c=>{
-    b.innerHTML+=`<tr><td>${c.date}</td><td>${c.time}</td><td><span class="badge ${t[c.status]}">${n[c.status]}</span></td><td>${c.note||'-'}</td><td><button onclick="editCourse('${c.id}')" style="background:#ffc107;color:white;padding:6px 10px;border:none;border-radius:6px;cursor:pointer">修改</button> <button onclick="delCourse('${c.id}')" style="background:#dc3545;color:white;padding:6px 10px;border:none;border-radius:6px;cursor:pointer">刪除</button></td></tr>`;
+  courseRaw=[];courses.forEach(d=>courseRaw.push({id:d.id,...d.data()}));
+  renderCourseList(courseRaw);
+  updateStats();
+}
+
+function updateStats(){
+  const total=courseRaw.length;
+  const ok=courseRaw.filter(c=>c.status==='completed'||c.status==='leave').length;
+  const left=total-ok;
+  const rate=total?Math.round(ok/total*100):0;
+  document.getElementById('courseStats').innerHTML=`
+  <div class="stat"><h3>📊 總課程</h3><h2>${total}</h2></div>
+  <div class="stat"><h3>✅ 已完成</h3><h2>${ok}</h2></div>
+  <div class="stat"><h3>⏳ 剩餘</h3><h2>${left}</h2></div>
+  <div class="stat"><h3>🎯 完成率</h3><h2>${rate}%</h2></div>
+  `;
+}
+
+function renderCourseList(arr){
+  const b=document.getElementById('courseList');b.innerHTML='';
+  const map={pending:'wait',completed:'ok',leave:'leave',absent:'absent'};
+  const txt={pending:'⏳ 未完成',completed:'✔️ 已完成',leave:'🏖️ 請假',absent:'🚫 缺席'};
+  arr.sort((a,b)=>new Date(a.date)-new Date(b.date)).forEach(c=>{
+    b.innerHTML+=`<tr>
+      <td><input type="checkbox" class="courseCheck" data-id="${c.id}"></td>
+      <td>${c.date}（${getWeek(c.date)}）</td>
+      <td>${formatTime(c.time)}</td>
+      <td><span class="badge ${map[c.status]}">${txt[c.status]}</span></td>
+      <td>${c.note||'-'}</td>
+      <td>
+        <button onclick="editCourse('${c.id}')" style="background:#ffc107;padding:6px 10px;border:none;border-radius:6px;color:white">修改</button>
+        <button onclick="delCourse('${c.id}')" style="background:#dc3545;padding:6px 10px;border:none;border-radius:6px;color:white">刪除</button>
+      </td>
+    </tr>`;
   });
 }
+
+async function batchSet(status){
+  const checks=document.querySelectorAll('.courseCheck:checked');
+  if(checks.length===0)return alert('請選擇課程');
+  if(!confirm('確定批量修改？'))return;
+  for(let cb of checks){await db.collection('courses').doc(cb.dataset.id).update({status})}
+  loadCourseList();
+}
+
 function addCourse(){currentCourseId=null;document.getElementById('cday').valueAsDate=new Date();document.getElementById('ctime').value='';document.getElementById('endTimeShow').textContent='';document.getElementById('cnote').value='';document.getElementById('cstatus').value='pending';document.getElementById('courseModal').style.display='flex'}
 async function saveCourse(){
   const sid=document.getElementById('courseStudentSelect').value;
@@ -371,8 +440,7 @@ async function saveCourse(){
   if(!sid||!d||!t)return alert('填寫完整');
   if(currentCourseId) await db.collection('courses').doc(currentCourseId).update({studentId:sid,date:d,time:t,note:nt,status:s});
   else await db.collection('courses').add({studentId:sid,date:d,time:t,note:nt,status:s});
-  closeAll();
-  loadCourseList();
+  closeAll();loadCourseList();
 }
 function editCourse(id){currentCourseId=id;db.collection('courses').doc(id).get().then(d=>{const c=d.data();document.getElementById('courseStudentSelect').value=c.studentId;document.getElementById('cday').value=c.date;document.getElementById('ctime').value=c.time;calcEndTime();document.getElementById('cnote').value=c.note||'';document.getElementById('cstatus').value=c.status;document.getElementById('courseModal').style.display='flex'})}
 async function delCourse(id){if(!confirm('刪除課程？'))return;await db.collection('courses').doc(id).delete();loadCourseList();}
@@ -389,15 +457,9 @@ async function quickPackage(count){
     const date=dd.toISOString().split('T')[0];
     await db.collection('courses').add({studentId:sid,date,time:startTime,note:'課程',status:'pending'});
   }
-  alert('已產生 '+count+' 堂課');
-  closeAll();
-  loadCourseList();
+  alert('已產生 '+count+' 堂課');closeAll();loadCourseList();
 }
 
-function logout(){location.reload()}
-</script>
-</body>
-</html>
 function logout(){location.reload()}
 </script>
 </body>
