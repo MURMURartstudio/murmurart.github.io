@@ -73,7 +73,8 @@
     .warningItem{background:white;padding:12px;border-radius:10px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.min.js"></script>
 </head>
 <body>
 
@@ -90,7 +91,8 @@
       <button class="btn" onclick="parentLogin()">登入</button>
     </div>
     <div id="teacherLogin" style="display:none">
-      <input class="input" id="pwd" type="password" placeholder="老師密碼">
+      <input class="input" id="email" placeholder="管理者信箱" type="email">
+      <input class="input" id="password" placeholder="管理者密碼" type="password">
       <button class="btn" onclick="teacherLogin()">登入</button>
     </div>
   </div>
@@ -149,7 +151,7 @@
         <button class="check-btn" onclick="batchSet('leave')">請假</button>
         <button class="check-btn" onclick="batchSet('absent')">缺席</button>
         <button class="check-btn" onclick="batchSet('holiday')">公眾假期</button>
-        <button class="del-btn" onclick="batchDeleteCourses()">批量刪除</button>
+        <button class="check-btn" onclick="batchDeleteCourses()">批量刪除</button>
       </div>
       <table>
         <thead>
@@ -185,13 +187,10 @@
       <option value="12堂">12堂</option>
       <option value="24堂">24堂</option>
     </select>
-    <div class="section-title">額外資料</div>
-    <input class="input" id="sidCard" placeholder="身份證">
+    <div class="section-title">基本資料</div>
     <input class="input" id="school" placeholder="學校">
     <input class="input" id="birthYear" placeholder="出生年份">
     <input class="input" id="gender" placeholder="性別">
-    <input class="input" id="address" placeholder="地址">
-    <input class="input" id="familyEmail" placeholder="家人Email">
     <textarea class="input" id="note" placeholder="備註" style="height:80px"></textarea>
     <button class="btn" onclick="saveStu()">儲存</button>
   </div>
@@ -260,7 +259,8 @@ const firebaseConfig = {
 };
 if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-const PWD = "teacher123";
+const auth = firebase.auth();
+
 let currentStudentId = null;
 let currentCourseId = null;
 let studentList = [];
@@ -274,12 +274,20 @@ function switchTab(role) {
   document.getElementById('parentLogin').style.display = role==='parent'?'block':'none';
   document.getElementById('teacherLogin').style.display = role==='teacher'?'block':'none';
 }
-function teacherLogin() {
-  if(document.getElementById('pwd').value!==PWD) return alert('密碼錯誤');
-  document.getElementById('loginPage').style.display='none';
-  document.getElementById('main').style.display='block';
-  loadAllStudents();
+
+async function teacherLogin() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  try {
+    await auth.signInWithEmailAndPassword(email, password);
+    document.getElementById('loginPage').style.display='none';
+    document.getElementById('main').style.display='block';
+    loadAllStudents();
+  } catch(e) {
+    alert("登入失敗");
+  }
 }
+
 async function parentLogin() {
   const name = document.getElementById('pName').value.trim();
   const phone = document.getElementById('pPhone').value.trim().replace(/\s/g,'');
@@ -293,6 +301,15 @@ async function parentLogin() {
   if(!found) return alert('資訊錯誤');
   location.href=`class.html?sid=${found}`;
 }
+
+auth.onAuthStateChanged(user => {
+  if (user) {
+    document.getElementById('loginPage').style.display='none';
+    document.getElementById('main').style.display='block';
+    loadAllStudents();
+  }
+});
+
 function show(n) {
   document.getElementById('page1').style.display=n==1?'block':'none';
   document.getElementById('page9').style.display=n==9?'block':'none';
@@ -350,7 +367,7 @@ async function loadWarningList(){
       w.innerHTML+=`
       <div class="warningItem">
         <div>
-          <strong>${s.name}</strong>｜${s.parentPhone||'-'}｜方案：${s.courseType||'-'}
+          <strong>${s.name}</strong>｜方案：${s.courseType||'-'}
         </div>
         <div style="color:red;font-weight:bold">剩餘 ${s.left} 堂</div>
       </div>`;
@@ -360,9 +377,9 @@ async function loadWarningList(){
 }
 
 function exportCSV(){
-  let csv = "姓名,學生編號,家長電話,課程方案,剩餘堂數,身份證,學校,出生年份,性別,地址,Email,備註\n";
+  let csv = "姓名,學生編號,家長電話,課程方案,剩餘堂數,學校,出生年份,性別,備註\n";
   studentList.forEach(s=>{
-    csv += `"${s.name}","${s.studentNo||''}","${s.parentPhone||''}","${s.courseType||''}","${s.left||0}","${s.idCard||''}","${s.school||''}","${s.birthYear||''}","${s.gender||''}","${s.address||''}","${s.familyEmail||''}","${s.note||''}"\n`;
+    csv += `"${s.name}","${s.studentNo||''}","${s.parentPhone||''}","${s.courseType||''}","${s.left||0}","${s.school||''}","${s.birthYear||''}","${s.gender||''}","${s.note||''}"\n`;
   });
   const blob = new Blob([csv],{type:"text/csv"});
   const url = URL.createObjectURL(blob);
@@ -425,12 +442,9 @@ function addStu(){
   document.getElementById('sphone').value='';
   document.getElementById('savatar').value='';
   document.getElementById('courseType').value='';
-  document.getElementById('sidCard').value='';
   document.getElementById('school').value='';
   document.getElementById('birthYear').value='';
   document.getElementById('gender').value='';
-  document.getElementById('address').value='';
-  document.getElementById('familyEmail').value='';
   document.getElementById('note').value='';
   document.getElementById('stuModal').style.display='flex';
 }
@@ -440,15 +454,12 @@ async function saveStu(){
   const p=document.getElementById('sphone').value;
   const a=document.getElementById('savatar').value;
   const ct=document.getElementById('courseType').value;
-  const idCard=document.getElementById('sidCard').value;
   const school=document.getElementById('school').value;
   const birthYear=document.getElementById('birthYear').value;
   const gender=document.getElementById('gender').value;
-  const address=document.getElementById('address').value;
-  const familyEmail=document.getElementById('familyEmail').value;
   const note=document.getElementById('note').value;
   if(!n||!p)return;
-  const data = {name:n,studentNo:no,parentPhone:p,avatar:a,courseType:ct,idCard,school,birthYear,gender,address,familyEmail,note};
+  const data = {name:n,studentNo:no,parentPhone:p,avatar:a,courseType:ct,school,birthYear,gender,note};
   if(currentStudentId) await db.collection('students').doc(currentStudentId).update(data);
   else await db.collection('students').add({...data,createdAt:new Date()});
   closeAll();
@@ -470,12 +481,9 @@ function editStu(id){
     document.getElementById('sphone').value=s.parentPhone||'';
     document.getElementById('savatar').value=s.avatar||'';
     document.getElementById('courseType').value=s.courseType||'';
-    document.getElementById('sidCard').value=s.idCard||'';
     document.getElementById('school').value=s.school||'';
     document.getElementById('birthYear').value=s.birthYear||'';
     document.getElementById('gender').value=s.gender||'';
-    document.getElementById('address').value=s.address||'';
-    document.getElementById('familyEmail').value=s.familyEmail||'';
     document.getElementById('note').value=s.note||'';
     document.getElementById('stuModal').style.display='flex';
   })
@@ -526,7 +534,7 @@ function calcEndTime(){
   const [h,m]=t.split(':').map(Number);
   const min=h*60+m+75;
   const eh=Math.floor(min/60),em=min%60;
-  document.getElementById('endTimeShow').textContent=`結束時間：${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}`;
+  document.getElementById('endTimeShow').textContent=`結束時間：${String(eh).padStart(2,'0')}:${String(em).padStart(2,0)}`;
 }
 function searchCourse(){
   const kw=document.getElementById('searchCourse').value.toLowerCase();
@@ -535,7 +543,7 @@ function searchCourse(){
   if(st){
     switchCourseStudentById(st.id);
     infoBar.style.display='block';
-    infoBar.innerHTML=`學生：${st.name}｜編號：${st.studentNo||'-'}｜電話：${st.parentPhone||'-'}`;
+    infoBar.innerHTML=`學生：${st.name}｜編號：${st.studentNo||'-'}`;
   }else{
     renderCourseList(courseRaw);
     infoBar.style.display='none';
@@ -657,7 +665,7 @@ async function quickPackage(count){
   }
   alert('已產生 '+count+' 堂課');closeAll();loadCourseList();
 }
-function logout(){location.reload()}
+function logout(){auth.signOut();location.reload()}
 </script>
 </body>
 </html>
