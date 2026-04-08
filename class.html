@@ -8,29 +8,142 @@
     *{margin:0;padding:0;box-sizing:border-box;font-family:微軟正黑體,"Noto Sans TC"}
     body{background:linear-gradient(120deg,#fdfbf7,#f0e9ff);color:#444;padding-bottom:120px}
     .container{width:90%;max-width:800px;margin:0 auto}
-    .header{text-align:center;padding:30px 0}
+
+    /* 導覽列 */
+    .navbar{
+      background:rgba(255,255,255,0.95);
+      backdrop-filter:blur(10px);
+      padding:14px 0;
+      position:sticky;
+      top:0;
+      z-index:99;
+      margin-bottom:20px;
+    }
+    .nav-tabs{
+      display:flex;
+      justify-content:center;
+      gap:10px;
+    }
+    .nav-tab{
+      padding:10px 20px;
+      border-radius:12px;
+      background:#e8edff;
+      color:#666;
+      cursor:pointer;
+      font-weight:bold;
+    }
+    .nav-tab.active{
+      background:#879acb;
+      color:white;
+    }
+
+    .header{text-align:center;padding:10px 0 20px}
     .logo{font-size:32px;color:#879acb;font-weight:bold}
     .student-card{background:white;border-radius:20px;padding:25px;text-align:center;margin-bottom:20px;box-shadow:0 8px 20px #879acb20}
     .student-card img{width:100px;height:100px;border-radius:50%;border:5px solid #879acb;margin-bottom:15px}
     .student-name{font-size:24px;color:#879acb;margin-bottom:8px}
     .info{color:#666;margin:5px 0}
+
+    /* 作品網格 */
     .art-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:20px}
     .art-item{background:white;border-radius:14px;overflow:hidden;box-shadow:0 4px 10px #00000010}
     .art-item img{width:100%;height:160px;object-fit:cover}
+
     .section{margin:30px 0}
     .title{font-size:20px;color:#879acb;margin-bottom:15px}
+
+    /* 課程列表（老師版整齊排版） */
     .course-list{background:white;border-radius:16px;overflow:hidden}
-    .course-item{padding:15px;border-bottom:1px solid #eee}
-    .course-date{color:#879acb;font-weight:bold}
-    .course-status{display:inline-block;padding:5px 10px;border-radius:10px;font-size:12px;color:white;margin-top:5px}
+    .course-item{padding:16px;border-bottom:1px solid #eee}
+    .course-date{
+      color:#879acb;
+      font-weight:bold;
+      margin-bottom:4px;
+    }
+    .course-time{
+      font-size:14px;
+      color:#555;
+      margin-bottom:6px;
+    }
+    .course-status{
+      display:inline-block;
+      padding:5px 10px;
+      border-radius:10px;
+      font-size:12px;
+      font-weight:bold;
+    }
     .ok{background:#d4edda;color:#28a745}
     .wait{background:#fff3cd;color:#ffc107}
     .leave{background:#f8d7da;color:#dc3545}
     .absent{background:#333;color:#fff}
     .holiday{background:#d1ecf1;color:#17a2b8}
-    .preview{position:fixed;top:0;left:0;width:100%;height:100%;background:#000000dd;display:none;justify-content:center;align-items:center;padding:20px;z-index:999}
-    .preview img{max-width:90%;max-height:80vh;border-radius:12px;object-fit:contain;margin:0 auto;display:block}
-    .close{position:absolute;top:20px;right:20px;font-size:30px;color:white;cursor:pointer}
+
+    /* 分頁 */
+    .pagination{
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:10px;
+      margin:20px 0;
+    }
+    .page-btn{
+      padding:8px 14px;
+      background:#e8edff;
+      color:#555;
+      border:none;
+      border-radius:10px;
+      cursor:pointer;
+    }
+    .page-btn.active{
+      background:#879acb;
+      color:white;
+    }
+    .page-info{
+      font-size:14px;
+      color:#666;
+    }
+
+    /* 預覽 + 左右按鈕 */
+    .preview{
+      position:fixed;
+      top:0;left:0;
+      width:100%;height:100%;
+      background:#000000dd;
+      display:none;
+      justify-content:center;
+      align-items:center;
+      padding:20px;
+      z-index:999;
+    }
+    .preview img{
+      max-width:90%;
+      max-height:80vh;
+      border-radius:12px;
+      object-fit:contain;
+      margin:0 auto;
+      display:block
+    }
+    .close{
+      position:absolute;
+      top:20px;right:20px;
+      font-size:30px;
+      color:white;
+      cursor:pointer
+    }
+    .prev,.next{
+      position:absolute;
+      top:50%;
+      transform:translateY(-50%);
+      font-size:24px;
+      background:#879acb;
+      color:white;
+      border:none;
+      border-radius:50%;
+      width:50px;height:50px;
+      cursor:pointer;
+    }
+    .prev{left:20px}
+    .next{right:20px}
     .p-text{color:white;text-align:center;margin-top:10px}
 
     /* 續費提醒 */
@@ -63,51 +176,78 @@
       margin-bottom:15px;
     }
     .social a{
-      padding:10px 14px;
-      border-radius:10px;
+      width:44px;
+      height:44px;
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
       color:white;
       text-decoration:none;
       font-weight:bold;
+      font-size:16px;
     }
-    .ig{background:#E4405F}
-    .fb{background:#1877F2}
-    .wa{background:#25D366}
+    .ig{background:#bfa3cd}
+    .fb{background:#879acb}
+    .wa{background:#a1c8b5}
     .rule{
       font-size:13px;
       color:#666;
       line-height:1.5;
     }
+
+    /* 頁面切換 */
+    .page{display:none}
+    .page.active{display:block}
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
+<div class="navbar">
+  <div class="container nav-tabs">
+    <div class="nav-tab active" onclick="goPage(1)">學生資料 & 作品</div>
+    <div class="nav-tab" onclick="goPage(2)">課程進度</div>
+  </div>
+</div>
+
 <div class="container">
-  <div class="header">
-    <div class="logo">🎨 MURMUR ART</div>
+  <!-- 頁面1：學生資料 + 作品 -->
+  <div class="page active" id="page1">
+    <div class="header">
+      <div class="logo">🎨 MURMUR ART</div>
+    </div>
+
+    <div id="reminderBox" style="display:none;" class="reminder">課程即將用罄，記得續課哦！</div>
+
+    <div class="student-card" id="studentCard">
+      <img id="avatar" src="">
+      <div class="student-name" id="name"></div>
+      <div class="info" id="studentNo"></div>
+      <div class="info" id="courseType"></div>
+      <div class="info" id="left"></div>
+      <div class="info" id="lastClass" style="display:none;margin-top:10px;color:#879acb"></div>
+    </div>
+
+    <div class="section">
+      <div class="title">🖼️ 學生作品</div>
+      <div class="art-grid" id="artGrid"></div>
+      <div class="pagination" id="artPage"></div>
+    </div>
   </div>
 
-  <!-- 續費提醒 -->
-  <div id="reminderBox" style="display:none;" class="reminder">課程即將用罄，記得續課哦！</div>
+  <!-- 頁面2：課程進度 -->
+  <div class="page" id="page2">
+    <div class="header">
+      <div class="logo">🎨 課程進度</div>
+    </div>
 
-  <div class="student-card" id="studentCard">
-    <img id="avatar" src="">
-    <div class="student-name" id="name"></div>
-    <div class="info" id="studentNo"></div>
-    <div class="info" id="courseType"></div>
-    <div class="info" id="left"></div>
-    <div class="info" id="lastClass" style="display:none;margin-top:10px;color:#879acb"></div>
-  </div>
-
-  <div class="section">
-    <div class="title">🖼️ 學生作品</div>
-    <div class="art-grid" id="artGrid"></div>
-  </div>
-
-  <div class="section">
-    <div class="title">📅 課程記錄</div>
-    <div class="course-list" id="courseList"></div>
+    <div class="section">
+      <div class="title">📅 課程記錄</div>
+      <div class="course-list" id="courseList"></div>
+      <div class="pagination" id="coursePage"></div>
+    </div>
   </div>
 
   <!-- 頁尾 -->
@@ -127,7 +267,9 @@
 
 <div class="preview" id="preview">
   <span class="close" onclick="closePreview()">&times;</span>
+  <button class="prev" onclick="prevArt()">&lt;</button>
   <img id="previewImg">
+  <button class="next" onclick="nextArt()">&gt;</button>
   <div class="p-text" id="previewDate"></div>
 </div>
 
@@ -145,11 +287,14 @@ const db = firebase.firestore();
 
 const params = new URLSearchParams(window.location.search);
 const sid = params.get('sid');
+if(!sid){ alert('無學生資訊'); window.close(); }
 
-if(!sid){
-  alert('無學生資訊');
-  window.close();
-}
+// 分頁設定
+const PER_PAGE = 20;
+let artPage = 1;
+let coursePage = 1;
+let arts = [];
+let courses = [];
 
 async function getDirectImageUrl(url) {
   if (!url) return "https://via.placeholder.com/300";
@@ -171,6 +316,15 @@ function getWeek(d){
   return w[new Date(d).getDay()];
 }
 
+// 導覽列切換
+function goPage(num){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page'+num).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// 載入學生基本資料
 async function loadStudent(){
   const doc = await db.collection('students').doc(sid).get();
   if(!doc.exists) return;
@@ -184,74 +338,132 @@ async function loadStudent(){
   document.getElementById('avatar').onerror = e=>e.target.src="https://via.placeholder.com/100";
 }
 
+// 載入課程 + 分頁
 async function loadCourses(){
   const snap = await db.collection('courses').where('studentId','==',sid).get();
-  const arr = [];
-  snap.forEach(d=>arr.push({id:d.id,...d.data()}));
+  courses = [];
+  snap.forEach(d=>courses.push({id:d.id,...d.data()}));
   
-  const valid = arr.filter(x=>!['leave','holiday'].includes(x.status));
+  const valid = courses.filter(x=>!['leave','holiday'].includes(x.status));
   const total = valid.length;
   const done = valid.filter(x=>x.status==='completed'||x.status==='absent').length;
   const left = total - done;
   
   document.getElementById('left').innerText = '剩餘堂數：'+left;
 
-  // 上次上課日期
-  const last = arr.filter(x=>x.status==='completed').sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
+  const last = courses.filter(x=>x.status==='completed').sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
   if(last){
     document.getElementById('lastClass').style.display='block';
     document.getElementById('lastClass').innerText=`🗓️ 上次上課：${last.date}（${getWeek(last.date)}）`;
   }
 
-  // 續費提醒
   if(left < 3){
     document.getElementById('reminderBox').style.display = 'block';
   }
+
+  courses.sort((a,b)=>new Date(b.date)-new Date(a.date));
+  renderCoursePage();
+}
+
+function renderCoursePage(){
+  const totalPage = Math.ceil(courses.length / PER_PAGE);
+  const start = (coursePage-1)*PER_PAGE;
+  const end = start + PER_PAGE;
+  const show = courses.slice(start, end);
 
   const list = document.getElementById('courseList');
   list.innerHTML = '';
   const map = {pending:'wait',completed:'ok',leave:'leave',absent:'absent',holiday:'holiday'};
   const txt = {pending:'未完成',completed:'已完成',leave:'請假',absent:'缺席',holiday:'假期'};
 
-  arr.sort((a,b)=>new Date(b.date)-new Date(a.date));
-
-  for(let c of arr){
+  for(let c of show){
     list.innerHTML += `
     <div class="course-item">
-      <div class="course-date">${c.date}（${getWeek(c.date)}）${c.time}</div>
+      <div class="course-date">${c.date}（${getWeek(c.date)}）</div>
+      <div class="course-time">時間：${c.time}</div>
       <span class="course-status ${map[c.status]}">${txt[c.status]}</span>
     </div>`;
   }
+
+  const p = document.getElementById('coursePage');
+  p.innerHTML = `
+    <button class="page-btn" onclick="changeCoursePage(${coursePage-1})" ${coursePage<=1?'disabled':''}>上一頁</button>
+    <span class="page-info">第 ${coursePage} / ${totalPage} 頁</span>
+    <button class="page-btn" onclick="changeCoursePage(${coursePage+1})" ${coursePage>=totalPage?'disabled':''}>下一頁</button>
+  `;
 }
 
+function changeCoursePage(p){
+  if(p<1) return;
+  const total = Math.ceil(courses.length/PER_PAGE);
+  if(p>total) return;
+  coursePage = p;
+  renderCoursePage();
+}
+
+// 載入作品 + 分頁
 async function loadArt(){
   const snap = await db.collection('artworks').where('studentId','==',sid).get();
+  arts = [];
+  snap.forEach(d=>arts.push({id:d.id,...d.data()}));
+  arts.sort((a,b)=>new Date(b.createDate)-new Date(a.createDate));
+  renderArtPage();
+}
+
+function renderArtPage(){
+  const totalPage = Math.ceil(arts.length / PER_PAGE);
+  const start = (artPage-1)*PER_PAGE;
+  const end = start + PER_PAGE;
+  const show = arts.slice(start, end);
+
   const list = document.getElementById('artGrid');
   list.innerHTML = '';
-  const arts = [];
-  snap.forEach(d=>arts.push({id:d.id,...d.data()}));
-  
-  // 依照日期排序 最新在前
-  arts.sort((a,b)=>new Date(b.createDate)-new Date(a.createDate));
 
-  for(let i=0;i<arts.length;i++){
-    const item = arts[i];
+  for(let i=0;i<show.length;i++){
+    const item = show[i];
     const img = await getDirectImageUrl(item.imageUrl);
+    const realIndex = (artPage-1)*PER_PAGE + i;
     list.innerHTML += `
-    <div class="art-item" onclick="showPreview(${i})">
+    <div class="art-item" onclick="showPreview(${realIndex})">
       <img src="${img}" onerror="this.src='https://via.placeholder.com/150x160'">
     </div>`;
   }
-  window.arts = arts;
+
+  const p = document.getElementById('artPage');
+  p.innerHTML = `
+    <button class="page-btn" onclick="changeArtPage(${artPage-1})" ${artPage<=1?'disabled':''}>上一頁</button>
+    <span class="page-info">第 ${artPage} / ${totalPage} 頁</span>
+    <button class="page-btn" onclick="changeArtPage(${artPage+1})" ${artPage>=totalPage?'disabled':''}>下一頁</button>
+  `;
 }
 
+function changeArtPage(p){
+  if(p<1) return;
+  const total = Math.ceil(arts.length/PER_PAGE);
+  if(p>total) return;
+  artPage = p;
+  renderArtPage();
+}
+
+// 作品預覽 + 左右切換
+let currentArtIndex = 0;
 function showPreview(i){
-  const item = window.arts[i];
+  currentArtIndex = i;
+  const item = arts[i];
   document.getElementById('previewImg').src = item.imageUrl;
   document.getElementById('previewDate').innerText = item.createDate;
   document.getElementById('preview').style.display = 'flex';
 }
-
+function prevArt(){
+  currentArtIndex--;
+  if(currentArtIndex<0) currentArtIndex = arts.length-1;
+  showPreview(currentArtIndex);
+}
+function nextArt(){
+  currentArtIndex++;
+  if(currentArtIndex>=arts.length) currentArtIndex = 0;
+  showPreview(currentArtIndex);
+}
 function closePreview(){
   document.getElementById('preview').style.display = 'none';
 }
@@ -261,7 +473,6 @@ async function init(){
   await loadCourses();
   await loadArt();
 }
-
 init();
 </script>
 </body>
