@@ -40,7 +40,7 @@
     .prev,.next{position:absolute;top:50%;transform:translateY(-50%);font-size:22px;color:white;background:#879acb;padding:10px 16px;border-radius:10px;cursor:pointer}
     .prev{left:15px}
     .next{right:15px}
-    .close{position:absolute;top:18px;right:18px;font-size:22px;cursor:pointer;color:#777}
+    .close{position:absolute;top:18px;right:18px;font-size:22px;cursor-pointer;color:#777}
     .reminder{background:#fff3cd;color:#ff9800;padding:12px;border-radius:12px;text-align:center;margin-bottom:15px;font-weight:bold}
     .last-class{text-align:center;background:#e8edff;padding:10px;border-radius:12px;margin-bottom:10px;color:#879acb;font-weight:bold}
     .course-img{max-width:120px;max-height:80px;border-radius:8px;margin-top:6px}
@@ -52,6 +52,8 @@
     .wa{background:#25d366}
     .rule{text-align:center;color:#888;margin-top:10px;font-size:14px}
   </style>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
 <div class="navbar">
@@ -125,117 +127,116 @@
 </div>
 
 <script>
-function formatGooglePhotoUrl(u) {
-  if (!u) return 'https://via.placeholder.com/200';
-  const m = u.match(/photos\.app\.goo\.gl\/([a-zA-Z0-9_-]+)/) || u.match(/goo\.gl\/([a-zA-Z0-9_-]+)/) || u.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
-  if (m && m[1]) return "https://drive.google.com/uc?export=view&id=" + m[1];
-  return u;
+const cfg = {
+  apiKey:"AIzaSyBqUEh-MjMZ5Gj2gaFJpKffrDmvP9l7Slo",
+  authDomain:"murmurart-8f6cc.firebaseapp.com",
+  projectId:"murmurart-8f6cc",
+  messagingSenderId:"205741159610",
+  appId:"1:205741159610:web:624b7ca35c04e6e09a7e83"
+};
+if(!firebase.apps.length)firebase.initializeApp(cfg);
+const db=firebase.firestore();
+const params=new URLSearchParams(location.search);
+const uid=params.get('sid');
+if(!uid)location.href='index.html';
+
+let artList=[];
+let currentImg=0;
+let studentData=null;
+
+// ✅ 修复 Google 相册图片
+function fixGoogleImage(url) {
+  if (!url) return "https://via.placeholder.com/300";
+  const regex = /(?:drive\.google\.com\/file\/d\/|photos\.app\.goo\.gl\/|goo\.gl\/)([a-zA-Z0-9_-]+)/;
+  const match = url.match(regex);
+  if (match && match[1]) {
+    return "https://drive.google.com/uc?export=view&id=" + match[1];
+  }
+  return url;
 }
 
-const students = JSON.parse(localStorage.getItem('murmurStudents')) || [];
-const artworks = JSON.parse(localStorage.getItem('murmurArtworks')) || [];
-const courses = JSON.parse(localStorage.getItem('murmurCourses')) || [];
-const params = new URLSearchParams(location.search);
-const uid = params.get('sid');
-if (!uid) location.href='index.html';
-
-let artList = [];
-let currentImg = 0;
-let studentData = null;
-
-window.onload = () => { init(); loadArt(); loadCourse(); sh(1); }
-
-function init(){
-  studentData = students.find(s=>s.id===uid);
-  if(!studentData){alert('找不到學生');location.href='index.html';return}
-  document.getElementById('studentNameBox').innerText = studentData.name+' 同學';
+window.onload=()=>{init();loadArt();loadCourse();sh(1)}
+async function init(){
+  const s = await db.collection('students').doc(uid).get();
+  studentData = s.data();
+  document.getElementById('studentNameBox').innerText = `${studentData.name} 同學`;
   document.getElementById('studentNameBox').style.display='block';
   if(studentData.courseType){
-    document.getElementById('courseTypeTag').innerText = '課程方案：'+studentData.courseType;
+    document.getElementById('courseTypeTag').innerText = `課程方案：${studentData.courseType}`;
     document.getElementById('courseTypeTag').style.display='inline-block';
   }
-  document.getElementById('avt').src = formatGooglePhotoUrl(studentData.avatar);
 }
+function sh(x){document.getElementById('p1').style.display=x==1?'block':'none';document.getElementById('p2').style.display=x==2?'block':'none'}
+function closePrev(){document.getElementById('preview').style.display='none'}
+function prevImg(){event.stopPropagation();currentImg=(currentImg-1+artList.length)%artList.length;showArt(currentImg)}
+function nextImg(){event.stopPropagation();currentImg=(currentImg+1)%artList.length;showArt(currentImg)}
 
-function sh(x){
-  document.getElementById('p1').style.display = x==1 ? 'block' : 'none';
-  document.getElementById('p2').style.display = x==2 ? 'block' : 'none';
-}
+function getWeek(d){const w=['日','一','二','三','四','五','六'];return w[new Date(d).getDay()]}
+function fmtTime(t){const [h,m]=t.split(':');const min=h*60+parseInt(m)+75;const eh=Math.floor(min/60),em=min%60;return `${t} - ${String(eh).padStart(2,0)}:${String(em).padStart(2,0)}`}
 
-function closePrev(){ document.getElementById('preview').style.display='none' }
-function prevImg(){ event.stopPropagation(); currentImg = (currentImg-1+artList.length)%artList.length; showArt(currentImg); }
-function nextImg(){ event.stopPropagation(); currentImg = (currentImg+1)%artList.length; showArt(currentImg); }
-
-function getWeek(d){
-  const w=['日','一','二','三','四','五','六'];
-  return w[new Date(d).getDay()];
-}
-
-function fmtTime(t){
-  const [h,m]=t.split(':');
-  const min=h*60+parseInt(m)+75;
-  const eh=Math.floor(min/60), em=min%60;
-  return `${t} - ${String(eh).padStart(2,0)}:${String(em).padStart(2,0)}`;
-}
-
-function loadArt(){
-  const wrap=document.getElementById('r');
-  wrap.innerHTML='';
-  artList=artworks.filter(a=>a.studentId===uid);
-  if(artList.length===0){
-    wrap.innerHTML='<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#888">暫無作品</div>';
-    return;
-  }
-  let a=0;
-  const step=360/artList.length;
+async function loadArt(){
+  const wrap=document.getElementById('r');wrap.innerHTML='';
+  document.getElementById('avt').src=fixGoogleImage(studentData.avatar);
+  const res=await db.collection('artworks').where('studentId','==',uid).get();
+  artList=[];res.forEach(d=>artList.push({...d.data()}));
+  let a=0;const step=360/artList.length;
   artList.forEach((d,i)=>{
-    const u=formatGooglePhotoUrl(d.imageUrl);
-    wrap.innerHTML+=`<div class="art" style="transform:rotate(${a}deg) translate(190px) rotate(${-a}deg)" onclick="showArt(${i})"><img src="${u}" onerror="this.src='https://via.placeholder.com/140'"></div>`;
+    wrap.innerHTML+=`<div class="art" style="transform:rotate(${a}deg) translate(190px) rotate(${-a}deg)" onclick="showArt(${i})"><img src="${fixGoogleImage(d.imageUrl)}"></div>`;
     a+=step;
   })
 }
-
 function showArt(i){
   currentImg=i;
   const item=artList[i];
-  document.getElementById('previewImg').src=formatGooglePhotoUrl(item.imageUrl);
+  document.getElementById('previewImg').src=fixGoogleImage(item.imageUrl);
   document.getElementById('artDate').innerText=item.createDate||'未填寫';
   document.getElementById('artNote').innerText=item.note||'無';
   document.getElementById('preview').style.display='block';
 }
 
-function loadCourse(){
-  const list=document.getElementById('courseList');
-  list.innerHTML='';
-  const cs=courses.filter(c=>c.studentId===uid);
+async function loadCourse(){
+  const list=document.getElementById('courseList');list.innerHTML='';
+  const res=await db.collection('courses').where('studentId','==',uid).get();
   const map={pending:"wait",completed:"ok",leave:"leave",absent:"absent",holiday:"holiday"};
   const name={pending:"⏳ 未完成",completed:"✔️ 已完成",leave:"🏖️ 請假",absent:"🚫 缺席",holiday:"🌧️ 公眾假期"};
-  if(cs.length===0){list.innerHTML='<tr><td colspan=5 style="text-align:center;color:#888">暫無記錄</td></tr>';return}
-  const sorted=cs.sort((a,b)=>new Date(b.date)-new Date(a.date));
-  const total=sorted.length;
-  const completed=sorted.filter(x=>x.status=='completed'||x.status=='absent').length;
+  let arr=[];res.forEach(d=>arr.push({id:d.id,...d.data()}));
+  
+  const total=arr.length;
+  const completed=arr.filter(x=>x.status==='completed'||x.status==='absent').length;
   const left=total-completed;
-  if(left<3) document.getElementById('reminderBox').style.display='block';
-  const last=sorted.filter(x=>x.status=='completed').sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
+
+  if(left < 3){
+    document.getElementById('reminderBox').style.display='block';
+  }
+
+  const last = arr.filter(x=>x.status==='completed').sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
   if(last){
     document.getElementById('lastClass').style.display='block';
-    document.getElementById('lastClass').innerText='🗓️ 上次上課：'+last.date+'（'+getWeek(last.date)+'）';
+    document.getElementById('lastClass').innerText=`🗓️ 上次上課：${last.date}（${getWeek(last.date)}）`;
   }
+
   document.getElementById('info').innerHTML=`
   <div class="info-item"><h3>📊 總課程</h3><h2>${total}</h2></div>
   <div class="info-item"><h3>✅ 已完成</h3><h2>${completed}</h2></div>
-  <div class="info-item"><h3>⏳ 剩餘</h3><h2>${left}</h2></div>`;
-  sorted.forEach(c=>{
-    const img=c.imgUrl?`<img src="${formatGooglePhotoUrl(c.imgUrl)}" class="course-img" onerror="this.src='https://via.placeholder.com/120'">`:'無';
-    list.innerHTML+=`
-    <tr>
+  <div class="info-item"><h3>⏳ 剩餘</h3><h2>${left}</h2></div>
+  `;
+
+  arr.sort((a,b)=>{
+    if(a.status==='pending' && b.status!=='pending') return -1;
+    if(a.status!=='pending' && b.status==='pending') return 1;
+    return new Date(a.date)-new Date(b.date);
+  });
+
+  arr.forEach(c=>{
+    const imgHtml = c.imgUrl ? `<img src="${fixGoogleImage(c.imgUrl)}" class="course-img">` : '';
+    list.innerHTML+=`<tr>
       <td>${c.date}（${getWeek(c.date)}）</td>
       <td>${fmtTime(c.time)}</td>
       <td><span class="badge ${map[c.status]}">${name[c.status]}</span></td>
-      <td>${img}</td>
-      <td>${c.note||'無'}</td>
-    </tr>`
-  })
+      <td>${imgHtml}</td>
+      <td>${c.note||'-'}</td>
+    </tr>`;
+  });
 }
 </script>
 </body>
