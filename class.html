@@ -407,7 +407,7 @@ async function loadArt(){
   const snap = await db.collection('artworks').where('studentId','==',sid).get();
   arts = [];
   snap.forEach(d=>arts.push({id:d.id,...d.data()}));
-  arts.sort((a,b)=>new Date(b.createDate)-new Date(a.createDate));
+  arts.sort((a,b)=>new Date(b.createDate)-new Date(a.date));
   renderArtPage();
 }
 
