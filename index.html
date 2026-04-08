@@ -73,8 +73,6 @@
     .warningPage{background:#fff3cd;padding:15px;border-radius:16px;margin:15px 0}
     .warningItem{background:white;padding:12px;border-radius:10px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
   </style>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -262,24 +260,24 @@
 </div>
 
 <script>
-const firebaseConfig = {
-  apiKey:"AIzaSyBqUEh-MjMZ5Gj2gaFJpKffrDmvP9l7Slo",
-  authDomain:"murmurart-8f6cc.firebaseapp.com",
-  projectId:"murmurart-8f6cc",
-  messagingSenderId:"205741159610",
-  appId:"1:205741159610:web:624b7ca35c04e6e09a7e83"
-};
-
-if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
 const ADMIN_PWD = "teacher123";
 let isTeacher = false;
 let currentStudentId = null;
 let currentCourseId = null;
 let currentMakeupId = null;
-let studentList = [];
+let studentList = JSON.parse(localStorage.getItem('murmurStudents')) || [];
+let artworks = JSON.parse(localStorage.getItem('murmurArtworks')) || [];
+let courses = JSON.parse(localStorage.getItem('murmurCourses')) || [];
 let artList = [];
 let courseRaw = [];
+let currentImg = 0;
+
+function formatGooglePhotoUrl(u) {
+  if (!u) return 'https://via.placeholder.com/200';
+  const m = u.match(/photos\.app\.goo\.gl\/([a-zA-Z0-9_-]+)/) || u.match(/goo\.gl\/([a-zA-Z0-9_-]+)/) || u.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if (m && m[1]) return "https://drive.google.com/uc?export=view&id=" + m[1];
+  return u;
+}
 
 function switchTab(role) {
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
@@ -298,20 +296,13 @@ function teacherLogin() {
   } else alert('密碼錯誤');
 }
 
-async function parentLogin() {
+function parentLogin() {
   const name = document.getElementById('pName').value.trim();
   const phone = document.getElementById('pPhone').value.trim().replace(/\s/g, '');
   if (!name || !phone) { alert('請填寫完整'); return; }
-  try {
-    const snap = await db.collection('students').where('name', '==', name).get();
-    let found = null;
-    snap.forEach(doc => {
-      const p = (doc.data().parentPhone || '').replace(/\s/g, '');
-      if (p === phone) found = doc.id;
-    });
-    if (found) location.href = `class.html?sid=${found}`;
-    else alert('找不到學生資料');
-  } catch (e) { alert('登入失敗'); }
+  const found = studentList.find(s => s.name === name && (s.parentPhone || '').replace(/\s/g, '') === phone);
+  if (found) location.href = `class.html?sid=${found.id}`;
+  else alert('找不到學生資料');
 }
 
 function show(n) {
@@ -324,47 +315,41 @@ function show(n) {
   if(n==9) loadWarningList();
 }
 
-async function getLeftCount(sid){
-  const courses = await db.collection('courses').where('studentId','==',sid).get();
-  const valid = courses.docs.filter(x => !['leave','holiday'].includes(x.data().status));
+function getLeftCount(sid){
+  const valid = courses.filter(c => c.studentId === sid && !['leave','holiday'].includes(c.status));
   const total = valid.length;
-  const done = valid.filter(x => x.data().status === 'completed' || x.data().status === 'absent').length;
+  const done = valid.filter(x => x.status === 'completed' || x.status === 'absent').length;
   return total - done;
 }
 
-async function loadAllStudents() {
-  const snap = await db.collection('students').get();
-  studentList=[];
+function loadAllStudents() {
   const list=document.getElementById('stuList');
   list.innerHTML='';
-  for(let doc of snap.docs){
-    const s={id:doc.id,...doc.data()};
-    const left = await getLeftCount(s.id);
-    s.left = left;
-    s.warning = left < 3;
-    studentList.push(s);
+  studentList.forEach(s=>{
+    s.left = getLeftCount(s.id);
+    s.warning = s.left < 3;
     list.innerHTML+=`
     <div class="stu ${s.warning?'warning':''}">
-      <img src="${s.avatar||'https://via.placeholder.com/85'}">
+      <img src="${formatGooglePhotoUrl(s.avatar)}">
       <h3>${s.name}</h3>
       <p>編號：${s.studentNo||'-'}</p>
       <p>家長：${s.parentPhone||'-'}</p>
       <p>方案：${s.courseType||'-'}</p>
-      <span class="leftTag">剩餘 ${left} 堂</span>
+      <span class="leftTag">剩餘 ${s.left} 堂</span>
       ${s.warning?'<p style="color:red;font-weight:bold;margin-top:6px">即將續課</p>':''}
       <div class="action">
         <button onclick="selectStudent('${s.id}')">選取</button>
         ${isTeacher ? `<button onclick="editStu('${s.id}')">編輯</button><button onclick="delStu('${s.id}')">刪除</button>` : ''}
       </div>
     </div>`;
-  }
+  });
   fillStudentSelects();
 }
 
-async function loadWarningList(){
+function loadWarningList(){
   const w = document.getElementById('warningList');
   w.innerHTML='';
-  for(let s of studentList){
+  studentList.forEach(s=>{
     if(s.warning){
       w.innerHTML+=`
       <div class="warningItem">
@@ -372,7 +357,7 @@ async function loadWarningList(){
         <div style="color:red;font-weight:bold">剩餘 ${s.left} 堂</div>
       </div>`;
     }
-  }
+  });
   if(w.innerHTML==='') w.innerHTML='<div style="text-align:center;padding:10px">暫無即將續費學生</div>';
 }
 
@@ -388,7 +373,8 @@ function fillStudentSelects() {
 }
 
 function updateStats(){
-  const valid = courseRaw.filter(c => !['leave','holiday'].includes(c.status));
+  if(!currentStudentId) return;
+  const valid = courses.filter(c => c.studentId === currentStudentId && !['leave','holiday'].includes(c.status));
   const total = valid.length;
   const ok = valid.filter(c => c.status === 'completed' || c.status === 'absent').length;
   const left = total - ok;
@@ -410,7 +396,7 @@ function renderCourseList(arr){
     return new Date(a.date)-new Date(b.date);
   });
   arr.forEach(c=>{
-    const imgHtml = c.imgUrl ? `<img src="${c.imgUrl}" class="course-img">` : '';
+    const imgHtml = c.imgUrl ? `<img src="${formatGooglePhotoUrl(c.imgUrl)}" class="course-img">` : '';
     b.innerHTML+=`<tr>
 <td><input type="checkbox" class="courseCheck" data-id="${c.id}"></td>
 <td>${c.date}（${getWeek(c.date)}）</td>
@@ -434,23 +420,23 @@ function openMakeup(cid){
   document.getElementById('makeupModal').style.display = 'flex';
 }
 
-async function saveMakeup(){
+function saveMakeup(){
   const d = document.getElementById('makeupDate').value;
   const t = document.getElementById('makeupTime').value;
   if(!d || !t) return alert('請填寫完整');
-  await db.collection('courses').add({
-    studentId:currentStudentId, date:d, time:t, note:'補課', status:'pending'
+  courses.push({
+    id:Date.now().toString(), studentId:currentStudentId, date:d, time:t, note:'補課', status:'pending'
   });
+  localStorage.setItem('murmurCourses',JSON.stringify(courses));
   closeAll();
   loadCourseList();
   loadAllStudents();
   alert('補課已新增');
 }
 
-async function loadCourseList(){
+function loadCourseList(){
   if(!currentStudentId)return;
-  const courses=await db.collection('courses').where('studentId','==',currentStudentId).get();
-  courseRaw=[];courses.forEach(d=>courseRaw.push({id:d.id,...d.data()}));
+  courseRaw = courses.filter(c=>c.studentId===currentStudentId);
   renderCourseList(courseRaw);
   updateStats();
 }
@@ -465,149 +451,162 @@ function selectStudent(id) { currentStudentId=id; show(2); loadArtList(); }
 function closeAll(){ document.querySelectorAll('.modal').forEach(m=>m.style.display='none'); document.getElementById('preview').style.display='none'; }
 function addStu(){ if(!isTeacher)return; currentStudentId=null; document.getElementById('sname').value='';document.getElementById('sno').value='';document.getElementById('sphone').value='';document.getElementById('savatar').value='';document.getElementById('courseType').value='';document.getElementById('school').value='';document.getElementById('birthYear').value='';document.getElementById('gender').value='';document.getElementById('note').value='';document.getElementById('stuModal').style.display='flex'; }
 
-async function saveStu(){
+function saveStu(){
   if(!isTeacher)return;
   const n=document.getElementById('sname').value;
   const no=document.getElementById('sno').value;
   const p=document.getElementById('sphone').value;
-  const a=document.getElementById('savatar').value;
+  const a=formatGooglePhotoUrl(document.getElementById('savatar').value);
   const ct=document.getElementById('courseType').value;
   const school=document.getElementById('school').value;
   const birthYear=document.getElementById('birthYear').value;
   const gender=document.getElementById('gender').value;
   const note=document.getElementById('note').value;
   if(!n||!p)return;
-  const data={name:n,studentNo:no,parentPhone:p,avatar:a,courseType:ct,school,birthYear,gender,note};
-  if(currentStudentId) await db.collection('students').doc(currentStudentId).update(data);
-  else await db.collection('students').add({...data,createdAt:new Date()});
+  const data={id:currentStudentId||Date.now().toString(), name:n, studentNo:no, parentPhone:p, avatar:a, courseType:ct, school, birthYear, gender, note};
+  if(currentStudentId){
+    studentList = studentList.map(s=>s.id===currentStudentId?data:s);
+  }else{
+    studentList.push(data);
+  }
+  localStorage.setItem('murmurStudents',JSON.stringify(studentList));
   closeAll();loadAllStudents();
 }
 
-async function delStu(id){
+function delStu(id){
   if(!isTeacher)return;
   if(!confirm('確定刪除？'))return;
-  await db.collection('students').doc(id).delete();
-  await db.collection('artworks').where('studentId','==',id).get().then(s=>s.forEach(d=>d.ref.delete()));
-  await db.collection('courses').where('studentId','==',id).get().then(s=>s.forEach(d=>d.ref.delete()));
+  studentList = studentList.filter(s=>s.id!==id);
+  artworks = artworks.filter(a=>a.studentId!==id);
+  courses = courses.filter(c=>c.studentId!==id);
+  localStorage.setItem('murmurStudents',JSON.stringify(studentList));
+  localStorage.setItem('murmurArtworks',JSON.stringify(artworks));
+  localStorage.setItem('murmurCourses',JSON.stringify(courses));
   loadAllStudents();
 }
 
 function editStu(id){
   if(!isTeacher)return;
   currentStudentId=id;
-  db.collection('students').doc(id).get().then(d=>{
-    const s=d.data();
-    document.getElementById('sname').value=s.name||'';
-    document.getElementById('sno').value=s.studentNo||'';
-    document.getElementById('sphone').value=s.parentPhone||'';
-    document.getElementById('savatar').value=s.avatar||'';
-    document.getElementById('courseType').value=s.courseType||'';
-    document.getElementById('school').value=s.school||'';
-    document.getElementById('birthYear').value=s.birthYear||'';
-    document.getElementById('gender').value=s.gender||'';
-    document.getElementById('note').value=s.note||'';
-    document.getElementById('stuModal').style.display='flex';
-  })
+  const s=studentList.find(x=>x.id===id);
+  document.getElementById('sname').value=s.name||'';
+  document.getElementById('sno').value=s.studentNo||'';
+  document.getElementById('sphone').value=s.parentPhone||'';
+  document.getElementById('savatar').value=s.avatar||'';
+  document.getElementById('courseType').value=s.courseType||'';
+  document.getElementById('school').value=s.school||'';
+  document.getElementById('birthYear').value=s.birthYear||'';
+  document.getElementById('gender').value=s.gender||'';
+  document.getElementById('note').value=s.note||'';
+  document.getElementById('stuModal').style.display='flex';
 }
 
 function switchArtStudent(){currentStudentId=document.getElementById('selectStudentForArt').value;loadArtList();}
-async function loadArtList(){
+function loadArtList(){
   if(!currentStudentId)return;
   const g=document.getElementById('rotateWrap');g.innerHTML='';
-  const s=await db.collection('students').doc(currentStudentId).get();
-  document.getElementById('mainAvatar').src=s.data().avatar||'https://via.placeholder.com/200';
-  const arts=await db.collection('artworks').where('studentId','==',currentStudentId).get();
-  artList=[];arts.forEach(d=>artList.push({id:d.id,...d.data()}));
+  const s=studentList.find(x=>x.id===currentStudentId);
+  document.getElementById('mainAvatar').src=formatGooglePhotoUrl(s.avatar);
+  artList=artworks.filter(a=>a.studentId===currentStudentId);
   let a=0;const step=360/artList.length;
   artList.forEach((d,i)=>{
-    g.innerHTML+=`<div class="art" style="transform:rotate(${a}deg) translate(220px) rotate(${-a}deg)" onclick="showPreview(${i})"><img src="${d.imageUrl}"></div>`;a+=step;
+    g.innerHTML+=`<div class="art" style="transform:rotate(${a}deg) translate(220px) rotate(${-a}deg)" onclick="showPreview(${i})"><img src="${formatGooglePhotoUrl(d.imageUrl)}"></div>`;a+=step;
   });
 }
 function openArt(){ if(!isTeacher)return; document.getElementById('artModal').style.display='flex'; }
-async function saveArt(){
+function saveArt(){
   if(!isTeacher)return;
   const sid=document.getElementById('artStudentSelect').value;
-  const url=document.getElementById('img').value;
+  const url=formatGooglePhotoUrl(document.getElementById('img').value);
   const d=document.getElementById('cdate').value;
   const n=document.getElementById('artNote').value;
   if(!sid||!url||!d)return;
-  await db.collection('artworks').add({studentId:sid,imageUrl:url,createDate:d,note:n,time:new Date()});
+  artworks.push({id:Date.now().toString(), studentId:sid, imageUrl:url, createDate:d, note:n});
+  localStorage.setItem('murmurArtworks',JSON.stringify(artworks));
   closeAll();loadArtList();
 }
 function showPreview(i){
   currentImg=i;
   const item=artList[i];
-  document.getElementById('previewImg').src=item.imageUrl;
+  document.getElementById('previewImg').src=formatGooglePhotoUrl(item.imageUrl);
   document.getElementById('pDate').textContent=item.createDate;
   document.getElementById('pNote').textContent=item.note||'無';
   document.getElementById('preview').style.display='block';
 }
-async function deleteCurrentArt(){
+function deleteCurrentArt(){
   if(!isTeacher)return;
   if(!confirm('確定刪除？'))return;
   const id=artList[currentImg].id;
-  await db.collection('artworks').doc(id).delete();
+  artworks=artworks.filter(a=>a.id!==id);
+  localStorage.setItem('murmurArtworks',JSON.stringify(artworks));
   closeAll();loadArtList();
 }
 function prevImg(){event.stopPropagation();currentImg=(currentImg-1+artList.length)%artList.length;showPreview(currentImg)}
 function nextImg(){event.stopPropagation();currentImg=(currentImg+1)%artList.length;showPreview(currentImg)}
 
-async function batchSet(status){
+function batchSet(status){
   if(!isTeacher)return;
   const checks=document.querySelectorAll('.courseCheck:checked');
   if(checks.length===0)return alert('請選擇');
   if(!confirm('確定修改？'))return;
-  for(let cb of checks) await db.collection('courses').doc(cb.dataset.id).update({status});
+  checks.forEach(cb=>{
+    const id=cb.dataset.id;
+    courses=courses.map(c=>c.id===id?{...c,status}:c);
+  });
+  localStorage.setItem('murmurCourses',JSON.stringify(courses));
   loadCourseList();
   loadAllStudents();
 }
-async function batchDeleteCourses(){
+function batchDeleteCourses(){
   if(!isTeacher)return;
   const checks=document.querySelectorAll('.courseCheck:checked');
   if(checks.length===0)return alert('請選擇');
   if(!confirm('確定刪除？'))return;
-  for(let cb of checks) await db.collection('courses').doc(cb.dataset.id).delete();
+  const ids=Array.from(checks).map(cb=>cb.dataset.id);
+  courses=courses.filter(c=>!ids.includes(c.id));
+  localStorage.setItem('murmurCourses',JSON.stringify(courses));
   loadCourseList();
-  loadAllStudents();
 }
 function addCourse(){ if(!isTeacher)return; currentCourseId=null; document.getElementById('cday').valueAsDate=new Date(); document.getElementById('ctime').value=''; document.getElementById('endTimeShow').textContent=''; document.getElementById('cnote').value=''; document.getElementById('courseImgUrl').value=''; document.getElementById('cstatus').value='pending'; document.getElementById('courseModal').style.display='flex'; }
-async function saveCourse(){
+function saveCourse(){
   if(!isTeacher)return;
   const sid=document.getElementById('courseStudentSelect').value;
   const d=document.getElementById('cday').value;
   const t=document.getElementById('ctime').value;
   const nt=document.getElementById('cnote').value;
-  const imgUrl=document.getElementById('courseImgUrl').value;
+  const imgUrl=formatGooglePhotoUrl(document.getElementById('courseImgUrl').value);
   const s=document.getElementById('cstatus').value;
   if(!sid||!d||!t)return;
-  const data={studentId:sid,date:d,time:t,note:nt,status:s,imgUrl};
-  if(currentCourseId) await db.collection('courses').doc(currentCourseId).update(data);
-  else await db.collection('courses').add(data);
+  const data={id:currentCourseId||Date.now().toString(), studentId:sid, date:d, time:t, note:nt, status:s, imgUrl};
+  if(currentCourseId){
+    courses=courses.map(c=>c.id===currentCourseId?data:c);
+  }else{
+    courses.push(data);
+  }
+  localStorage.setItem('murmurCourses',JSON.stringify(courses));
   closeAll();loadCourseList();loadAllStudents();
 }
 function editCourse(id){
   if(!isTeacher)return;
   currentCourseId=id;
-  db.collection('courses').doc(id).get().then(d=>{
-    const c=d.data();
-    document.getElementById('courseStudentSelect').value=c.studentId;
-    document.getElementById('cday').value=c.date;
-    document.getElementById('ctime').value=c.time;
-    calcEndTime();
-    document.getElementById('cnote').value=c.note||'';
-    document.getElementById('courseImgUrl').value=c.imgUrl||'';
-    document.getElementById('cstatus').value=c.status;
-    document.getElementById('courseModal').style.display='flex';
-  })
+  const c=courses.find(x=>x.id===id);
+  document.getElementById('courseStudentSelect').value=c.studentId;
+  document.getElementById('cday').value=c.date;
+  document.getElementById('ctime').value=c.time;
+  calcEndTime();
+  document.getElementById('cnote').value=c.note||'';
+  document.getElementById('courseImgUrl').value=c.imgUrl||'';
+  document.getElementById('cstatus').value=c.status;
+  document.getElementById('courseModal').style.display='flex';
 }
-async function delCourse(id){
+function delCourse(id){
   if(!isTeacher)return;
   if(!confirm('確定刪除？'))return;
-  await db.collection('courses').doc(id).delete();
+  courses=courses.filter(c=>c.id!==id);
+  localStorage.setItem('murmurCourses',JSON.stringify(courses));
   loadCourseList();
-  loadAllStudents();
 }
-async function quickPackage(count){
+function quickPackage(count){
   if(!isTeacher)return;
   const sid=document.getElementById('courseStudentSelect').value;
   const startDate=document.getElementById('cday').value;
@@ -619,12 +618,13 @@ async function quickPackage(count){
     const dd=new Date(start);
     dd.setDate(start.getDate()+i*7);
     const date=dd.toISOString().split('T')[0];
-    await db.collection('courses').add({studentId:sid,date,time:startTime,note:'課程',status:'pending'});
+    courses.push({id:Date.now().toString(),studentId:sid,date,time:startTime,note:'課程',status:'pending'});
   }
+  localStorage.setItem('murmurCourses',JSON.stringify(courses));
   alert('完成');
-  closeAll();loadCourseList();loadAllStudents();
+  closeAll();loadCourseList();
 }
-function searchStudent(){const kw=document.getElementById('searchStudent').value.toLowerCase();const list=document.getElementById('stuList');list.innerHTML='';studentList.filter(s=>s.name.toLowerCase().includes(kw)||(s.parentPhone||'').includes(kw)||(s.studentNo||'').toLowerCase().includes(kw)).forEach(s=>{list.innerHTML+=`<div class="stu ${s.warning?'warning':''}"><img src="${s.avatar||'https://via.placeholder.com/85'}"><h3>${s.name}</h3><p>編號：${s.studentNo||'-'}</p><p>家長：${s.parentPhone||'-'}</p><p>方案：${s.courseType||'-'}</p><span class="leftTag">剩餘 ${s.left||0} 堂</span>${s.warning?'<p style="color:red;font-weight:bold;margin-top:6px">即將續課</p>':''}<div class="action"><button onclick="selectStudent('${s.id}')">選取</button>${isTeacher ? `<button onclick="editStu('${s.id}')">編輯</button><button onclick="delStu('${s.id}')">刪除</button>` : ''}</div></div>`;})}
+function searchStudent(){const kw=document.getElementById('searchStudent').value.toLowerCase();const list=document.getElementById('stuList');list.innerHTML='';studentList.filter(s=>s.name.toLowerCase().includes(kw)||(s.parentPhone||'').includes(kw)||(s.studentNo||'').toLowerCase().includes(kw)).forEach(s=>{list.innerHTML+=`<div class="stu ${s.warning?'warning':''}"><img src="${formatGooglePhotoUrl(s.avatar)}"><h3>${s.name}</h3><p>編號：${s.studentNo||'-'}</p><p>家長：${s.parentPhone||'-'}</p><p>方案：${s.courseType||'-'}</p><span class="leftTag">剩餘 ${s.left||0} 堂</span>${s.warning?'<p style="color:red;font-weight:bold;margin-top:6px">即將續課</p>':''}<div class="action"><button onclick="selectStudent('${s.id}')">選取</button>${isTeacher ? `<button onclick="editStu('${s.id}')">編輯</button><button onclick="delStu('${s.id}')">刪除</button>` : ''}</div></div>`;})}
 function exportCSV(){if(!isTeacher)return;let csv = "姓名,學生編號,家長電話,課程方案,剩餘堂數,學校,出生年份,性別,備註\n";studentList.forEach(s=>{csv += `"${s.name}","${s.studentNo||''}","${s.parentPhone||''}","${s.courseType||''}","${s.left||0}","${s.school||''}","${s.birthYear||''}","${s.gender||''}","${s.note||''}"\n`;});const blob = new Blob([csv],{type:"text/csv"});const url = URL.createObjectURL(blob);const a = document.createElement("a");a.href = url;a.download = "學生資料.csv";a.click();}
 function logout(){location.reload()}
 </script>
