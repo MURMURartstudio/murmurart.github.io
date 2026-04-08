@@ -11,7 +11,7 @@
     .nav{display:flex;justify-content:space-between;align-items:center;width:90%;max-width:1200px;margin:0 auto;flex-wrap:wrap;gap:10px}
     .logo{font-size:22px;color:#879acb}
     .menu{display:flex;gap:14px}
-    .menu a{color:#555;text-decoration:none;cursor:pointer}
+    .menu a{color:#555;text-decoration:none;cursor-pointer}
     .menu a:hover{color:#879acb}
     .gallery{position:relative;width:100%;height:600px;display:flex;justify-content:center;align-items:center;margin:20px 0}
     .avatar{width:170px;height:170px;border-radius:50%;border:6px solid #879acb;position:absolute;z-index:10}
@@ -40,7 +40,7 @@
     .prev,.next{position:absolute;top:50%;transform:translateY(-50%);font-size:22px;color:white;background:#879acb;padding:10px 16px;border-radius:10px;cursor:pointer}
     .prev{left:15px}
     .next{right:15px}
-    .close{position:absolute;top:18px;right:18px;font-size:22px;cursor-pointer;color:#777}
+    .close{position:absolute;top:18px;right:18px;font-size:22px;cursor:pointer;color:#777}
     .reminder{background:#fff3cd;color:#ff9800;padding:12px;border-radius:12px;text-align:center;margin-bottom:15px;font-weight:bold}
     .last-class{text-align:center;background:#e8edff;padding:10px;border-radius:12px;margin-bottom:10px;color:#879acb;font-weight:bold}
     .course-img{max-width:120px;max-height:80px;border-radius:8px;margin-top:6px}
@@ -51,6 +51,8 @@
     .fb{background:#1877f2}
     .wa{background:#25d366}
     .rule{text-align:center;color:#888;margin-top:10px;font-size:14px}
+    /* 新增：加載提示樣式 */
+    .loading{text-align:center;padding:20px;color:#879acb;font-size:18px}
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -78,14 +80,18 @@
   
   <div id="p1">
     <h2 style="text-align:center;color:#879acb;margin:10px 0 20px">🎨 學生作品</h2>
+    <!-- 新增加載提示 -->
+    <div id="artLoading" class="loading">載入學生作品中...</div>
     <div class="gallery">
-      <img class="avatar" id="avt" src="https://via.placeholder.com/200" onerror="this.src='https://via.placeholder.com/170'">
+      <img class="avatar" id="avt" src="https://via.placeholder.com/200" onerror="this.src='https://via.placeholder.com/200';">
       <div class="rotate" id="r"></div>
     </div>
   </div>
 
   <div id="p2" style="display:none">
     <h2 style="text-align:center;color:#879acb;margin:10px 0 20px">📋 課程進度</h2>
+    <!-- 新增加載提示 -->
+    <div id="courseLoading" class="loading">載入課程進度中...</div>
     <div class="info" id="info"></div>
     <table>
       <thead>
@@ -118,7 +124,7 @@
 <div class="preview" id="preview">
   <span class="close" onclick="closePrev()">&times;</span>
   <div class="prev" onclick="prevImg()">&lt;</div>
-  <img id="previewImg" onerror="this.src='https://via.placeholder.com/700x400'">
+  <img id="previewImg" onerror="this.src='https://via.placeholder.com/700x400';">
   <div style="margin-top:10px;text-align:center">
     <p style="margin:4px"><strong>創作日期：</strong><span id="artDate"></span></p>
     <p style="margin:4px"><strong>備註：</strong><span id="artNote"></span></p>
@@ -136,6 +142,9 @@ const cfg = {
 };
 if(!firebase.apps.length)firebase.initializeApp(cfg);
 const db=firebase.firestore();
+// 開啟 Firestore 實時更新（關鍵：禁用緩存）
+db.settings({ cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED, persistence: false });
+
 const params=new URLSearchParams(location.search);
 const uid=params.get('sid');
 if(!uid)location.href='index.html';
@@ -144,129 +153,215 @@ let artList=[];
 let currentImg=0;
 let studentData=null;
 
-// 圖片解析（與老師端完全同步，不會卡住）
-function getImageUrl(url) {
-  if (!url) return "https://via.placeholder.com/300";
-
-  // ImgBB
-  let imgbbMatch = url.match(/ibb\.co\/([a-zA-Z0-9]+)/);
-  if (imgbbMatch) {
-    return `https://i.ibb.co/${imgbbMatch[1]}/image.jpg`;
+// 重構初始化流程：保證順序執行
+window.onload=async ()=>{
+  try {
+    await init(); // 先加載學生基礎信息
+    await loadArt(); // 再加載作品
+    await loadCourse(); // 最後加載課程
+    sh(1); // 默認顯示作品頁
+  } catch (e) {
+    console.error("加載數據出錯：", e);
+    alert("數據加載失敗，請刷新頁面重試！");
   }
-  if (url.includes("i.ibb.co")) return url;
-
-  // Google Drive
-  let driveMatch = url.match(/drive\.google\.com\/file\/d\/([^\/\?]+)/);
-  if (driveMatch) return "https://drive.google.com/thumbnail?id=" + driveMatch[1] + "&sz=w1000";
-
-  // Google 相簿
-  if (url.includes("lh3.googleusercontent.com")) return url;
-
-  // 一般圖片
-  if (url.endsWith(".jpg") || url.endsWith(".png") || url.endsWith(".jpeg")) return url;
-
-  return "https://via.placeholder.com/300";
 }
 
-window.onload=()=>{init();loadArt();loadCourse();sh(1)}
+// 初始化學生信息（強制從服務器拉取最新數據）
 async function init(){
-  const s = await db.collection('students').doc(uid).get();
+  // 關鍵：加載時跳過緩存，獲取最新數據
+  const s = await db.collection('students').doc(uid).get({ source: 'server' });
+  if(!s.exists){
+    alert("學生信息不存在！");
+    location.href='index.html';
+    return;
+  }
   studentData = s.data();
-  document.getElementById('studentNameBox').innerText = `${studentData.name} 同學`;
+  document.getElementById('studentNameBox').innerText = `${studentData.name || '未知'} 同學`;
   document.getElementById('studentNameBox').style.display='block';
+  
   if(studentData.courseType){
     document.getElementById('courseTypeTag').innerText = `課程方案：${studentData.courseType}`;
     document.getElementById('courseTypeTag').style.display='inline-block';
   }
+  
+  // 更新頭像（增加異常處理）
+  const avtEl = document.getElementById('avt');
+  avtEl.src = studentData.avatar || 'https://via.placeholder.com/200';
+  avtEl.onerror = () => {
+    avtEl.src = 'https://via.placeholder.com/200'; // 加載失敗顯示默認圖
+  };
 }
+
+// 切換頁面
 function sh(x){
   document.getElementById('p1').style.display=x==1?'block':'none';
   document.getElementById('p2').style.display=x==2?'block':'none';
 }
-function closePrev(){document.getElementById('preview').style.display='none'}
-function prevImg(){event.stopPropagation();currentImg=(currentImg-1+artList.length)%artList.length;showArt(currentImg)}
-function nextImg(){event.stopPropagation();currentImg=(currentImg+1)%artList.length;showArt(currentImg)}
 
-function getWeek(d){const w=['日','一','二','三','四','五','六'];return w[new Date(d).getDay()]}
-function fmtTime(t){const [h,m]=t.split(':');const min=h*60+parseInt(m)+75;const eh=Math.floor(min/60),em=min%60;return `${t} - ${String(eh).padStart(2,0)}:${String(em).padStart(2,0)}`}
+// 關閉作品預覽
+function closePrev(){
+  document.getElementById('preview').style.display='none';
+}
 
+// 上一張作品
+function prevImg(){
+  event.stopPropagation();
+  currentImg=(currentImg-1+artList.length)%artList.length;
+  showArt(currentImg);
+}
+
+// 下一張作品
+function nextImg(){
+  event.stopPropagation();
+  currentImg=(currentImg+1)%artList.length;
+  showArt(currentImg);
+}
+
+// 獲取星期幾
+function getWeek(d){
+  const w=['日','一','二','三','四','五','六'];
+  return w[new Date(d).getDay()];
+}
+
+// 格式化課程時間（開始-結束）
+function fmtTime(t){
+  if(!t) return '未設定';
+  const [h,m]=t.split(':');
+  const min=h*60+parseInt(m)+75; // 75分鐘課程
+  const eh=Math.floor(min/60),em=min%60;
+  return `${t} - ${String(eh).padStart(2,0)}:${String(em).padStart(2,0)}`;
+}
+
+// 加載學生作品（強制最新）
 async function loadArt(){
   const wrap=document.getElementById('r');
   wrap.innerHTML='';
-  
-  // 頭像
-  document.getElementById('avt').src = getImageUrl(studentData.avatar);
+  const loadingEl = document.getElementById('artLoading');
+  loadingEl.style.display = 'block'; // 顯示加載提示
 
-  const res=await db.collection('artworks').where('studentId','==',uid).get();
-  artList=[];
-  res.forEach(d=>artList.push({...d.data()}));
-
-  let a=0;
-  const step=360/artList.length;
-  
-  artList.forEach((d,i)=>{
-    const img = getImageUrl(d.imageUrl);
-    wrap.innerHTML+=`<div class="art" style="transform:rotate(${a}deg) translate(190px) rotate(${-a}deg)" onclick="showArt(${i})"><img src="${img}" onerror="this.src='https://via.placeholder.com/140'"></div>`;
-    a+=step;
-  })
+  try {
+    // 關鍵：從服務器拉取最新作品數據
+    const res=await db.collection('artworks').where('studentId','==',uid).get({ source: 'server' });
+    artList=[];
+    res.forEach(d=>artList.push({ id: d.id, ...d.data() }));
+    
+    let a=0;
+    const step=artList.length > 0 ? 360/artList.length : 0;
+    
+    artList.forEach((d,i)=>{
+      const artEl = document.createElement('div');
+      artEl.className = 'art';
+      artEl.style.transform = `rotate(${a}deg) translate(190px) rotate(${-a}deg)`;
+      artEl.onclick = () => showArt(i);
+      
+      // 作品圖片（增加異常處理）
+      const imgEl = document.createElement('img');
+      imgEl.src = d.imageUrl || 'https://via.placeholder.com/140';
+      imgEl.onerror = () => {
+        imgEl.src = 'https://via.placeholder.com/140';
+      };
+      artEl.appendChild(imgEl);
+      wrap.appendChild(artEl);
+      
+      a+=step;
+    });
+  } catch (e) {
+    console.error("加載作品出錯：", e);
+    alert("作品加載失敗！");
+  } finally {
+    loadingEl.style.display = 'none'; // 隱藏加載提示
+  }
 }
 
+// 顯示作品預覽
 function showArt(i){
+  if(artList.length === 0) return;
   currentImg=i;
   const item=artList[i];
-  document.getElementById('previewImg').src=getImageUrl(item.imageUrl);
+  const previewImg = document.getElementById('previewImg');
+  
+  previewImg.src = item.imageUrl || 'https://via.placeholder.com/700x400';
+  previewImg.onerror = () => {
+    previewImg.src = 'https://via.placeholder.com/700x400';
+  };
+  
   document.getElementById('artDate').innerText=item.createDate||'未填寫';
   document.getElementById('artNote').innerText=item.note||'無';
   document.getElementById('preview').style.display='block';
 }
 
+// 加載課程進度（強制最新）
 async function loadCourse(){
   const list=document.getElementById('courseList');
   list.innerHTML='';
-  
-  const res=await db.collection('courses').where('studentId','==',uid).get();
-  const map={pending:"wait",completed:"ok",leave:"leave",absent:"absent",holiday:"holiday"};
-  const name={pending:"⏳ 未完成",completed:"✔️ 已完成",leave:"🏖️ 請假",absent:"🚫 缺席",holiday:"🌧️ 公眾假期"};
-  
-  let arr=[];
-  res.forEach(d=>arr.push({id:d.id,...d.data()}));
-  
-  const total=arr.length;
-  const completed=arr.filter(x=>x.status==='completed'||x.status==='absent').length;
-  const left=total-completed;
+  const loadingEl = document.getElementById('courseLoading');
+  loadingEl.style.display = 'block'; // 顯示加載提示
 
-  if(left < 3){
-    document.getElementById('reminderBox').style.display='block';
+  try {
+    // 關鍵：從服務器拉取最新課程數據
+    const res=await db.collection('courses').where('studentId','==',uid).get({ source: 'server' });
+    const map={pending:"wait",completed:"ok",leave:"leave",absent:"absent",holiday:"holiday"};
+    const name={pending:"⏳ 未完成",completed:"✔️ 已完成",leave:"🏖️ 請假",absent:"🚫 缺席",holiday:"🌧️ 公眾假期"};
+    
+    let arr=[];
+    res.forEach(d=>arr.push({id:d.id,...d.data()}));
+    // 按日期排序（最新的在前面）
+    arr.sort((a,b)=>new Date(b.date)-new Date(a.date));
+    
+    const total=arr.length;
+    const completed=arr.filter(x=>x.status==='completed'||x.status==='absent').length;
+    const left=total-completed;
+
+    // 續課提醒
+    if(left < 3 && total > 0){
+      document.getElementById('reminderBox').style.display='block';
+    }
+
+    // 上次上課時間
+    const last = arr.filter(x=>x.status==='completed').sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
+    if(last){
+      document.getElementById('lastClass').style.display='block';
+      document.getElementById('lastClass').innerText=`🗓️ 上次上課：${last.date}（${getWeek(last.date)}）`;
+    }
+
+    // 課程統計信息
+    document.getElementById('info').innerHTML=`
+      <div class="info-item">
+        <h3>總課程數</h3>
+        <h2>${total}</h2>
+      </div>
+      <div class="info-item">
+        <h3>已完成</h3>
+        <h2>${completed}</h2>
+      </div>
+      <div class="info-item">
+        <h3>剩餘課程</h3>
+        <h2>${left}</h2>
+      </div>
+    `;
+
+    // 渲染課程列表
+    arr.forEach(item=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML=`
+        <td>${item.date || '未設定'}</td>
+        <td>${fmtTime(item.time)}</td>
+        <td><span class="badge ${map[item.status] || 'wait'}">${name[item.status] || '未設定'}</span></td>
+        <td>
+          ${item.courseImg ? 
+            `<img src="${item.courseImg}" class="course-img" onerror="this.src='https://via.placeholder.com/120x80';">` : 
+            '無照片'}
+        </td>
+        <td>${item.note || '無'}</td>
+      `;
+      list.appendChild(tr);
+    });
+  } catch (e) {
+    console.error("加載課程出錯：", e);
+    alert("課程加載失敗！");
+  } finally {
+    loadingEl.style.display = 'none'; // 隱藏加載提示
   }
-
-  const last = arr.filter(x=>x.status==='completed').sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
-  if(last){
-    document.getElementById('lastClass').style.display='block';
-    document.getElementById('lastClass').innerText=`🗓️ 上次上課：${last.date}（${getWeek(last.date)}）`;
-  }
-
-  document.getElementById('info').innerHTML=`
-  <div class="info-item"><h3>📊 總課程</h3><h2>${total}</h2></div>
-  <div class="info-item"><h3>✅ 已完成</h3><h2>${completed}</h2></div>
-  <div class="info-item"><h3>⏳ 剩餘</h3><h2>${left}</h2></div>
-  `;
-
-  arr.sort((a,b)=>{
-    if(a.status==='pending' && b.status!=='pending') return -1;
-    if(a.status!=='pending' && b.status==='pending') return 1;
-    return new Date(a.date)-new Date(b.date);
-  });
-
-  arr.forEach(c=>{
-    const imgHtml = c.imgUrl ? `<img src="${getImageUrl(c.imgUrl)}" class="course-img" onerror="this.src='https://via.placeholder.com/120x80'">` : '';
-    list.innerHTML+=`<tr>
-      <td>${c.date}（${getWeek(c.date)}）</td>
-      <td>${fmtTime(c.time)}</td>
-      <td><span class="badge ${map[c.status]}">${name[c.status]}</span></td>
-      <td>${imgHtml}</td>
-      <td>${c.note||'-'}</td>
-    </tr>`;
-  });
 }
 </script>
 </body>
