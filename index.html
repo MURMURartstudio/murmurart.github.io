@@ -964,7 +964,7 @@ function selectCalendarDate(date){
   renderTimeTable();
 }
 
-// Google 風格時間表
+// Google 風格時間表 → 整點排版（你要求的新版本）
 function renderTimeTable(){
   const container = document.getElementById('timeTableView');
   container.innerHTML = '';
@@ -972,15 +972,35 @@ function renderTimeTable(){
   const targetDate = selectedDate;
   const todayCourses = allCourses.filter(x=>x.date===targetDate);
   
-  const timeGroups = {};
-  todayCourses.forEach(c => {
-    if (!timeGroups[c.time]) timeGroups[c.time] = [];
-    timeGroups[c.time].push(c);
+  // 建立 09:00 ~ 21:00 整點時段
+  const timeSlots = [];
+  for (let h = 9; h <= 21; h++) {
+    timeSlots.push(`${String(h).padStart(2, '0')}:00`);
+  }
+
+  // 把課程依照「整點」分組
+  const grouped = {};
+  timeSlots.forEach(time => {
+    grouped[time] = todayCourses.filter(c => {
+      return c.time.startsWith(time.slice(0, 2)); // 比對小時（9:xx 歸 9:00）
+    });
   });
 
-  const allTimes = Object.keys(timeGroups).sort();
-  allTimes.forEach(time => {
-    const courses = timeGroups[time];
+  // 逐行輸出：每整點一行
+  timeSlots.forEach(time => {
+    const courses = grouped[time];
+    if (courses.length === 0) {
+      // 空時段仍保留行高，保持排版整齊
+      container.innerHTML += `
+        <div class="time-row">
+          <div class="time-label">${time}</div>
+          <div class="time-slots"></div>
+        </div>
+      `;
+      return;
+    }
+
+    // 有課程就左右並排
     let html = `<div class="time-row">`;
     html += `<div class="time-label">${time}</div>`;
     html += `<div class="time-slots">`;
