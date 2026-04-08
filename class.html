@@ -40,7 +40,7 @@
     .prev,.next{position:absolute;top:50%;transform:translateY(-50%);font-size:22px;color:white;background:#879acb;padding:10px 16px;border-radius:10px;cursor:pointer}
     .prev{left:15px}
     .next{right:15px}
-    .close{position:absolute;top:18px;right:18px;font-size:22px;cursor:pointer;color:#777}
+    .close{position:absolute;top:18px;right:18px;font-size:22px;cursor-pointer;color:#777}
     .reminder{background:#fff3cd;color:#ff9800;padding:12px;border-radius:12px;text-align:center;margin-bottom:15px;font-weight:bold}
     .last-class{text-align:center;background:#e8edff;padding:10px;border-radius:12px;margin-bottom:10px;color:#879acb;font-weight:bold}
     .course-img{max-width:120px;max-height:80px;border-radius:8px;margin-top:6px}
@@ -144,47 +144,26 @@ let artList=[];
 let currentImg=0;
 let studentData=null;
 
-// ✅ 與老師端完全同步：支援 ImgBB / Google 相簿 / 直接圖片鏈接
-async function getDirectImageUrl(url) {
+// 圖片解析（與老師端完全同步，不會卡住）
+function getImageUrl(url) {
   if (!url) return "https://via.placeholder.com/300";
 
-  // 1. 處理 ImgBB 短鏈（ibb.co/xxx）
+  // ImgBB
   let imgbbMatch = url.match(/ibb\.co\/([a-zA-Z0-9]+)/);
   if (imgbbMatch) {
     return `https://i.ibb.co/${imgbbMatch[1]}/image.jpg`;
   }
-  
-  // 2. 處理 ImgBB 直接鏈接
-  if (url.includes("i.ibb.co") && (url.endsWith(".jpg") || url.endsWith(".png") || url.endsWith(".jpeg"))) {
-    return url;
-  }
+  if (url.includes("i.ibb.co")) return url;
 
-  // 3. 處理 Google Drive
+  // Google Drive
   let driveMatch = url.match(/drive\.google\.com\/file\/d\/([^\/\?]+)/);
   if (driveMatch) return "https://drive.google.com/thumbnail?id=" + driveMatch[1] + "&sz=w1000";
-  
-  // 4. 處理 Google 相簿短連結
-  if (url.includes("photos.app.goo.gl")) {
-    try {
-      const res = await fetch(url, { mode: "cors" });
-      const text = await res.text();
-      const regex = /https:\/\/lh3\.googleusercontent\.com\/[^\s"]+/;
-      const found = text.match(regex);
-      if (found) return found[0];
-    } catch (e) {
-      return "https://via.placeholder.com/300";
-    }
-  }
 
-  // 5. Google 相簿原生鏈接
-  if (url.includes("lh3.googleusercontent.com")) {
-    return url;
-  }
+  // Google 相簿
+  if (url.includes("lh3.googleusercontent.com")) return url;
 
-  // 6. 一般圖片格式
-  if (url.endsWith(".jpg") || url.endsWith(".png") || url.endsWith(".jpeg") || url.endsWith(".gif")) {
-    return url;
-  }
+  // 一般圖片
+  if (url.endsWith(".jpg") || url.endsWith(".png") || url.endsWith(".jpeg")) return url;
 
   return "https://via.placeholder.com/300";
 }
@@ -200,7 +179,10 @@ async function init(){
     document.getElementById('courseTypeTag').style.display='inline-block';
   }
 }
-function sh(x){document.getElementById('p1').style.display=x==1?'block':'none';document.getElementById('p2').style.display=x==2?'block':'none'}
+function sh(x){
+  document.getElementById('p1').style.display=x==1?'block':'none';
+  document.getElementById('p2').style.display=x==2?'block':'none';
+}
 function closePrev(){document.getElementById('preview').style.display='none'}
 function prevImg(){event.stopPropagation();currentImg=(currentImg-1+artList.length)%artList.length;showArt(currentImg)}
 function nextImg(){event.stopPropagation();currentImg=(currentImg+1)%artList.length;showArt(currentImg)}
@@ -209,38 +191,45 @@ function getWeek(d){const w=['日','一','二','三','四','五','六'];return w
 function fmtTime(t){const [h,m]=t.split(':');const min=h*60+parseInt(m)+75;const eh=Math.floor(min/60),em=min%60;return `${t} - ${String(eh).padStart(2,0)}:${String(em).padStart(2,0)}`}
 
 async function loadArt(){
-  const wrap=document.getElementById('r');wrap.innerHTML='';
-  // 學生頭像：即時同步老師上傳
-  const avatarUrl = await getDirectImageUrl(studentData.avatar);
-  document.getElementById('avt').src = avatarUrl;
+  const wrap=document.getElementById('r');
+  wrap.innerHTML='';
   
+  // 頭像
+  document.getElementById('avt').src = getImageUrl(studentData.avatar);
+
   const res=await db.collection('artworks').where('studentId','==',uid).get();
-  artList=[];res.forEach(d=>artList.push({...d.data()}));
-  let a=0;const step=360/artList.length;
+  artList=[];
+  res.forEach(d=>artList.push({...d.data()}));
+
+  let a=0;
+  const step=360/artList.length;
   
-  for(let d of artList){
-    const imgUrl = await getDirectImageUrl(d.imageUrl);
-    wrap.innerHTML+=`<div class="art" style="transform:rotate(${a}deg) translate(190px) rotate(${-a}deg)" onclick="showArt(${a})"><img src="${imgUrl}" onerror="this.src='https://via.placeholder.com/140'"></div>`;
+  artList.forEach((d,i)=>{
+    const img = getImageUrl(d.imageUrl);
+    wrap.innerHTML+=`<div class="art" style="transform:rotate(${a}deg) translate(190px) rotate(${-a}deg)" onclick="showArt(${i})"><img src="${img}" onerror="this.src='https://via.placeholder.com/140'"></div>`;
     a+=step;
-  }
+  })
 }
 
-async function showArt(i){
+function showArt(i){
   currentImg=i;
   const item=artList[i];
-  const imgUrl = await getDirectImageUrl(item.imageUrl);
-  document.getElementById('previewImg').src = imgUrl;
+  document.getElementById('previewImg').src=getImageUrl(item.imageUrl);
   document.getElementById('artDate').innerText=item.createDate||'未填寫';
   document.getElementById('artNote').innerText=item.note||'無';
   document.getElementById('preview').style.display='block';
 }
 
 async function loadCourse(){
-  const list=document.getElementById('courseList');list.innerHTML='';
+  const list=document.getElementById('courseList');
+  list.innerHTML='';
+  
   const res=await db.collection('courses').where('studentId','==',uid).get();
   const map={pending:"wait",completed:"ok",leave:"leave",absent:"absent",holiday:"holiday"};
   const name={pending:"⏳ 未完成",completed:"✔️ 已完成",leave:"🏖️ 請假",absent:"🚫 缺席",holiday:"🌧️ 公眾假期"};
-  let arr=[];res.forEach(d=>arr.push({id:d.id,...d.data()}));
+  
+  let arr=[];
+  res.forEach(d=>arr.push({id:d.id,...d.data()}));
   
   const total=arr.length;
   const completed=arr.filter(x=>x.status==='completed'||x.status==='absent').length;
@@ -268,9 +257,8 @@ async function loadCourse(){
     return new Date(a.date)-new Date(b.date);
   });
 
-  for(let c of arr){
-    const imgUrl = await getDirectImageUrl(c.imgUrl);
-    const imgHtml = c.imgUrl ? `<img src="${imgUrl}" class="course-img" onerror="this.src='https://via.placeholder.com/120x80'">` : '';
+  arr.forEach(c=>{
+    const imgHtml = c.imgUrl ? `<img src="${getImageUrl(c.imgUrl)}" class="course-img" onerror="this.src='https://via.placeholder.com/120x80'">` : '';
     list.innerHTML+=`<tr>
       <td>${c.date}（${getWeek(c.date)}）</td>
       <td>${fmtTime(c.time)}</td>
@@ -278,7 +266,7 @@ async function loadCourse(){
       <td>${imgHtml}</td>
       <td>${c.note||'-'}</td>
     </tr>`;
-  }
+  });
 }
 </script>
 </body>
