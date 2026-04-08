@@ -55,8 +55,9 @@
     .holiday{background:#d1ecf1;color:#17a2b8}
     .course-package{display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap}
     .package-btn{padding:10px 14px;background:#e8edff;border:none;border-radius:8px;cursor:pointer}
-    .preview{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:90%;max-width:800px;background:white;border-radius:20px;padding:25px;display:none;z-index:9999}
-    .preview img{max-width:100%;max-height:400;border-radius:12px}
+    /* 修改：放大作品預覽容器和圖片尺寸 */
+    .preview{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:95%;max-width:1200px;background:white;border-radius:20px;padding:25px;display:none;z-index:9999}
+    .preview img{max-width:100%;max-height:70vh;border-radius:12px;object-fit:contain}
     .prev,.next{position:absolute;top:50%;transform:translateY(-50%);font-size:24px;color:white;background:#879acb;padding:10px 18px;border-radius:10px;cursor:pointer}
     .prev{left:15px}
     .next{right:15px}
@@ -179,7 +180,7 @@
     <input class="input" id="sname" placeholder="姓名">
     <input class="input" id="sno" placeholder="學生編號">
     <input class="input" id="sphone" placeholder="家長電話">
-    <input class="input" id="savatar" placeholder="貼上 Google 相簿大頭貼連結">
+    <input class="input" id="savatar" placeholder="貼上圖片連結（ImgBB/Google 相簿都可）">
     <select class="input" id="courseType">
       <option value="">課程方案</option>
       <option value="常規班">常規班</option>
@@ -202,7 +203,7 @@
     <span class="close" onclick="closeAll()">&times;</span>
     <h3>上傳作品</h3>
     <select class="input" id="artStudentSelect"></select>
-    <input class="input" id="img" placeholder="貼上 Google 相簿作品圖片連結">
+    <input class="input" id="img" placeholder="貼上圖片連結（ImgBB/Google 相簿都可）">
     <input class="input" id="cdate" type="date">
     <input class="input" id="artNote" placeholder="備註">
     <button class="btn" onclick="saveArt()">儲存</button>
@@ -218,7 +219,7 @@
     <input class="input" type="time" step="300" id="ctime" onchange="calcEndTime()">
     <div id="endTimeShow" style="margin:0 0 15px;color:#879acb"></div>
     <textarea class="input" id="cnote" placeholder="備註"></textarea>
-    <input class="input" id="courseImgUrl" placeholder="貼上 Google 相簿課程照片連結">
+    <input class="input" id="courseImgUrl" placeholder="貼上圖片連結（ImgBB/Google 相簿都可）">
     <select class="input" id="cstatus">
       <option value="pending">未完成</option>
       <option value="completed">已完成</option>
@@ -280,16 +281,53 @@ let currentMakeupId = null;
 let studentList = [];
 let artList = [];
 let courseRaw = [];
+let currentImg = 0;
 
-// ✅ 修复 Google 相册图片解析（唯一新增的函数，不影响任何 Firebase）
-function fixGoogleImage(url) {
+// ✅ 增強：優化圖片鏈接處理邏輯，確保所有圖片都能正確顯示
+async function getDirectImageUrl(url) {
   if (!url) return "https://via.placeholder.com/300";
-  const regex = /(?:drive\.google\.com\/file\/d\/|photos\.app\.goo\.gl\/|goo\.gl\/)([a-zA-Z0-9_-]+)/;
-  const match = url.match(regex);
-  if (match && match[1]) {
-    return "https://drive.google.com/uc?export=view&id=" + match[1];
+
+  // 1. 處理 ImgBB 短鏈（ibb.co/xxx）
+  let imgbbMatch = url.match(/ibb\.co\/([a-zA-Z0-9]+)/);
+  if (imgbbMatch) {
+    return `https://i.ibb.co/${imgbbMatch[1]}/image.jpg`;
   }
-  return url;
+  
+  // 2. 處理 ImgBB 直接鏈接（i.ibb.co/xxx.jpg）- 直接返回
+  if (url.includes("i.ibb.co") && (url.endsWith(".jpg") || url.endsWith(".png") || url.endsWith(".jpeg"))) {
+    return url;
+  }
+
+  // 3. 處理 Google Drive
+  let driveMatch = url.match(/drive\.google\.com\/file\/d\/([^\/\?]+)/);
+  if (driveMatch) return "https://drive.google.com/thumbnail?id=" + driveMatch[1] + "&sz=w1000";
+  
+  // 4. 處理 Google 相簿短連結（photos.app.goo.gl）
+  if (url.includes("photos.app.goo.gl")) {
+    try {
+      const res = await fetch(url, { mode: "cors" });
+      const text = await res.text();
+      const regex = /https:\/\/lh3\.googleusercontent\.com\/[^\s"]+/;
+      const found = text.match(regex);
+      if (found) return found[0];
+    } catch (e) {
+      // 失敗時返回默認占位圖
+      return "https://via.placeholder.com/300";
+    }
+  }
+
+  // 5. 處理 Google 相簿直接鏈接（lh3.googleusercontent.com）
+  if (url.includes("lh3.googleusercontent.com")) {
+    return url;
+  }
+
+  // 6. 其他直接圖片鏈接（.jpg/.png 結尾）直接返回
+  if (url.endsWith(".jpg") || url.endsWith(".png") || url.endsWith(".jpeg") || url.endsWith(".gif")) {
+    return url;
+  }
+
+  // 默認返回占位圖
+  return "https://via.placeholder.com/300";
 }
 
 function switchTab(role) {
@@ -354,9 +392,11 @@ async function loadAllStudents() {
     s.left = left;
     s.warning = left < 3;
     studentList.push(s);
+    // ✅ 修復：學生管理頭像使用統一的圖片處理函數，並添加錯誤處理
+    const img = await getDirectImageUrl(s.avatar);
     list.innerHTML+=`
     <div class="stu ${s.warning?'warning':''}">
-      <img src="${fixGoogleImage(s.avatar)}">
+      <img src="${img}" onerror="this.src='https://via.placeholder.com/85'" alt="${s.name} 的頭像">
       <h3>${s.name}</h3>
       <p>編號：${s.studentNo||'-'}</p>
       <p>家長：${s.parentPhone||'-'}</p>
@@ -411,7 +451,7 @@ function updateStats(){
 <div class="stat"><h3>完成率</h3><h2>${rate}%</h2></div>`;
 }
 
-function renderCourseList(arr){
+async function renderCourseList(arr){
   const b=document.getElementById('courseList');b.innerHTML='';
   const map={pending:'wait',completed:'ok',leave:'leave',absent:'absent',holiday:'holiday'};
   const txt={pending:'未完成',completed:'已完成',leave:'請假',absent:'缺席',holiday:'公眾假期'};
@@ -420,8 +460,9 @@ function renderCourseList(arr){
     if(a.status!=='pending'&&b.status==='pending')return 1;
     return new Date(a.date)-new Date(b.date);
   });
-  arr.forEach(c=>{
-    const imgHtml = c.imgUrl ? `<img src="${fixGoogleImage(c.imgUrl)}" class="course-img">` : '';
+  for(let c of arr){
+    const imgUrl = await getDirectImageUrl(c.imgUrl);
+    const imgHtml = c.imgUrl ? `<img src="${imgUrl}" class="course-img" onerror="this.src='https://via.placeholder.com/120x80'" alt="課程照片">` : '';
     b.innerHTML+=`<tr>
 <td><input type="checkbox" class="courseCheck" data-id="${c.id}"></td>
 <td>${c.date}（${getWeek(c.date)}）</td>
@@ -437,7 +478,7 @@ function renderCourseList(arr){
   ` : ''}
 </td>
 </tr>`;
-  });
+  }
 }
 
 function openMakeup(cid){
@@ -526,13 +567,21 @@ async function loadArtList(){
   if(!currentStudentId)return;
   const g=document.getElementById('rotateWrap');g.innerHTML='';
   const s=await db.collection('students').doc(currentStudentId).get();
-  document.getElementById('mainAvatar').src=fixGoogleImage(s.data().avatar);
+  // ✅ 修復：作品管理中間頭像使用統一的圖片處理函數
+  const avatarUrl = await getDirectImageUrl(s.data().avatar);
+  document.getElementById('mainAvatar').src = avatarUrl;
+  // 給大頭貼加錯誤處理
+  document.getElementById('mainAvatar').setAttribute('onerror', "this.src='https://via.placeholder.com/200'");
+  document.getElementById('mainAvatar').setAttribute('alt', s.data().name + ' 的頭像');
+  
   const arts=await db.collection('artworks').where('studentId','==',currentStudentId).get();
   artList=[];arts.forEach(d=>artList.push({id:d.id,...d.data()}));
   let a=0;const step=360/artList.length;
-  artList.forEach((d,i)=>{
-    g.innerHTML+=`<div class="art" style="transform:rotate(${a}deg) translate(220px) rotate(${-a}deg)" onclick="showPreview(${i})"><img src="${fixGoogleImage(d.imageUrl)}"></div>`;a+=step;
-  });
+  for(let d of artList){
+    const img = await getDirectImageUrl(d.imageUrl);
+    g.innerHTML+=`<div class="art" style="transform:rotate(${a}deg) translate(220px) rotate(${-a}deg)" onclick="showPreview(${a})"><img src="${img}" onerror="this.src='https://via.placeholder.com/160'" alt="學生作品"></div>`;
+    a+=step;
+  }
 }
 function openArt(){ if(!isTeacher)return; document.getElementById('artModal').style.display='flex'; }
 async function saveArt(){
@@ -545,10 +594,15 @@ async function saveArt(){
   await db.collection('artworks').add({studentId:sid,imageUrl:url,createDate:d,note:n,time:new Date()});
   closeAll();loadArtList();
 }
-function showPreview(i){
+async function showPreview(i){
   currentImg=i;
   const item=artList[i];
-  document.getElementById('previewImg').src=fixGoogleImage(item.imageUrl);
+  // ✅ 優化：作品預覽使用高清圖片鏈接
+  const highResUrl = await getDirectImageUrl(item.imageUrl);
+  document.getElementById('previewImg').src = highResUrl;
+  // 預覽圖加錯誤處理
+  document.getElementById('previewImg').setAttribute('onerror', "this.src='https://via.placeholder.com/1200x800'");
+  document.getElementById('previewImg').setAttribute('alt', '學生作品預覽');
   document.getElementById('pDate').textContent=item.createDate;
   document.getElementById('pNote').textContent=item.note||'無';
   document.getElementById('preview').style.display='block';
@@ -590,7 +644,7 @@ async function saveCourse(){
   const imgUrl=document.getElementById('courseImgUrl').value;
   const s=document.getElementById('cstatus').value;
   if(!sid||!d||!t)return;
-  const data={studentId:sid,date:d,time:t,note:nt,status:s,imgUrl};
+  const data={studentId:sid,date:d,time:t,note:nt,status:s,imgUrl:imgUrl};
   if(currentCourseId) await db.collection('courses').doc(currentCourseId).update(data);
   else await db.collection('courses').add(data);
   closeAll();loadCourseList();loadAllStudents();
@@ -633,7 +687,33 @@ async function quickPackage(count){
   alert('完成');
   closeAll();loadCourseList();
 }
-function searchStudent(){const kw=document.getElementById('searchStudent').value.toLowerCase();const list=document.getElementById('stuList');list.innerHTML='';studentList.filter(s=>s.name.toLowerCase().includes(kw)||(s.parentPhone||'').includes(kw)||(s.studentNo||'').toLowerCase().includes(kw)).forEach(s=>{list.innerHTML+=`<div class="stu ${s.warning?'warning':''}"><img src="${fixGoogleImage(s.avatar)}"><h3>${s.name}</h3><p>編號：${s.studentNo||'-'}</p><p>家長：${s.parentPhone||'-'}</p><p>方案：${s.courseType||'-'}</p><span class="leftTag">剩餘 ${s.left||0} 堂</span>${s.warning?'<p style="color:red;font-weight:bold;margin-top:6px">即將續課</p>':''}<div class="action"><button onclick="selectStudent('${s.id}')">選取</button>${isTeacher ? `<button onclick="editStu('${s.id}')">編輯</button><button onclick="delStu('${s.id}')">刪除</button>` : ''}</div></div>`;})}
+async function searchStudent(){
+  const kw=document.getElementById('searchStudent').value.toLowerCase();
+  const list=document.getElementById('stuList');list.innerHTML='';
+  const filtered = studentList.filter(s=>
+    s.name.toLowerCase().includes(kw)||
+    (s.parentPhone||'').includes(kw)||
+    (s.studentNo||'').toLowerCase().includes(kw)
+  );
+  for(let s of filtered){
+    // ✅ 修復：搜尋結果中的學生頭像也使用統一處理
+    const img = await getDirectImageUrl(s.avatar);
+    list.innerHTML+=`
+    <div class="stu ${s.warning?'warning':''}">
+      <img src="${img}" onerror="this.src='https://via.placeholder.com/85'" alt="${s.name} 的頭像">
+      <h3>${s.name}</h3>
+      <p>編號：${s.studentNo||'-'}</p>
+      <p>家長：${s.parentPhone||'-'}</p>
+      <p>方案：${s.courseType||'-'}</p>
+      <span class="leftTag">剩餘 ${s.left||0} 堂</span>
+      ${s.warning?'<p style="color:red;font-weight:bold;margin-top:6px">即將續課</p>':''}
+      <div class="action">
+        <button onclick="selectStudent('${s.id}')">選取</button>
+        ${isTeacher ? `<button onclick="editStu('${s.id}')">編輯</button><button onclick="delStu('${s.id}')">刪除</button>` : ''}
+      </div>
+    </div>`;
+  }
+}
 function exportCSV(){if(!isTeacher)return;let csv = "姓名,學生編號,家長電話,課程方案,剩餘堂數,學校,出生年份,性別,備註\n";studentList.forEach(s=>{csv += `"${s.name}","${s.studentNo||''}","${s.parentPhone||''}","${s.courseType||''}","${s.left||0}","${s.school||''}","${s.birthYear||''}","${s.gender||''}","${s.note||''}"\n`;});const blob = new Blob([csv],{type:"text/csv"});const url = URL.createObjectURL(blob);const a = document.createElement("a");a.href = url;a.download = "學生資料.csv";a.click();}
 function logout(){location.reload()}
 </script>
