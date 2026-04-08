@@ -40,7 +40,7 @@
     .prev,.next{position:absolute;top:50%;transform:translateY(-50%);font-size:22px;color:white;background:#879acb;padding:10px 16px;border-radius:10px;cursor:pointer}
     .prev{left:15px}
     .next{right:15px}
-    .close{position:absolute;top:18px;right:18px;font-size:22px;cursor-pointer;color:#777}
+    .close{position:absolute;top:18px;right:18px;font-size:22px;cursor:pointer;color:#777}
     .reminder{background:#fff3cd;color:#ff9800;padding:12px;border-radius:12px;text-align:center;margin-bottom:15px;font-weight:bold}
     .last-class{text-align:center;background:#e8edff;padding:10px;border-radius:12px;margin-bottom:10px;color:#879acb;font-weight:bold}
     .course-img{max-width:120px;max-height:80px;border-radius:8px;margin-top:6px}
@@ -79,7 +79,7 @@
   <div id="p1">
     <h2 style="text-align:center;color:#879acb;margin:10px 0 20px">🎨 學生作品</h2>
     <div class="gallery">
-      <img class="avatar" id="avt" src="https://via.placeholder.com/200">
+      <img class="avatar" id="avt" src="https://via.placeholder.com/200" onerror="this.src='https://via.placeholder.com/170'">
       <div class="rotate" id="r"></div>
     </div>
   </div>
@@ -118,7 +118,7 @@
 <div class="preview" id="preview">
   <span class="close" onclick="closePrev()">&times;</span>
   <div class="prev" onclick="prevImg()">&lt;</div>
-  <img id="previewImg">
+  <img id="previewImg" onerror="this.src='https://via.placeholder.com/700x400'">
   <div style="margin-top:10px;text-align:center">
     <p style="margin:4px"><strong>創作日期：</strong><span id="artDate"></span></p>
     <p style="margin:4px"><strong>備註：</strong><span id="artNote"></span></p>
@@ -144,15 +144,49 @@ let artList=[];
 let currentImg=0;
 let studentData=null;
 
-// ✅ 修复 Google 相册图片
-function fixGoogleImage(url) {
+// ✅ 與老師端完全同步：支援 ImgBB / Google 相簿 / 直接圖片鏈接
+async function getDirectImageUrl(url) {
   if (!url) return "https://via.placeholder.com/300";
-  const regex = /(?:drive\.google\.com\/file\/d\/|photos\.app\.goo\.gl\/|goo\.gl\/)([a-zA-Z0-9_-]+)/;
-  const match = url.match(regex);
-  if (match && match[1]) {
-    return "https://drive.google.com/uc?export=view&id=" + match[1];
+
+  // 1. 處理 ImgBB 短鏈（ibb.co/xxx）
+  let imgbbMatch = url.match(/ibb\.co\/([a-zA-Z0-9]+)/);
+  if (imgbbMatch) {
+    return `https://i.ibb.co/${imgbbMatch[1]}/image.jpg`;
   }
-  return url;
+  
+  // 2. 處理 ImgBB 直接鏈接
+  if (url.includes("i.ibb.co") && (url.endsWith(".jpg") || url.endsWith(".png") || url.endsWith(".jpeg"))) {
+    return url;
+  }
+
+  // 3. 處理 Google Drive
+  let driveMatch = url.match(/drive\.google\.com\/file\/d\/([^\/\?]+)/);
+  if (driveMatch) return "https://drive.google.com/thumbnail?id=" + driveMatch[1] + "&sz=w1000";
+  
+  // 4. 處理 Google 相簿短連結
+  if (url.includes("photos.app.goo.gl")) {
+    try {
+      const res = await fetch(url, { mode: "cors" });
+      const text = await res.text();
+      const regex = /https:\/\/lh3\.googleusercontent\.com\/[^\s"]+/;
+      const found = text.match(regex);
+      if (found) return found[0];
+    } catch (e) {
+      return "https://via.placeholder.com/300";
+    }
+  }
+
+  // 5. Google 相簿原生鏈接
+  if (url.includes("lh3.googleusercontent.com")) {
+    return url;
+  }
+
+  // 6. 一般圖片格式
+  if (url.endsWith(".jpg") || url.endsWith(".png") || url.endsWith(".jpeg") || url.endsWith(".gif")) {
+    return url;
+  }
+
+  return "https://via.placeholder.com/300";
 }
 
 window.onload=()=>{init();loadArt();loadCourse();sh(1)}
@@ -176,19 +210,26 @@ function fmtTime(t){const [h,m]=t.split(':');const min=h*60+parseInt(m)+75;const
 
 async function loadArt(){
   const wrap=document.getElementById('r');wrap.innerHTML='';
-  document.getElementById('avt').src=fixGoogleImage(studentData.avatar);
+  // 學生頭像：即時同步老師上傳
+  const avatarUrl = await getDirectImageUrl(studentData.avatar);
+  document.getElementById('avt').src = avatarUrl;
+  
   const res=await db.collection('artworks').where('studentId','==',uid).get();
   artList=[];res.forEach(d=>artList.push({...d.data()}));
   let a=0;const step=360/artList.length;
-  artList.forEach((d,i)=>{
-    wrap.innerHTML+=`<div class="art" style="transform:rotate(${a}deg) translate(190px) rotate(${-a}deg)" onclick="showArt(${i})"><img src="${fixGoogleImage(d.imageUrl)}"></div>`;
+  
+  for(let d of artList){
+    const imgUrl = await getDirectImageUrl(d.imageUrl);
+    wrap.innerHTML+=`<div class="art" style="transform:rotate(${a}deg) translate(190px) rotate(${-a}deg)" onclick="showArt(${a})"><img src="${imgUrl}" onerror="this.src='https://via.placeholder.com/140'"></div>`;
     a+=step;
-  })
+  }
 }
-function showArt(i){
+
+async function showArt(i){
   currentImg=i;
   const item=artList[i];
-  document.getElementById('previewImg').src=fixGoogleImage(item.imageUrl);
+  const imgUrl = await getDirectImageUrl(item.imageUrl);
+  document.getElementById('previewImg').src = imgUrl;
   document.getElementById('artDate').innerText=item.createDate||'未填寫';
   document.getElementById('artNote').innerText=item.note||'無';
   document.getElementById('preview').style.display='block';
@@ -227,8 +268,9 @@ async function loadCourse(){
     return new Date(a.date)-new Date(b.date);
   });
 
-  arr.forEach(c=>{
-    const imgHtml = c.imgUrl ? `<img src="${fixGoogleImage(c.imgUrl)}" class="course-img">` : '';
+  for(let c of arr){
+    const imgUrl = await getDirectImageUrl(c.imgUrl);
+    const imgHtml = c.imgUrl ? `<img src="${imgUrl}" class="course-img" onerror="this.src='https://via.placeholder.com/120x80'">` : '';
     list.innerHTML+=`<tr>
       <td>${c.date}（${getWeek(c.date)}）</td>
       <td>${fmtTime(c.time)}</td>
@@ -236,7 +278,7 @@ async function loadCourse(){
       <td>${imgHtml}</td>
       <td>${c.note||'-'}</td>
     </tr>`;
-  });
+  }
 }
 </script>
 </body>
