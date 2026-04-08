@@ -218,6 +218,92 @@
       .navbar,.modal,.preview,.add,.batch-bar,table,.stats,.search,.export-btn{display:none!important;}
       .day-schedule{display:block!important;border:none!important;box-shadow:none!important;}
     }
+
+    /* 分頁樣式 */
+    .pagination{
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:10px;
+      margin:20px 0;
+    }
+    .page-btn{
+      padding:8px 14px;
+      background:#e8edff;
+      color:#555;
+      border:none;
+      border-radius:10px;
+      cursor:pointer;
+    }
+    .page-btn:disabled{
+      opacity:0.5;
+      cursor:not-allowed;
+    }
+    .page-info{
+      font-size:14px;
+      color:#666;
+    }
+
+    /* 新月曆排版 */
+    .calendar-wrapper{
+      display:flex;
+      gap:20px;
+      margin-bottom:20px;
+      align-items:flex-start;
+    }
+    .calendar-left{
+      width:320px;
+      background:white;
+      padding:15px;
+      border-radius:12px;
+      box-shadow:0 2px 8px rgba(0,0,0,0.05);
+    }
+    .calendar-right{
+      flex:1;
+      background:white;
+      padding:15px;
+      border-radius:12px;
+      box-shadow:0 2px 8px rgba(0,0,0,0.05);
+      max-height:70vh;
+      overflow-y:auto;
+    }
+    .month-selector{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:10px;
+    }
+    .month-selector select{
+      padding:6px 10px;
+      border-radius:8px;
+      border:1px solid #e8edff;
+    }
+    .time-row{
+      display:flex;
+      align-items:center;
+      padding:8px 10px;
+      border-bottom:1px solid #f0f0f0;
+      min-height:50px;
+    }
+    .time-label{
+      width:70px;
+      font-weight:bold;
+      color:#879acb;
+    }
+    .time-slots{
+      flex:1;
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+    }
+    .course-block{
+      padding:6px 10px;
+      background:#e8edff;
+      border-radius:8px;
+      font-size:12px;
+      border-left:3px solid #879acb;
+      white-space:nowrap;
+    }
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -251,7 +337,6 @@
       <div class="logo">MURMUR ART 後台</div>
       <div class="menu">
         <a onclick="show(1)">學生管理</a>
-        <a onclick="show(9)">續費提醒</a>
         <a onclick="show(2)">作品管理</a>
         <a onclick="show(3)">課程管理</a>
         <a onclick="logout()">登出</a>
@@ -266,13 +351,10 @@
         <input class="search" id="searchStudent" placeholder="搜尋姓名/電話/編號" oninput="searchStudent()" style="margin:0;flex:1">
         <button class="btn" style="width:auto;padding:8px 15px" onclick="addStu()">+ 新增學生</button>
         <button class="export-btn" onclick="exportCSV()">匯出 CSV</button>
+        <button class="btn" style="width:auto;padding:8px 15px;background:#6c757d" onclick="sortStudentAZ()">A→Z 排序</button>
       </div>
       <div class="grid" id="stuList"></div>
-    </div>
-
-    <div id="page9" style="display:none">
-      <h2 style="margin-bottom:10px">⚠️ 即將續費學生</h2>
-      <div class="warningPage" id="warningList"></div>
+      <div id="stuPagination" class="pagination"></div>
     </div>
 
     <div id="page2" style="display:none">
@@ -287,6 +369,7 @@
         </div>
         <div class="art-grid" id="artGrid"></div>
       </div>
+      <div id="artPagination" class="pagination"></div>
       <div class="add" onclick="openArt()">+</div>
     </div>
 
@@ -309,9 +392,19 @@
       <button class="btn" style="width:auto;padding:8px 15px" onclick="addCourse()">+ 新增課程</button>
       <button class="export-btn" onclick="printSchedule()">下載／列印時間表</button>
 
-      <h3 style="margin:20px 0 10px;color:#879acb">📅 本月課程月曆</h3>
-      <div id="calendar" class="calendar"></div>
-      <div id="daySchedule" class="day-schedule" style="display:none;"></div>
+      <div class="calendar-wrapper">
+        <div class="calendar-left">
+          <div class="month-selector">
+            <span>📅 選擇月份</span>
+            <select id="monthSelect" onchange="onMonthChange()"></select>
+          </div>
+          <div id="smallCalendar" class="calendar"></div>
+        </div>
+        <div class="calendar-right">
+          <h4 style="margin-bottom:10px;color:#879acb">⏰ 當日課程時間表</h4>
+          <div id="timeTableView"></div>
+        </div>
+      </div>
 
       <div class="stats" id="courseStats"></div>
       <div class="batch-bar">
@@ -337,6 +430,7 @@
         </thead>
         <tbody id="courseList"></tbody>
       </table>
+      <div id="coursePagination" class="pagination"></div>
     </div>
   </div>
 </div>
@@ -451,6 +545,16 @@ let courseRaw = [];
 let currentImg = 0;
 let allCourses = [];
 
+// 分頁設定
+const PER_PAGE = 20;
+let stuPage = 1;
+let artPage = 1;
+let coursePage = 1;
+
+// 新月曆
+let selectedYear = new Date().getFullYear();
+let selectedMonth = new Date().getMonth();
+
 async function getDirectImageUrl(url) {
   if (!url) return "https://via.placeholder.com/300";
   let imgbbMatch = url.match(/ibb\.co\/([a-zA-Z0-9]+)/);
@@ -481,6 +585,7 @@ function teacherLogin() {
     document.getElementById('main').style.display = 'block';
     loadAllStudents();
     loadAllCoursesForCalendar();
+    initMonthSelector();
   } else alert('密碼錯誤');
 }
 
@@ -502,15 +607,10 @@ async function parentLogin() {
 
 function show(n) {
   document.getElementById('page1').style.display=n==1?'block':'none';
-  document.getElementById('page9').style.display=n==9?'block':'none';
   document.getElementById('page2').style.display=n==2?'block':'none';
   document.getElementById('page3').style.display=n==3?'block':'none';
-  if(n==2) loadArtList();
-  if(n==3) {
-    loadCourseList();
-    buildMonthCalendar();
-  }
-  if(n==9) loadWarningList();
+  if(n==2) { artPage=1; loadArtList(); }
+  if(n==3) { coursePage=1; loadCourseList(); renderSmallCalendar(); renderTimeTable(); }
 }
 
 async function getLeftCount(sid){
@@ -521,49 +621,82 @@ async function getLeftCount(sid){
   return total - done;
 }
 
+// 學生排序 A→Z 英文優先
+function sortStudentAZ(){
+  studentList.sort((a,b)=>{
+    const nameA = a.name || '';
+    const nameB = b.name || '';
+    const isLetterA = /^[A-Za-z]/.test(nameA);
+    const isLetterB = /^[A-Za-z]/.test(nameB);
+    if(isLetterA && !isLetterB) return -1;
+    if(!isLetterA && isLetterB) return 1;
+    return nameA.localeCompare(nameB, 'zh');
+  });
+  stuPage=1;
+  renderStudentPage();
+}
+
+// 學生分頁
 async function loadAllStudents() {
   const snap = await db.collection('students').get();
   studentList=[];
-  const list=document.getElementById('stuList');
-  list.innerHTML='';
   for(let doc of snap.docs){
     const s={id:doc.id,...doc.data()};
     const left = await getLeftCount(s.id);
     s.left = left;
     s.warning = left < 3;
     studentList.push(s);
-    const img = await getDirectImageUrl(s.avatar);
-    list.innerHTML+=`
-    <div class="stu ${s.warning?'warning':''}">
-      <img src="${img}" onerror="this.src='https://via.placeholder.com/85'" alt="${s.name}">
-      <h3>${s.name}</h3>
-      <p>編號：${s.studentNo||'-'}</p>
-      <p>家長：${s.parentPhone||'-'}</p>
-      <p>方案：${s.courseType||'-'}</p>
-      <span class="leftTag">剩餘 ${left} 堂</span>
-      ${s.warning?'<p style="color:red;font-weight:bold;margin-top:6px">即將續課</p>':''}
-      <div class="action">
-        <button onclick="selectStudent('${s.id}')">選取</button>
-        ${isTeacher ? `<button onclick="editStu('${s.id}')">編輯</button><button onclick="delStu('${s.id}')">刪除</button>` : ''}
-      </div>
-    </div>`;
   }
+  sortStudentAZ();
   fillStudentSelects();
 }
 
-async function loadWarningList(){
-  const w = document.getElementById('warningList');
-  w.innerHTML='';
-  for(let s of studentList){
-    if(s.warning){
-      w.innerHTML+=`
-      <div class="warningItem">
-        <div><strong>${s.name}</strong>｜方案：${s.courseType||'-'}</div>
-        <div style="color:red;font-weight:bold">剩餘 ${s.left} 堂</div>
-      </div>`;
-    }
+function renderStudentPage(){
+  const totalPage = Math.ceil(studentList.length / PER_PAGE);
+  const start = (stuPage-1)*PER_PAGE;
+  const end = start + PER_PAGE;
+  const show = studentList.slice(start, end);
+
+  const list=document.getElementById('stuList');
+  list.innerHTML='';
+
+  for(let s of show){
+    renderStudentItem(s);
   }
-  if(w.innerHTML==='') w.innerHTML='<div style="text-align:center;padding:10px">暫無即將續費學生</div>';
+
+  const p = document.getElementById('stuPagination');
+  p.innerHTML = `
+    <button class="page-btn" onclick="changeStuPage(${stuPage-1})" ${stuPage<=1?'disabled':''}>上一頁</button>
+    <span class="page-info">第 ${stuPage} / ${totalPage} 頁</span>
+    <button class="page-btn" onclick="changeStuPage(${stuPage+1})" ${stuPage>=totalPage?'disabled':''}>下一頁</button>
+  `;
+}
+
+function changeStuPage(p){
+  if(p<1) return;
+  const total = Math.ceil(studentList.length/PER_PAGE);
+  if(p>total) return;
+  stuPage = p;
+  renderStudentPage();
+}
+
+async function renderStudentItem(s){
+  const img = await getDirectImageUrl(s.avatar);
+  const list=document.getElementById('stuList');
+  list.innerHTML+=`
+  <div class="stu ${s.warning?'warning':''}">
+    <img src="${img}" onerror="this.src='https://via.placeholder.com/85'" alt="${s.name}">
+    <h3>${s.name}</h3>
+    <p>編號：${s.studentNo||'-'}</p>
+    <p>家長：${s.parentPhone||'-'}</p>
+    <p>方案：${s.courseType||'-'}</p>
+    <span class="leftTag">剩餘 ${s.left} 堂</span>
+    ${s.warning?'<p style="color:red;font-weight:bold;margin-top:6px">即將續課</p>':''}
+    <div class="action">
+      <button onclick="selectStudent('${s.id}')">選取</button>
+      ${isTeacher ? `<button onclick="editStu('${s.id}')">編輯</button><button onclick="delStu('${s.id}')">刪除</button>` : ''}
+    </div>
+  </div>`;
 }
 
 function fillStudentSelects() {
@@ -591,15 +724,23 @@ function updateStats(){
 }
 
 async function renderCourseList(arr){
+  const totalPage = Math.ceil(arr.length / PER_PAGE);
+  const start = (coursePage-1)*PER_PAGE;
+  const end = start + PER_PAGE;
+  const show = arr.slice(start, end);
+
   const b=document.getElementById('courseList');b.innerHTML='';
   const map={pending:'wait',completed:'ok',leave:'leave',absent:'absent',holiday:'holiday'};
   const txt={pending:'未完成',completed:'已完成',leave:'請假',absent:'缺席',holiday:'公眾假期'};
-  arr.sort((a,b)=>{
+  
+  let sorted = [...show];
+  sorted.sort((a,b)=>{
     if(a.status==='pending'&&b.status!=='pending')return -1;
     if(a.status!=='pending'&&b.status==='pending')return 1;
     return new Date(a.date)-new Date(b.date);
   });
-  for(let c of arr){
+
+  for(let c of sorted){
     const imgUrl = await getDirectImageUrl(c.imgUrl);
     const imgHtml = c.imgUrl ? `<img src="${imgUrl}" class="course-img" onerror="this.src='https://via.placeholder.com/120x80'" alt="課程照片">` : '';
     b.innerHTML+=`<tr>
@@ -618,6 +759,21 @@ async function renderCourseList(arr){
 </td>
 </tr>`;
   }
+
+  const p = document.getElementById('coursePagination');
+  p.innerHTML = `
+    <button class="page-btn" onclick="changeCoursePage(${coursePage-1})" ${coursePage<=1?'disabled':''}>上一頁</button>
+    <span class="page-info">第 ${coursePage} / ${totalPage} 頁</span>
+    <button class="page-btn" onclick="changeCoursePage(${coursePage+1})" ${coursePage>=totalPage?'disabled':''}>下一頁</button>
+  `;
+}
+
+function changeCoursePage(p){
+  if(p<1) return;
+  const total = Math.ceil(courseRaw.length/PER_PAGE);
+  if(p>total) return;
+  coursePage = p;
+  renderCourseList(courseRaw);
 }
 
 function openMakeup(cid){
@@ -635,13 +791,18 @@ async function saveMakeup(){
   closeAll();
   loadCourseList();
   loadAllStudents();
-  buildMonthCalendar();
+  loadAllCoursesForCalendar();
+  renderSmallCalendar();
+  renderTimeTable();
   alert('補課已新增');
 }
 
 async function loadCourseList(){
   if(!currentStudentId){
     document.getElementById('studentInfoCard').style.display = 'none';
+    courseRaw=[];
+    renderCourseList([]);
+    updateStats();
     return;
   }
   const courses=await db.collection('courses').where('studentId','==',currentStudentId).get();
@@ -676,14 +837,30 @@ async function loadAllCoursesForCalendar(){
   snap.forEach(d=>allCourses.push({id:d.id,...d.data()}));
 }
 
-function buildMonthCalendar(){
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
+// 月份選擇
+function initMonthSelector(){
+  const sel = document.getElementById('monthSelect');
+  sel.innerHTML='';
+  for(let m=0;m<12;m++){
+    sel.innerHTML+=`<option value="${m}">${selectedYear}年 ${m+1}月</option>`;
+  }
+  sel.value = selectedMonth;
+}
+
+function onMonthChange(){
+  selectedMonth = parseInt(document.getElementById('monthSelect').value);
+  renderSmallCalendar();
+  renderTimeTable();
+}
+
+// 小月曆
+function renderSmallCalendar(){
+  const year = selectedYear;
+  const month = selectedMonth;
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month+1, 0).getDate();
 
-  const cal = document.getElementById('calendar');
+  const cal = document.getElementById('smallCalendar');
   cal.innerHTML = '';
 
   const week = ['日','一','二','三','四','五','六'];
@@ -695,100 +872,76 @@ function buildMonthCalendar(){
 
   for(let d=1;d<=daysInMonth;d++){
     const date = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const todayCourses = allCourses.filter(x=>x.date===date);
-
-    let html = `<div class="calendar-day" onclick="clickDay('${date}')">`;
-    html += `<div class="calendar-day-num">${d}</div>`;
-
-    todayCourses.slice(0,3).forEach(c=>{
-      const stu = studentList.find(s=>s.id===c.studentId);
-      const no = stu?.studentNo || '';
-      const name = stu?.name || '';
-      html += `<div class="calendar-item">${no} ${name} ${c.time}</div>`;
-    });
-    if(todayCourses.length>3) html+=`<div style="font-size:12px;color:#777">+${todayCourses.length-3} 筆</div>`;
-    html += `</div>`;
-    cal.innerHTML += html;
+    const hasCourse = allCourses.some(x=>x.date===date);
+    cal.innerHTML += `
+    <div class="calendar-day ${hasCourse?'active':''}" onclick="selectCalendarDate('${date}')">
+      <div class="calendar-day-num">${d}</div>
+    </div>`;
   }
 }
 
-// 點日期顯示時間表（即時更新狀態 + 顯示同時間人數）
-function clickDay(date){
-  document.querySelectorAll('.calendar-day').forEach(x=>x.classList.remove('active'));
-  event.target.closest('.calendar-day').classList.add('active');
-  
-  const list = allCourses.filter(x=>x.date===date);
-  list.sort((a,b)=>a.time.localeCompare(b.time));
+let selectedDate = new Date().toISOString().split('T')[0];
+function selectCalendarDate(date){
+  selectedDate = date;
+  renderSmallCalendar();
+  renderTimeTable();
+}
 
-  const box = document.getElementById('daySchedule');
-  box.style.display = 'block';
+// Google 風格時間表
+function renderTimeTable(){
+  const container = document.getElementById('timeTableView');
+  container.innerHTML = '';
 
-  const timeGroups = {};
-  list.forEach(c=>{
-    if(!timeGroups[c.time]) timeGroups[c.time] = [];
-    timeGroups[c.time].push(c);
+  const targetDate = selectedDate;
+  const todayCourses = allCourses.filter(x=>x.date===targetDate);
+  const timeMap = {};
+
+  for(let h=8;h<=22;h++){
+    for(let m=0;m<60;m+=30){
+      const time = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+      timeMap[time] = [];
+    }
+  }
+
+  todayCourses.forEach(c=>{
+    if(timeMap[c.time]) timeMap[c.time].push(c);
   });
 
-  let html = `<h4 style="margin-bottom:10px;color:#879acb">📅 ${date} 時間表</h4>`;
-
-  for(const time in timeGroups){
-    const items = timeGroups[time];
-    html += `<div style="margin-bottom:8px;">`;
-    html += `<div style="font-size:12px;color:#879acb;margin-bottom:4px">⏰ ${time}｜共 ${items.length} 人</div>`;
-
-    items.forEach(c=>{
+  for(let time in timeMap){
+    const courses = timeMap[time];
+    let html = `<div class="time-row">`;
+    html += `<div class="time-label">${time}</div>`;
+    html += `<div class="time-slots">`;
+    courses.forEach(c=>{
       const stu = studentList.find(s=>s.id===c.studentId);
-      if(!stu) return;
-
-      let statusClass = '';
-      let statusText = '';
-      if(c.status === 'completed') { statusClass = 'status-completed'; statusText='已完成'; }
-      if(c.status === 'pending') { statusClass = 'status-pending'; statusText='未完成'; }
-      if(c.status === 'leave') { statusClass = 'status-leave'; statusText='請假'; }
-      if(c.status === 'absent') { statusClass = 'status-absent'; statusText='缺席'; }
-      if(c.status === 'holiday') { statusClass = 'status-holiday'; statusText='假期'; }
-
-      html += `
-      <div class="schedule-item">
-        <div class="schedule-left">
-          <div class="schedule-name">${stu.name}</div>
-          <div class="schedule-no">${stu.studentNo||'無'}</div>
-        </div>
-        <div><span class="${statusClass}">${statusText}</span></div>
-        <div class="schedule-btns">
-          <button style="background:#28a745" onclick="quickSet('${c.id}','completed')">完成</button>
-          <button style="background:#ffc107" onclick="quickSet('${c.id}','pending')">未</button>
-          <button style="background:#dc3545" onclick="quickSet('${c.id}','leave')">假</button>
-          <button style="background:#000" onclick="quickSet('${c.id}','absent')">缺</button>
-        </div>
-      </div>`;
+      const name = stu?.name || '未知名';
+      const no = stu?.studentNo || '';
+      html += `<div class="course-block">${name} ${no} ${time}</div>`;
     });
-    html += `</div>`;
+    html += `</div></div>`;
+    container.innerHTML += html;
   }
-  box.innerHTML = html;
 }
+
+function clickDay(date){}
+function buildMonthCalendar(){}
 
 async function quickSet(cid,status){
   await db.collection('courses').doc(cid).update({status});
   await loadAllCoursesForCalendar();
-  buildMonthCalendar();
+  renderSmallCalendar();
+  renderTimeTable();
   loadCourseList();
   loadAllStudents();
-  
-  const activeEl = document.querySelector('.calendar-day.active');
-  if(activeEl){
-    const date = activeEl.getAttribute('onclick').match(/'([^']+)'/)[1];
-    clickDay(date);
-  }
 }
 
 function getWeek(d){const w=['日','一','二','三','四','五','六'];return w[new Date(d).getDay()]}
 function formatTime(t){const [h,m]=t.split(':');const min=h*60+parseInt(m)+75;const eh=Math.floor(min/60),em=min%60;return `${t} - ${String(eh).padStart(2,0)}:${String(em).padStart(2,0)}`;}
-function calcEndTime(){const t=document.getElementById('ctime').value;if(!t)return;const [h,m]=t.split(':').map(Number);const min=h*60+m+75;const eh=Math.floor(min/60),em=min%60;document.getElementById('endTimeShow').textContent=`結束時間：${String(eh).padStart(2,'0')}:${String(em).padStart(2,0)}`;}
+function calcEndTime(){const t=document.getElementById('ctime').value;if(!t)return;const [h,m]=t.split(':').map(Number);const min=h*60+m+75;const eh=Math.floor(min/60),em=min%60;document.getElementById('endTimeShow').textContent=`結束時間：${String(eh).padStart(2,0)}:${String(em).padStart(2,0)}`;}
 function searchCourse(){const kw=document.getElementById('searchCourse').value.toLowerCase();const st=studentList.find(s=>s.studentNo&&s.studentNo.toLowerCase().includes(kw));if(st){switchCourseStudentById(st.id);}else{renderCourseList(courseRaw);}}
-function switchCourseStudentById(id){currentStudentId=id;loadCourseList();}
-function switchCourseStudent(){currentStudentId=document.getElementById('selectStudentForCourse').value;loadCourseList();}
-function selectStudent(id) { currentStudentId=id; show(2); loadArtList(); }
+function switchCourseStudentById(id){currentStudentId=id;coursePage=1;loadCourseList();}
+function switchCourseStudent(){currentStudentId=document.getElementById('selectStudentForCourse').value;coursePage=1;loadCourseList();}
+function selectStudent(id) { currentStudentId=id; show(2); artPage=1; loadArtList(); }
 function closeAll(){ document.querySelectorAll('.modal').forEach(m=>m.style.display='none'); document.getElementById('preview').style.display='none'; }
 function addStu(){ if(!isTeacher)return; currentStudentId=null; document.getElementById('sname').value='';document.getElementById('sno').value='';document.getElementById('sphone').value='';document.getElementById('savatar').value='';document.getElementById('courseType').value='';document.getElementById('school').value='';document.getElementById('birthYear').value='';document.getElementById('gender').value='';document.getElementById('note').value='';document.getElementById('stuModal').style.display='flex'; }
 
@@ -839,6 +992,7 @@ function editStu(id){
 
 function switchArtStudent(){
   currentStudentId=document.getElementById('selectStudentForArt').value;
+  artPage=1;
   loadArtList();
 }
 
@@ -846,6 +1000,7 @@ async function loadArtList(){
   if(!currentStudentId){
     document.getElementById('artStudentHeader').style.display='none';
     document.getElementById('artGrid').innerHTML='';
+    document.getElementById('artPagination').innerHTML='';
     return;
   }
   const s=await db.collection('students').doc(currentStudentId).get();
@@ -861,16 +1016,37 @@ async function loadArtList(){
   
   artList.sort((a,b)=>new Date(b.createDate)-new Date(a.createDate));
   
+  const totalPage = Math.ceil(artList.length / PER_PAGE);
+  const start = (artPage-1)*PER_PAGE;
+  const end = start + PER_PAGE;
+  const show = artList.slice(start, end);
+
   const grid=document.getElementById('artGrid');
   grid.innerHTML='';
-  for(let i=0;i<artList.length;i++){
-    const item=artList[i];
+
+  for(let i=0;i<show.length;i++){
+    const item=show[i];
     const img=await getDirectImageUrl(item.imageUrl);
     grid.innerHTML+=`
     <div class="art-card" onclick="showPreview(${i})">
       <img src="${img}" onerror="this.src='https://via.placeholder.com/160x180'">
     </div>`;
   }
+
+  const p = document.getElementById('artPagination');
+  p.innerHTML = `
+    <button class="page-btn" onclick="changeArtPage(${artPage-1})" ${artPage<=1?'disabled':''}>上一頁</button>
+    <span class="page-info">第 ${artPage} / ${totalPage} 頁</span>
+    <button class="page-btn" onclick="changeArtPage(${artPage+1})" ${artPage>=totalPage?'disabled':''}>下一頁</button>
+  `;
+}
+
+function changeArtPage(p){
+  if(p<1) return;
+  const total = Math.ceil(artList.length/PER_PAGE);
+  if(p>total) return;
+  artPage = p;
+  loadArtList();
 }
 
 function openArt(){ if(!isTeacher)return; document.getElementById('artModal').style.display='flex'; }
@@ -913,7 +1089,8 @@ async function batchSet(status){
   loadCourseList();
   loadAllStudents();
   await loadAllCoursesForCalendar();
-  buildMonthCalendar();
+  renderSmallCalendar();
+  renderTimeTable();
 }
 async function batchDeleteCourses(){
   if(!isTeacher)return;
@@ -923,7 +1100,8 @@ async function batchDeleteCourses(){
   for(let cb of checks) await db.collection('courses').doc(cb.dataset.id).delete();
   loadCourseList();
   await loadAllCoursesForCalendar();
-  buildMonthCalendar();
+  renderSmallCalendar();
+  renderTimeTable();
 }
 function addCourse(){ if(!isTeacher)return; currentCourseId=null; document.getElementById('cday').valueAsDate=new Date(); document.getElementById('ctime').value=''; document.getElementById('endTimeShow').textContent=''; document.getElementById('cnote').value=''; document.getElementById('courseImgUrl').value=''; document.getElementById('cstatus').value='pending'; document.getElementById('courseModal').style.display='flex'; }
 async function saveCourse(){
@@ -938,7 +1116,7 @@ async function saveCourse(){
   const data={studentId:sid,date:d,time:t,note:nt,status:s,imgUrl:imgUrl};
   if(currentCourseId) await db.collection('courses').doc(currentCourseId).update(data);
   else await db.collection('courses').add(data);
-  closeAll();loadCourseList();loadAllStudents();await loadAllCoursesForCalendar();buildMonthCalendar();
+  closeAll();loadCourseList();loadAllStudents();await loadAllCoursesForCalendar();renderSmallCalendar();renderTimeTable();
 }
 function editCourse(id){
   if(!isTeacher)return;
@@ -961,7 +1139,8 @@ async function delCourse(id){
   await db.collection('courses').doc(id).delete();
   loadCourseList();
   await loadAllCoursesForCalendar();
-  buildMonthCalendar();
+  renderSmallCalendar();
+  renderTimeTable();
 }
 async function quickPackage(count){
   if(!isTeacher)return;
@@ -978,33 +1157,19 @@ async function quickPackage(count){
     await db.collection('courses').add({studentId:sid,date,time:startTime,note:'課程',status:'pending'});
   }
   alert('完成');
-  closeAll();loadCourseList();await loadAllCoursesForCalendar();buildMonthCalendar();
+  closeAll();loadCourseList();await loadAllCoursesForCalendar();renderSmallCalendar();renderTimeTable();
 }
 async function searchStudent(){
   const kw=document.getElementById('searchStudent').value.toLowerCase();
-  const list=document.getElementById('stuList');list.innerHTML='';
   const filtered = studentList.filter(s=>
     s.name.toLowerCase().includes(kw)||
     (s.parentPhone||'').includes(kw)||
     (s.studentNo||'').toLowerCase().includes(kw)
   );
-  for(let s of filtered){
-    const img = await getDirectImageUrl(s.avatar);
-    list.innerHTML+=`
-    <div class="stu ${s.warning?'warning':''}">
-      <img src="${img}" onerror="this.src='https://via.placeholder.com/85'" alt="${s.name}">
-      <h3>${s.name}</h3>
-      <p>編號：${s.studentNo||'-'}</p>
-      <p>家長：${s.parentPhone||'-'}</p>
-      <p>方案：${s.courseType||'-'}</p>
-      <span class="leftTag">剩餘 ${s.left||0} 堂</span>
-      ${s.warning?'<p style="color:red;font-weight:bold;margin-top:6px">即將續課</p>':''}
-      <div class="action">
-        <button onclick="selectStudent('${s.id}')">選取</button>
-        ${isTeacher ? `<button onclick="editStu('${s.id}')">編輯</button><button onclick="delStu('${s.id}')">刪除</button>` : ''}
-      </div>
-    </div>`;
-  }
+  studentList = filtered;
+  stuPage=1;
+  renderStudentPage();
+  if(kw==='') loadAllStudents();
 }
 function exportCSV(){if(!isTeacher)return;let csv = "姓名,學生編號,家長電話,課程方案,剩餘堂數,學校,出生年份,性別,備註\n";studentList.forEach(s=>{csv += `"${s.name}","${s.studentNo||''}","${s.parentPhone||''}","${s.courseType||''}","${s.left||0}","${s.school||''}","${s.birthYear||''}","${s.gender||''}","${s.note||''}"\n`;});const blob = new Blob([csv],{type:"text/csv"});const url = URL.createObjectURL(blob);const a = document.createElement("a");a.href = url;a.download = "學生資料.csv";a.click();URL.revokeObjectURL(url);}
 
