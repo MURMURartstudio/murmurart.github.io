@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="favicon.png">
-  <title>MURMUR ART 學生/家長區</title>
+  <title>MURMUR ART 學生/家長區 - 版本2</title>
   <style>
-    *{margin:0;padding:0;box-sizing:border-box;font-family:微軟正黑體,"Noto Sans TC";transition:all 0.25s ease}
+    *{margin:0;padding:0;box-sizing:border-box;font-family:微軟正黑體,"Noto Sans TC"}
     body{background:linear-gradient(120deg,#fdfbf7,#f0e9ff);color:#444}
     .container{width:90%;max-width:1200px;margin:0 auto}
     .login{display:flex;justify-content:center;align-items:center;height:100vh;padding:20px}
@@ -34,12 +34,15 @@
     .action button:nth-child(1){background:#879acb;color:white}
     .action button:nth-child(2){background:#ffc107;color:white}
     .action button:nth-child(3){background:#dc3545;color:white}
-    .gallery{position:relative;width:100%;height:700px;display:flex;justify-content:center;align-items:center;margin:30px 0}
-    .avatar{width:200px;height:200px;border-radius:50%;border:8px solid #879acb;position:absolute;z-index:10}
-    .rotate{width:450px;height:450px;position:relative;animation:r 25s linear infinite}
-    @keyframes r{100%{transform:rotate(360deg)}}
-    .art{position:absolute;width:160px;height:160px;border-radius:14px;overflow:hidden;box-shadow:0 8px 20px #00000020;cursor:pointer}
-    .art img{width:100%;height:100%;object-fit:cover}
+
+    .art-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px;margin-top:20px}
+    .art-card{background:white;border-radius:14px;overflow:hidden;box-shadow:0 4px 12px #00000010;cursor:pointer}
+    .art-card img{width:100%;height:180px;object-fit:cover}
+    .art-info{padding:10px;font-size:12px;color:#666}
+    .gallery{margin:30px 0}
+    .student-header{display:flex;align-items:center;gap:16px;margin-bottom:20px}
+    .student-header img{width:100px;height:100px;border-radius:50%;border:4px solid #879acb}
+
     .modal{position:fixed;top:0;left:0;width:100%;height:100%;background:#000000dd;display:none;justify-content:center;align-items:center;padding:20px;z-index:9999}
     .modal .box{background:white;border-radius:20px;padding:35px;max-width:580px;width:100%;max-height:90vh;overflow-y:auto}
     .close{position:absolute;top:18px;right:18px;font-size:22px;cursor:pointer;color:#777}
@@ -51,11 +54,10 @@
     .ok{background:#d4edda;color:#28a745}
     .wait{background:#fff3cd;color:#ffc107}
     .leave{background:#f8d7da;color:#dc3545}
-    .absent{background:#e9ecef;color:#6c757d}
+    .absent{background:#333;color:#fff}
     .holiday{background:#d1ecf1;color:#17a2b8}
     .course-package{display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap}
     .package-btn{padding:10px 14px;background:#e8edff;border:none;border-radius:8px;cursor:pointer}
-    /* 修改：放大作品預覽容器和圖片尺寸 */
     .preview{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:95%;max-width:1200px;background:white;border-radius:20px;padding:25px;display:none;z-index:9999}
     .preview img{max-width:100%;max-height:70vh;border-radius:12px;object-fit:contain}
     .prev,.next{position:absolute;top:50%;transform:translateY(-50%);font-size:24px;color:white;background:#879acb;padding:10px 18px;border-radius:10px;cursor:pointer}
@@ -64,15 +66,158 @@
     .search{width:100%;padding:12px;border:2px solid #e8edff;border-radius:12px;margin-bottom:15px}
     .stats{background:white;padding:20px;border-radius:16px;display:flex;gap:15px;text-align:center;margin:15px 0}
     .stat{flex:1}
-    .check-btn{background:#28a745;color:white;padding:8px 12px;border:none;border-radius:8px;margin-right:5px}
-    .del-btn{background:#dc3545;color:white;padding:8px 12px;border:none;border-radius:8px}
+
+    /* 日曆 - 縮小版 手機友善 */
+    .calendar{
+      display:grid;
+      grid-template-columns:repeat(7,1fr);
+      gap:4px;
+      margin:15px 0;
+      font-size:12px;
+    }
+    .calendar-header{
+      background:#879acb;
+      color:white;
+      padding:6px;
+      text-align:center;
+      border-radius:6px;
+      font-weight:bold;
+      font-size:12px;
+    }
+    .calendar-day{
+      background:white;
+      border-radius:8px;
+      padding:6px;
+      min-height:60px;
+      border:1px solid #e8edff;
+      cursor:pointer;
+    }
+    .calendar-day.active{
+      background:#e8edff;
+      border-color:#879acb;
+    }
+    .calendar-day-num{
+      font-weight:bold;
+      margin-bottom:4px;
+      color:#879acb;
+      font-size:12px;
+    }
+    .calendar-item{
+      font-size:10px;
+      padding:2px 4px;
+      background:#f8f9ff;
+      border-radius:4px;
+      margin-bottom:3px;
+      white-space:nowrap;
+      overflow:hidden;
+    }
+
+    /* 時間表 */
+    .day-schedule{
+      background:white;
+      padding:12px;
+      border-radius:12px;
+      margin-bottom:12px;
+      box-shadow:0 2px 8px #0000000a;
+    }
+    .schedule-item{
+      padding:8px 10px;
+      border-bottom:1px solid #e8edff;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      font-size:13px;
+    }
+    .schedule-left{
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .schedule-time{
+      font-weight:bold;
+      color:#879acb;
+      min-width:60px;
+    }
+    .schedule-name{
+      font-weight:bold;
+    }
+    .schedule-no{
+      color:#777;
+      font-size:11px;
+    }
+    .schedule-btgs{
+      padding:4px 6px;
+      border-radius:6px;
+      font-size:11px;
+      color:white;
+    }
+    .schedule-btns button{
+      padding:5px 8px;
+      border:none;
+      border-radius:6px;
+      color:white;
+      font-size:11px;
+      margin-left:3px;
+    }
+
+    /* 學生資訊卡片 */
+    .student-info-card{
+      background:white;
+      padding:16px;
+      border-radius:14px;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin-bottom:12px;
+      box-shadow:0 4px 12px #0000000a;
+    }
+    .student-info-card img{
+      width:60px;
+      height:60px;
+      border-radius:50%;
+      border:4px solid #879acb;
+    }
+    .student-info-text h3{
+      color:#879acb;
+      margin-bottom:4px;
+      font-size:16px;
+    }
+    .student-info-text p{
+      color:#666;
+      font-size:13px;
+      margin:2px 0;
+    }
+
+    /* 批量按鈕 */
     .batch-bar{margin:10px 0;padding:10px;background:#f8f9ff;border-radius:12px}
-    .student-info-bar{background:#fff3cd;padding:12px 15px;border-radius:12px;margin-bottom:10px;font-size:15px}
+    .batch-btn{padding:8px 12px;border:none;border-radius:8px;margin-right:5px;color:white}
+    .btn-ok{background:#28a745}
+    .btn-wait{background:#ffc107}
+    .btn-leave{background:#dc3545}
+    .btn-absent{background:#333}
+    .btn-holiday{background:#17a2b8}
+    .btn-del{background:#dc3545}
+
+    .student-info-bar{background:#fff3cd;padding:12px 15px;border-radius:12px;margin-bottom:10px;font-size:15px;display:none}
     .course-img{max-width:120px;max-height:80px;border-radius:8px;margin-top:6px}
     .section-title{font-size:16px;color:#879acb;margin:10px 0 6px;font-weight:bold}
     .export-btn{background:#17a2b8;color:white;padding:8px 16px;border:none;border-radius:8px;margin-left:10px}
     .warningPage{background:#fff3cd;padding:15px;border-radius:16px;margin:15px 0}
     .warningItem{background:white;padding:12px;border-radius:10px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+    .imgbb-link{display:inline-block;margin-top:8px;color:#879acb;text-decoration:underline;font-size:14px}
+
+    /* 時間表狀態顏色 */
+    .status-completed{background:#28a745;color:white;padding:3px 6px;border-radius:4px;font-size:11px;}
+    .status-pending{background:#ffc107;color:#333;padding:3px 6px;border-radius:4px;font-size:11px;}
+    .status-leave{background:#dc3545;color:white;padding:3px 6px;border-radius:4px;font-size:11px;}
+    .status-absent{background:#000;color:white;padding:3px 6px;border-radius:4px;font-size:11px;}
+    .status-holiday{background:#17a2b8;color:white;padding:3px 6px;border-radius:4px;font-size:11px;}
+
+    /* 列印專用 */
+    @media print{
+      .navbar,.modal,.preview,.add,.batch-bar,table,.stats,.search,.export-btn{display:none!important;}
+      .day-schedule{display:block!important;border:none!important;box-shadow:none!important;}
+    }
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -134,31 +279,54 @@
       <h2 style="margin-bottom:10px">作品管理</h2>
       <select class="input" id="selectStudentForArt" onchange="switchArtStudent()"></select>
       <div class="gallery">
-        <img class="avatar" id="mainAvatar" src="https://via.placeholder.com/200">
-        <div class="rotate" id="rotateWrap"></div>
+        <div class="student-header" id="artStudentHeader" style="display:none">
+          <img id="artAvatar" src="">
+          <div>
+            <h3 id="artStudentName"></h3>
+          </div>
+        </div>
+        <div class="art-grid" id="artGrid"></div>
       </div>
       <div class="add" onclick="openArt()">+</div>
     </div>
 
     <div id="page3" style="display:none">
       <h2 style="margin-bottom:10px">課程管理</h2>
+
+      <div id="studentInfoCard" class="student-info-card" style="display:none;">
+        <img id="cardAvatar">
+        <div class="student-info-text">
+          <h3 id="cardName"></h3>
+          <p id="cardNo"></p>
+          <p id="cardCourseType"></p>
+          <p id="cardLeft"></p>
+        </div>
+      </div>
+
       <select class="input" id="selectStudentForCourse" onchange="switchCourseStudent()"></select>
       <input class="search" id="searchCourse" placeholder="搜尋學生編號" oninput="searchCourse()">
-      <div id="studentInfoDisplay" class="student-info-bar" style="display:none;"></div>
+      <div id="studentInfoDisplay" class="student-info-bar"></div>
       <button class="btn" style="width:auto;padding:8px 15px" onclick="addCourse()">+ 新增課程</button>
+      <button class="export-btn" onclick="printSchedule()">下載／列印時間表</button>
+
+      <h3 style="margin:20px 0 10px;color:#879acb">📅 本月課程月曆</h3>
+      <div id="calendar" class="calendar"></div>
+      <div id="daySchedule" class="day-schedule" style="display:none;"></div>
+
       <div class="stats" id="courseStats"></div>
       <div class="batch-bar">
         <small>批量操作：</small>
-        <button class="check-btn" onclick="batchSet('completed')">已完成</button>
-        <button class="check-btn" onclick="batchSet('leave')">請假</button>
-        <button class="check-btn" onclick="batchSet('absent')">缺席</button>
-        <button class="check-btn" onclick="batchSet('holiday')">公眾假期</button>
-        <button class="check-btn" onclick="batchDeleteCourses()">批量刪除</button>
+        <button class="batch-btn btn-wait" onclick="batchSet('pending')">未完成</button>
+        <button class="batch-btn btn-ok" onclick="batchSet('completed')">已完成</button>
+        <button class="batch-btn btn-leave" onclick="batchSet('leave')">請假</button>
+        <button class="batch-btn btn-absent" onclick="batchSet('absent')">缺席</button>
+        <button class="batch-btn btn-holiday" onclick="batchSet('holiday')">公眾假期</button>
+        <button class="batch-btn btn-del" onclick="batchDeleteCourses()">批量刪除</button>
       </div>
       <table>
         <thead>
           <tr>
-            <th><input type="checkbox" id="checkAll"></th>
+            <th><input type="checkbox" id="checkAll" onclick="toggleAllCheck()"></th>
             <th>日期</th>
             <th>時間</th>
             <th>狀態</th>
@@ -204,6 +372,7 @@
     <h3>上傳作品</h3>
     <select class="input" id="artStudentSelect"></select>
     <input class="input" id="img" placeholder="貼上圖片連結（ImgBB/Google 相簿都可）">
+    <a href="https://imgbb.com/" target="_blank" class="imgbb-link">→ 開啟 ImgBB 上傳圖片</a>
     <input class="input" id="cdate" type="date">
     <input class="input" id="artNote" placeholder="備註">
     <button class="btn" onclick="saveArt()">儲存</button>
@@ -252,14 +421,12 @@
 
 <div class="preview" id="preview">
   <span class="close" onclick="closeAll()">&times;</span>
-  <div class="prev" onclick="prevImg()">&lt;</div>
   <img id="previewImg">
   <div class="art-info" style="margin-top:10px">
     <p><strong>日期：</strong><span id="pDate"></span></p>
     <p><strong>備註：</strong><span id="pNote"></span></p>
     <button class="btn" style="background:#dc3545" onclick="deleteCurrentArt()">刪除作品</button>
   </div>
-  <div class="next" onclick="nextImg()">&gt;</div>
 </div>
 
 <script>
@@ -282,51 +449,20 @@ let studentList = [];
 let artList = [];
 let courseRaw = [];
 let currentImg = 0;
+let allCourses = [];
 
-// ✅ 增強：優化圖片鏈接處理邏輯，確保所有圖片都能正確顯示
 async function getDirectImageUrl(url) {
   if (!url) return "https://via.placeholder.com/300";
-
-  // 1. 處理 ImgBB 短鏈（ibb.co/xxx）
   let imgbbMatch = url.match(/ibb\.co\/([a-zA-Z0-9]+)/);
-  if (imgbbMatch) {
-    return `https://i.ibb.co/${imgbbMatch[1]}/image.jpg`;
-  }
-  
-  // 2. 處理 ImgBB 直接鏈接（i.ibb.co/xxx.jpg）- 直接返回
-  if (url.includes("i.ibb.co") && (url.endsWith(".jpg") || url.endsWith(".png") || url.endsWith(".jpeg"))) {
-    return url;
-  }
-
-  // 3. 處理 Google Drive
+  if (imgbbMatch) return `https://i.ibb.co/${imgbbMatch[1]}/image.jpg`;
+  if (url.includes("i.ibb.co") && (url.endsWith(".jpg")||url.endsWith(".png")||url.endsWith(".jpeg"))) return url;
   let driveMatch = url.match(/drive\.google\.com\/file\/d\/([^\/\?]+)/);
-  if (driveMatch) return "https://drive.google.com/thumbnail?id=" + driveMatch[1] + "&sz=w1000";
-  
-  // 4. 處理 Google 相簿短連結（photos.app.goo.gl）
+  if (driveMatch) return "https://drive.google.com/thumbnail?id="+driveMatch[1]+"&sz=w1000";
   if (url.includes("photos.app.goo.gl")) {
-    try {
-      const res = await fetch(url, { mode: "cors" });
-      const text = await res.text();
-      const regex = /https:\/\/lh3\.googleusercontent\.com\/[^\s"]+/;
-      const found = text.match(regex);
-      if (found) return found[0];
-    } catch (e) {
-      // 失敗時返回默認占位圖
-      return "https://via.placeholder.com/300";
-    }
+    try{const res=await fetch(url,{mode:"cors"});const t=await res.text();const f=t.match(/https:\/\/lh3\.googleusercontent\.com\/[^\s"]+/);if(f)return f[0]}catch(e){}
   }
-
-  // 5. 處理 Google 相簿直接鏈接（lh3.googleusercontent.com）
-  if (url.includes("lh3.googleusercontent.com")) {
-    return url;
-  }
-
-  // 6. 其他直接圖片鏈接（.jpg/.png 結尾）直接返回
-  if (url.endsWith(".jpg") || url.endsWith(".png") || url.endsWith(".jpeg") || url.endsWith(".gif")) {
-    return url;
-  }
-
-  // 默認返回占位圖
+  if (url.includes("lh3.googleusercontent.com")) return url;
+  if (url.endsWith(".jpg")||url.endsWith(".png")||url.endsWith(".jpeg")||url.endsWith(".gif")) return url;
   return "https://via.placeholder.com/300";
 }
 
@@ -344,6 +480,7 @@ function teacherLogin() {
     document.getElementById('loginPage').style.display = 'none';
     document.getElementById('main').style.display = 'block';
     loadAllStudents();
+    loadAllCoursesForCalendar();
   } else alert('密碼錯誤');
 }
 
@@ -369,7 +506,10 @@ function show(n) {
   document.getElementById('page2').style.display=n==2?'block':'none';
   document.getElementById('page3').style.display=n==3?'block':'none';
   if(n==2) loadArtList();
-  if(n==3) loadCourseList();
+  if(n==3) {
+    loadCourseList();
+    buildMonthCalendar();
+  }
   if(n==9) loadWarningList();
 }
 
@@ -392,11 +532,10 @@ async function loadAllStudents() {
     s.left = left;
     s.warning = left < 3;
     studentList.push(s);
-    // ✅ 修復：學生管理頭像使用統一的圖片處理函數，並添加錯誤處理
     const img = await getDirectImageUrl(s.avatar);
     list.innerHTML+=`
     <div class="stu ${s.warning?'warning':''}">
-      <img src="${img}" onerror="this.src='https://via.placeholder.com/85'" alt="${s.name} 的頭像">
+      <img src="${img}" onerror="this.src='https://via.placeholder.com/85'" alt="${s.name}">
       <h3>${s.name}</h3>
       <p>編號：${s.studentNo||'-'}</p>
       <p>家長：${s.parentPhone||'-'}</p>
@@ -496,23 +635,159 @@ async function saveMakeup(){
   closeAll();
   loadCourseList();
   loadAllStudents();
+  buildMonthCalendar();
   alert('補課已新增');
 }
 
 async function loadCourseList(){
-  if(!currentStudentId)return;
+  if(!currentStudentId){
+    document.getElementById('studentInfoCard').style.display = 'none';
+    return;
+  }
   const courses=await db.collection('courses').where('studentId','==',currentStudentId).get();
   courseRaw=[];courses.forEach(d=>courseRaw.push({id:d.id,...d.data()}));
   renderCourseList(courseRaw);
   updateStats();
+  showStudentInfoCard(currentStudentId);
+}
+
+async function showStudentInfoCard(sid){
+  const s = studentList.find(x=>x.id===sid);
+  if(!s) return;
+  document.getElementById('cardName').innerText = s.name;
+  document.getElementById('cardNo').innerText = '學生編號：'+(s.studentNo||'未設定');
+  document.getElementById('cardCourseType').innerText = '課程方案：'+(s.courseType||'未設定');
+  document.getElementById('cardLeft').innerText = '剩餘堂數：'+s.left;
+  
+  const avatar = await getDirectImageUrl(s.avatar);
+  document.getElementById('cardAvatar').src = avatar;
+  document.getElementById('cardAvatar').onerror = e=>e.target.src="https://via.placeholder.com/70";
+  document.getElementById('studentInfoCard').style.display = 'flex';
+}
+
+function toggleAllCheck(){
+  const ck=document.getElementById('checkAll').checked;
+  document.querySelectorAll('.courseCheck').forEach(c=>c.checked=ck);
+}
+
+async function loadAllCoursesForCalendar(){
+  const snap=await db.collection('courses').get();
+  allCourses=[];
+  snap.forEach(d=>allCourses.push({id:d.id,...d.data()}));
+}
+
+function buildMonthCalendar(){
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+
+  const cal = document.getElementById('calendar');
+  cal.innerHTML = '';
+
+  const week = ['日','一','二','三','四','五','六'];
+  week.forEach(w=>{
+    cal.innerHTML += `<div class="calendar-header">${w}</div>`;
+  });
+
+  for(let i=0;i<firstDay;i++) cal.innerHTML += `<div class="calendar-day"></div>`;
+
+  for(let d=1;d<=daysInMonth;d++){
+    const date = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const todayCourses = allCourses.filter(x=>x.date===date);
+
+    let html = `<div class="calendar-day" onclick="clickDay('${date}')">`;
+    html += `<div class="calendar-day-num">${d}</div>`;
+
+    todayCourses.slice(0,3).forEach(c=>{
+      const stu = studentList.find(s=>s.id===c.studentId);
+      const no = stu?.studentNo || '';
+      const name = stu?.name || '';
+      html += `<div class="calendar-item">${no} ${name} ${c.time}</div>`;
+    });
+    if(todayCourses.length>3) html+=`<div style="font-size:12px;color:#777">+${todayCourses.length-3} 筆</div>`;
+    html += `</div>`;
+    cal.innerHTML += html;
+  }
+}
+
+// 點日期顯示時間表（即時更新狀態 + 顯示同時間人數）
+function clickDay(date){
+  document.querySelectorAll('.calendar-day').forEach(x=>x.classList.remove('active'));
+  event.target.closest('.calendar-day').classList.add('active');
+  
+  const list = allCourses.filter(x=>x.date===date);
+  list.sort((a,b)=>a.time.localeCompare(b.time));
+
+  const box = document.getElementById('daySchedule');
+  box.style.display = 'block';
+
+  const timeGroups = {};
+  list.forEach(c=>{
+    if(!timeGroups[c.time]) timeGroups[c.time] = [];
+    timeGroups[c.time].push(c);
+  });
+
+  let html = `<h4 style="margin-bottom:10px;color:#879acb">📅 ${date} 時間表</h4>`;
+
+  for(const time in timeGroups){
+    const items = timeGroups[time];
+    html += `<div style="margin-bottom:8px;">`;
+    html += `<div style="font-size:12px;color:#879acb;margin-bottom:4px">⏰ ${time}｜共 ${items.length} 人</div>`;
+
+    items.forEach(c=>{
+      const stu = studentList.find(s=>s.id===c.studentId);
+      if(!stu) return;
+
+      let statusClass = '';
+      let statusText = '';
+      if(c.status === 'completed') { statusClass = 'status-completed'; statusText='已完成'; }
+      if(c.status === 'pending') { statusClass = 'status-pending'; statusText='未完成'; }
+      if(c.status === 'leave') { statusClass = 'status-leave'; statusText='請假'; }
+      if(c.status === 'absent') { statusClass = 'status-absent'; statusText='缺席'; }
+      if(c.status === 'holiday') { statusClass = 'status-holiday'; statusText='假期'; }
+
+      html += `
+      <div class="schedule-item">
+        <div class="schedule-left">
+          <div class="schedule-name">${stu.name}</div>
+          <div class="schedule-no">${stu.studentNo||'無'}</div>
+        </div>
+        <div><span class="${statusClass}">${statusText}</span></div>
+        <div class="schedule-btns">
+          <button style="background:#28a745" onclick="quickSet('${c.id}','completed')">完成</button>
+          <button style="background:#ffc107" onclick="quickSet('${c.id}','pending')">未</button>
+          <button style="background:#dc3545" onclick="quickSet('${c.id}','leave')">假</button>
+          <button style="background:#000" onclick="quickSet('${c.id}','absent')">缺</button>
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+  box.innerHTML = html;
+}
+
+async function quickSet(cid,status){
+  await db.collection('courses').doc(cid).update({status});
+  await loadAllCoursesForCalendar();
+  buildMonthCalendar();
+  loadCourseList();
+  loadAllStudents();
+  
+  const activeEl = document.querySelector('.calendar-day.active');
+  if(activeEl){
+    const date = activeEl.getAttribute('onclick').match(/'([^']+)'/)[1];
+    clickDay(date);
+  }
 }
 
 function getWeek(d){const w=['日','一','二','三','四','五','六'];return w[new Date(d).getDay()]}
-function formatTime(t){const [h,m]=t.split(':');const min=h*60+parseInt(m)+75;const eh=Math.floor(min/60),em=min%60;return `${t} - ${String(eh).padStart(2,0)}:${String(em).padStart(2,0)}`}
-function calcEndTime(){const t=document.getElementById('ctime').value;if(!t)return;const [h,m]=t.split(':').map(Number);const min=h*60+m+75;const eh=Math.floor(min/60),em=min%60;document.getElementById('endTimeShow').textContent=`結束時間：${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}`;}
-function searchCourse(){const kw=document.getElementById('searchCourse').value.toLowerCase();const st=studentList.find(s=>s.studentNo&&s.studentNo.toLowerCase().includes(kw));if(st){switchCourseStudentById(st.id);document.getElementById('studentInfoDisplay').style.display='block';document.getElementById('studentInfoDisplay').innerHTML=`學生：${st.name}｜編號：${st.studentNo||'-'}`;}else{renderCourseList(courseRaw);document.getElementById('studentInfoDisplay').style.display='none';}}
+function formatTime(t){const [h,m]=t.split(':');const min=h*60+parseInt(m)+75;const eh=Math.floor(min/60),em=min%60;return `${t} - ${String(eh).padStart(2,0)}:${String(em).padStart(2,0)}`;}
+function calcEndTime(){const t=document.getElementById('ctime').value;if(!t)return;const [h,m]=t.split(':').map(Number);const min=h*60+m+75;const eh=Math.floor(min/60),em=min%60;document.getElementById('endTimeShow').textContent=`結束時間：${String(eh).padStart(2,'0')}:${String(em).padStart(2,0)}`;}
+function searchCourse(){const kw=document.getElementById('searchCourse').value.toLowerCase();const st=studentList.find(s=>s.studentNo&&s.studentNo.toLowerCase().includes(kw));if(st){switchCourseStudentById(st.id);}else{renderCourseList(courseRaw);}}
 function switchCourseStudentById(id){currentStudentId=id;loadCourseList();}
-function switchCourseStudent(){currentStudentId=document.getElementById('selectStudentForCourse').value;document.getElementById('studentInfoDisplay').style.display='none';loadCourseList();}
+function switchCourseStudent(){currentStudentId=document.getElementById('selectStudentForCourse').value;loadCourseList();}
 function selectStudent(id) { currentStudentId=id; show(2); loadArtList(); }
 function closeAll(){ document.querySelectorAll('.modal').forEach(m=>m.style.display='none'); document.getElementById('preview').style.display='none'; }
 function addStu(){ if(!isTeacher)return; currentStudentId=null; document.getElementById('sname').value='';document.getElementById('sno').value='';document.getElementById('sphone').value='';document.getElementById('savatar').value='';document.getElementById('courseType').value='';document.getElementById('school').value='';document.getElementById('birthYear').value='';document.getElementById('gender').value='';document.getElementById('note').value='';document.getElementById('stuModal').style.display='flex'; }
@@ -562,27 +837,42 @@ function editStu(id){
   })
 }
 
-function switchArtStudent(){currentStudentId=document.getElementById('selectStudentForArt').value;loadArtList();}
+function switchArtStudent(){
+  currentStudentId=document.getElementById('selectStudentForArt').value;
+  loadArtList();
+}
+
 async function loadArtList(){
-  if(!currentStudentId)return;
-  const g=document.getElementById('rotateWrap');g.innerHTML='';
+  if(!currentStudentId){
+    document.getElementById('artStudentHeader').style.display='none';
+    document.getElementById('artGrid').innerHTML='';
+    return;
+  }
   const s=await db.collection('students').doc(currentStudentId).get();
-  // ✅ 修復：作品管理中間頭像使用統一的圖片處理函數
-  const avatarUrl = await getDirectImageUrl(s.data().avatar);
-  document.getElementById('mainAvatar').src = avatarUrl;
-  // 給大頭貼加錯誤處理
-  document.getElementById('mainAvatar').setAttribute('onerror', "this.src='https://via.placeholder.com/200'");
-  document.getElementById('mainAvatar').setAttribute('alt', s.data().name + ' 的頭像');
-  
+  const stuData=s.data();
+  document.getElementById('artStudentName').innerText=stuData.name;
+  const avatarUrl=await getDirectImageUrl(stuData.avatar);
+  document.getElementById('artAvatar').src=avatarUrl;
+  document.getElementById('artAvatar').onerror=()=>document.getElementById('artAvatar').src='https://via.placeholder.com/100';
+  document.getElementById('artStudentHeader').style.display='flex';
+
   const arts=await db.collection('artworks').where('studentId','==',currentStudentId).get();
   artList=[];arts.forEach(d=>artList.push({id:d.id,...d.data()}));
-  let a=0;const step=360/artList.length;
-  for(let d of artList){
-    const img = await getDirectImageUrl(d.imageUrl);
-    g.innerHTML+=`<div class="art" style="transform:rotate(${a}deg) translate(220px) rotate(${-a}deg)" onclick="showPreview(${a})"><img src="${img}" onerror="this.src='https://via.placeholder.com/160'" alt="學生作品"></div>`;
-    a+=step;
+  
+  artList.sort((a,b)=>new Date(b.createDate)-new Date(a.createDate));
+  
+  const grid=document.getElementById('artGrid');
+  grid.innerHTML='';
+  for(let i=0;i<artList.length;i++){
+    const item=artList[i];
+    const img=await getDirectImageUrl(item.imageUrl);
+    grid.innerHTML+=`
+    <div class="art-card" onclick="showPreview(${i})">
+      <img src="${img}" onerror="this.src='https://via.placeholder.com/160x180'">
+    </div>`;
   }
 }
+
 function openArt(){ if(!isTeacher)return; document.getElementById('artModal').style.display='flex'; }
 async function saveArt(){
   if(!isTeacher)return;
@@ -597,15 +887,14 @@ async function saveArt(){
 async function showPreview(i){
   currentImg=i;
   const item=artList[i];
-  // ✅ 優化：作品預覽使用高清圖片鏈接
   const highResUrl = await getDirectImageUrl(item.imageUrl);
   document.getElementById('previewImg').src = highResUrl;
-  // 預覽圖加錯誤處理
-  document.getElementById('previewImg').setAttribute('onerror', "this.src='https://via.placeholder.com/1200x800'");
-  document.getElementById('previewImg').setAttribute('alt', '學生作品預覽');
+  document.getElementById('previewImg').style.display='block';
+  document.getElementById('previewImg').style.margin='0 auto';
+  document.getElementById('previewImg').onerror=()=>document.getElementById('previewImg').src='https://via.placeholder.com/1200x800';
   document.getElementById('pDate').textContent=item.createDate;
   document.getElementById('pNote').textContent=item.note||'無';
-  document.getElementById('preview').style.display='block';
+  document.getElementById('preview').style.display='flex';
 }
 async function deleteCurrentArt(){
   if(!isTeacher)return;
@@ -614,8 +903,6 @@ async function deleteCurrentArt(){
   await db.collection('artworks').doc(id).delete();
   closeAll();loadArtList();
 }
-function prevImg(){event.stopPropagation();currentImg=(currentImg-1+artList.length)%artList.length;showPreview(currentImg)}
-function nextImg(){event.stopPropagation();currentImg=(currentImg+1)%artList.length;showPreview(currentImg)}
 
 async function batchSet(status){
   if(!isTeacher)return;
@@ -625,6 +912,8 @@ async function batchSet(status){
   for(let cb of checks) await db.collection('courses').doc(cb.dataset.id).update({status});
   loadCourseList();
   loadAllStudents();
+  await loadAllCoursesForCalendar();
+  buildMonthCalendar();
 }
 async function batchDeleteCourses(){
   if(!isTeacher)return;
@@ -633,6 +922,8 @@ async function batchDeleteCourses(){
   if(!confirm('確定刪除？'))return;
   for(let cb of checks) await db.collection('courses').doc(cb.dataset.id).delete();
   loadCourseList();
+  await loadAllCoursesForCalendar();
+  buildMonthCalendar();
 }
 function addCourse(){ if(!isTeacher)return; currentCourseId=null; document.getElementById('cday').valueAsDate=new Date(); document.getElementById('ctime').value=''; document.getElementById('endTimeShow').textContent=''; document.getElementById('cnote').value=''; document.getElementById('courseImgUrl').value=''; document.getElementById('cstatus').value='pending'; document.getElementById('courseModal').style.display='flex'; }
 async function saveCourse(){
@@ -647,7 +938,7 @@ async function saveCourse(){
   const data={studentId:sid,date:d,time:t,note:nt,status:s,imgUrl:imgUrl};
   if(currentCourseId) await db.collection('courses').doc(currentCourseId).update(data);
   else await db.collection('courses').add(data);
-  closeAll();loadCourseList();loadAllStudents();
+  closeAll();loadCourseList();loadAllStudents();await loadAllCoursesForCalendar();buildMonthCalendar();
 }
 function editCourse(id){
   if(!isTeacher)return;
@@ -669,6 +960,8 @@ async function delCourse(id){
   if(!confirm('確定刪除？'))return;
   await db.collection('courses').doc(id).delete();
   loadCourseList();
+  await loadAllCoursesForCalendar();
+  buildMonthCalendar();
 }
 async function quickPackage(count){
   if(!isTeacher)return;
@@ -685,7 +978,7 @@ async function quickPackage(count){
     await db.collection('courses').add({studentId:sid,date,time:startTime,note:'課程',status:'pending'});
   }
   alert('完成');
-  closeAll();loadCourseList();
+  closeAll();loadCourseList();await loadAllCoursesForCalendar();buildMonthCalendar();
 }
 async function searchStudent(){
   const kw=document.getElementById('searchStudent').value.toLowerCase();
@@ -696,11 +989,10 @@ async function searchStudent(){
     (s.studentNo||'').toLowerCase().includes(kw)
   );
   for(let s of filtered){
-    // ✅ 修復：搜尋結果中的學生頭像也使用統一處理
     const img = await getDirectImageUrl(s.avatar);
     list.innerHTML+=`
     <div class="stu ${s.warning?'warning':''}">
-      <img src="${img}" onerror="this.src='https://via.placeholder.com/85'" alt="${s.name} 的頭像">
+      <img src="${img}" onerror="this.src='https://via.placeholder.com/85'" alt="${s.name}">
       <h3>${s.name}</h3>
       <p>編號：${s.studentNo||'-'}</p>
       <p>家長：${s.parentPhone||'-'}</p>
@@ -714,8 +1006,14 @@ async function searchStudent(){
     </div>`;
   }
 }
-function exportCSV(){if(!isTeacher)return;let csv = "姓名,學生編號,家長電話,課程方案,剩餘堂數,學校,出生年份,性別,備註\n";studentList.forEach(s=>{csv += `"${s.name}","${s.studentNo||''}","${s.parentPhone||''}","${s.courseType||''}","${s.left||0}","${s.school||''}","${s.birthYear||''}","${s.gender||''}","${s.note||''}"\n`;});const blob = new Blob([csv],{type:"text/csv"});const url = URL.createObjectURL(blob);const a = document.createElement("a");a.href = url;a.download = "學生資料.csv";a.click();}
-function logout(){location.reload()}
+function exportCSV(){if(!isTeacher)return;let csv = "姓名,學生編號,家長電話,課程方案,剩餘堂數,學校,出生年份,性別,備註\n";studentList.forEach(s=>{csv += `"${s.name}","${s.studentNo||''}","${s.parentPhone||''}","${s.courseType||''}","${s.left||0}","${s.school||''}","${s.birthYear||''}","${s.gender||''}","${s.note||''}"\n`;});const blob = new Blob([csv],{type:"text/csv"});const url = URL.createObjectURL(blob);const a = document.createElement("a");a.href = url;a.download = "學生資料.csv";a.click();URL.revokeObjectURL(url);}
+
+// 列印時間表
+function printSchedule(){
+  window.print();
+}
+
+function logout(){location.reload();}
 </script>
 </body>
 </html>
