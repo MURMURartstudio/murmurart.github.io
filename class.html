@@ -10,6 +10,28 @@
     .container{width:90%;max-width:800px;margin:0 auto}
     .header{text-align:center;padding:30px 0}
     .logo{font-size:32px;color:#879acb;font-weight:bold}
+    
+    /* 導覽分頁 */
+    .tab-bar{
+      display:flex;
+      background:white;
+      border-radius:16px;
+      overflow:hidden;
+      margin-bottom:20px;
+    }
+    .tab-item{
+      flex:1;
+      text-align:center;
+      padding:14px;
+      font-weight:bold;
+      color:#666;
+      cursor:pointer;
+    }
+    .tab-item.active{
+      background:#879acb;
+      color:white;
+    }
+    
     .student-card{background:white;border-radius:20px;padding:25px;text-align:center;margin-bottom:20px;box-shadow:0 8px 20px #879acb20}
     .student-card img{width:100px;height:100px;border-radius:50%;border:5px solid #879acb;margin-bottom:15px}
     .student-name{font-size:24px;color:#879acb;margin-bottom:8px}
@@ -19,15 +41,39 @@
     .art-item img{width:100%;height:160px;object-fit:cover}
     .section{margin:30px 0}
     .title{font-size:20px;color:#879acb;margin-bottom:15px}
-    .course-list{background:white;border-radius:16px;overflow:hidden}
-    .course-item{padding:15px;border-bottom:1px solid #eee}
-    .course-date{color:#879acb;font-weight:bold}
-    .course-status{display:inline-block;padding:5px 10px;border-radius:10px;font-size:12px;color:white;margin-top:5px}
-    .ok{background:#d4edda;color:#28a745}
-    .wait{background:#fff3cd;color:#ffc107}
-    .leave{background:#f8d7da;color:#dc3545}
-    .absent{background:#333;color:#fff}
-    .holiday{background:#d1ecf1;color:#17a2b8}
+    
+    /* 課程表格 */
+    .course-table{
+      width:100%;
+      background:white;
+      border-radius:16px;
+      overflow:hidden;
+      margin-top:15px;
+    }
+    .course-table th{
+      background:#879acb;
+      color:white;
+      padding:12px;
+      text-align:left;
+      font-size:14px;
+    }
+    .course-table td{
+      padding:12px;
+      border-bottom:1px solid #eee;
+      font-size:14px;
+    }
+    .status-badge{
+      padding:5px 10px;
+      border-radius:20px;
+      font-size:12px;
+      color:white;
+    }
+    .status-ok{background:#28a745;}
+    .status-wait{background:#ffc107;}
+    .status-leave{background:#dc3545;}
+    .status-absent{background:#333;}
+    .status-holiday{background:#17a2b8;}
+
     .preview{position:fixed;top:0;left:0;width:100%;height:100%;background:#000000dd;display:none;justify-content:center;align-items:center;padding:20px;z-index:999}
     .preview img{max-width:90%;max-height:80vh;border-radius:12px;object-fit:contain;margin:0 auto;display:block}
     .close{position:absolute;top:20px;right:20px;font-size:30px;color:white;cursor:pointer}
@@ -63,15 +109,17 @@
       margin-bottom:15px;
     }
     .social a{
-      padding:10px 14px;
-      border-radius:10px;
+      width:44px;
+      height:44px;
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
       color:white;
       text-decoration:none;
       font-weight:bold;
+      background:#879acb;
     }
-    .ig{background:#E4405F}
-    .fb{background:#1877F2}
-    .wa{background:#25D366}
     .rule{
       font-size:13px;
       color:#666;
@@ -88,34 +136,56 @@
     <div class="logo">🎨 MURMUR ART</div>
   </div>
 
+  <!-- 導覽分頁 -->
+  <div class="tab-bar">
+    <div class="tab-item active" onclick="switchTab(1)">🎨 作品與資料</div>
+    <div class="tab-item" onclick="switchTab(2)">📅 課程進度</div>
+  </div>
+
   <!-- 續費提醒 -->
   <div id="reminderBox" style="display:none;" class="reminder">課程即將用罄，記得續課哦！</div>
 
-  <div class="student-card" id="studentCard">
-    <img id="avatar" src="">
-    <div class="student-name" id="name"></div>
-    <div class="info" id="studentNo"></div>
-    <div class="info" id="courseType"></div>
-    <div class="info" id="left"></div>
-    <div class="info" id="lastClass" style="display:none;margin-top:10px;color:#879acb"></div>
+  <!-- 頁面1：作品與資料 -->
+  <div id="page1">
+    <div class="student-card" id="studentCard">
+      <img id="avatar" src="">
+      <div class="student-name" id="name"></div>
+      <div class="info" id="studentNo"></div>
+      <div class="info" id="courseType"></div>
+      <div class="info" id="left"></div>
+      <div class="info" id="lastClass" style="display:none;margin-top:10px;color:#879acb"></div>
+    </div>
+
+    <div class="section">
+      <div class="title">🖼️ 學生作品</div>
+      <div class="art-grid" id="artGrid"></div>
+    </div>
   </div>
 
-  <div class="section">
-    <div class="title">🖼️ 學生作品</div>
-    <div class="art-grid" id="artGrid"></div>
+  <!-- 頁面2：課程進度 -->
+  <div id="page2" style="display:none;">
+    <div class="section">
+      <div class="title">📅 課程進度一覽</div>
+      <table class="course-table">
+        <thead>
+          <tr>
+            <th>日期</th>
+            <th>時間</th>
+            <th>狀態</th>
+          </tr>
+        </thead>
+        <tbody id="courseTableBody"></tbody>
+      </table>
+    </div>
   </div>
 
-  <div class="section">
-    <div class="title">📅 課程記錄</div>
-    <div class="course-list" id="courseList"></div>
-  </div>
   <!-- 頁尾 -->
  <div class="footer">
     <h3>🎨 歡迎追蹤我們</h3>
     <div class="social">
-      <a href="https://www.instagram.com/murmur_artstudio/" target="_blank" class="ig">IG</a>
-      <a href="https://www.facebook.com/share/1DMkDrhF65/?mibextid=wwXIfr" target="_blank" class="fb">FB</a>
-      <a href="https://wa.me/67480066" target="_blank" class="wa">WA</a>
+      <a href="https://www.instagram.com/murmur_artstudio/" target="_blank">IG</a>
+      <a href="https://www.facebook.com/share/1DMkDrhF65/?mibextid=wwXIfr" target="_blank">FB</a>
+      <a href="https://wa.me/67480066" target="_blank">WA</a>
     </div>
     <div class="rule">
       請假請提前一天聯絡老師，缺席將不予補課<br>
@@ -152,6 +222,14 @@ if(!sid){
   window.close();
 }
 
+// 分頁切換
+function switchTab(num){
+  document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-item')[num-1].classList.add('active');
+  document.getElementById('page1').style.display = num===1 ? 'block' : 'none';
+  document.getElementById('page2').style.display = num===2 ? 'block' : 'none';
+}
+
 async function getDirectImageUrl(url) {
   if (!url) return "https://via.placeholder.com/300";
   let imgbbMatch = url.match(/ibb\.co\/([a-zA-Z0-9]+)/);
@@ -170,6 +248,14 @@ async function getDirectImageUrl(url) {
 function getWeek(d){
   const w=['日','一','二','三','四','五','六'];
   return w[new Date(d).getDay()];
+}
+
+function formatTime(t){
+  if(!t) return '';
+  const [h,m]=t.split(':');
+  const min=h*60+parseInt(m)+75;
+  const eh=Math.floor(min/60),em=min%60;
+  return `${t} - ${String(eh).padStart(2,0)}:${String(em).padStart(2,0)}`;
 }
 
 async function loadStudent(){
@@ -209,20 +295,30 @@ async function loadCourses(){
     document.getElementById('reminderBox').style.display = 'block';
   }
 
-  const list = document.getElementById('courseList');
-  list.innerHTML = '';
-  const map = {pending:'wait',completed:'ok',leave:'leave',absent:'absent',holiday:'holiday'};
-  const txt = {pending:'未完成',completed:'已完成',leave:'請假',absent:'缺席',holiday:'假期'};
+  // 渲染課程表格
+  const tbody = document.getElementById('courseTableBody');
+  tbody.innerHTML = '';
+  const statusMap = {
+    pending: 'status-wait',
+    completed: 'status-ok',
+    leave: 'status-leave',
+    absent: 'status-absent',
+    holiday: 'status-holiday'
+  };
+  const statusText = {
+    pending:'未完成',completed:'已完成',leave:'請假',absent:'缺席',holiday:'假期'
+  };
 
-  arr.sort((a,b)=>new Date(b.date)-new Date(a.date));
-
-  for(let c of arr){
-    list.innerHTML += `
-    <div class="course-item">
-      <div class="course-date">${c.date}（${getWeek(c.date)}）${c.time}</div>
-      <span class="course-status ${map[c.status]}">${txt[c.status]}</span>
-    </div>`;
-  }
+  const sorted = [...arr].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  sorted.forEach(c=>{
+    tbody.innerHTML += `
+    <tr>
+      <td>${c.date}（${getWeek(c.date)}）</td>
+      <td>${formatTime(c.time)}</td>
+      <td><span class="status-badge ${statusMap[c.status]}">${statusText[c.status]}</span></td>
+    </tr>
+    `;
+  });
 }
 
 async function loadArt(){
@@ -256,6 +352,10 @@ function showPreview(i){
 function closePreview(){
   document.getElementById('preview').style.display = 'none';
 }
+
+// 空函數相容
+function prevArt(){}
+function nextArt(){}
 
 async function init(){
   await loadStudent();
