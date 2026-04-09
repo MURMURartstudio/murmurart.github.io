@@ -125,6 +125,59 @@
       color:#666;
       line-height:1.5;
     }
+
+    /* 新增：分頁樣式 */
+    .pagination{
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:10px;
+      margin:15px 0;
+    }
+    .page-btn{
+      padding:8px 14px;
+      background:#e8edff;
+      color:#555;
+      border:none;
+      border-radius:10px;
+      cursor:pointer;
+    }
+    .page-btn:disabled{
+      opacity:0.5;
+      cursor:not-allowed;
+    }
+    .page-info{
+      font-size:14px;
+      color:#666;
+    }
+
+    /* 新增：作品預覽按鈕 */
+    .prev,.next{
+      position:absolute;
+      top:50%;
+      transform:translateY(-50%);
+      font-size:30px;
+      color:white;
+      background:rgba(255,255,255,0.3);
+      padding:15px 20px;
+      border-radius:10px;
+      cursor:pointer;
+      border:none;
+    }
+    .prev{left:20px}
+    .next{right:20px}
+
+    /* 新增：圖片下方日期 */
+    .img-date{
+      position:absolute;
+      bottom:20px;
+      right:20px;
+      color:white;
+      background:rgba(0,0,0,0.5);
+      padding:5px 10px;
+      border-radius:8px;
+      font-size:14px;
+    }
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -166,6 +219,10 @@
   <div id="page2" style="display:none;">
     <div class="section">
       <div class="title">📅 課程進度一覽</div>
+      <div id="courseStats" style="background:white;padding:15px;border-radius:12px;margin-bottom:15px;display:flex;gap:15px;text-align:center;">
+        <div style="flex:1"><h4 style="color:#879acb">總課程</h4><h3 id="totalCourse">0</h3></div>
+        <div style="flex:1"><h4 style="color:#879acb">剩餘</h4><h3 id="leftCourse">0</h3></div>
+      </div>
       <table class="course-table">
         <thead>
           <tr>
@@ -176,6 +233,7 @@
         </thead>
         <tbody id="courseTableBody"></tbody>
       </table>
+      <div id="coursePagination" class="pagination"></div>
     </div>
   </div>
 
@@ -199,7 +257,7 @@
   <button class="prev" onclick="prevArt()">&lt;</button>
   <img id="previewImg">
   <button class="next" onclick="nextArt()">&gt;</button>
-  <div class="p-text" id="previewDate"></div>
+  <div class="img-date" id="previewDate"></div>
 </div>
 
 <script>
@@ -221,6 +279,12 @@ if(!sid){
   alert('無學生資訊');
   window.close();
 }
+
+// 分頁設定
+const PER_PAGE = 20;
+let coursePage = 1;
+let allCourses = [];
+let currentArtIndex = 0;
 
 // 分頁切換
 function switchTab(num){
@@ -271,33 +335,22 @@ async function loadStudent(){
   document.getElementById('avatar').onerror = e=>e.target.src="https://via.placeholder.com/100";
 }
 
-async function loadCourses(){
-  const snap = await db.collection('courses').where('studentId','==',sid).get();
-  const arr = [];
-  snap.forEach(d=>arr.push({id:d.id,...d.data()}));
-  
-  const valid = arr.filter(x=>!['leave','holiday'].includes(x.status));
-  const total = valid.length;
-  const done = valid.filter(x=>x.status==='completed'||x.status==='absent').length;
-  const left = total - done;
-  
-  document.getElementById('left').innerText = '剩餘堂數：'+left;
+// 課程分頁渲染
+function renderCoursePage(){
+  const sorted = [...allCourses].sort((a,b)=>{
+    if(a.status === 'pending' && b.status !== 'pending') return -1;
+    if(a.status !== 'pending' && b.status === 'pending') return 1;
+    return new Date(a.date) - new Date(b.date);
+  });
 
-  // 上次上課日期
-  const last = arr.filter(x=>x.status==='completed').sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
-  if(last){
-    document.getElementById('lastClass').style.display='block';
-    document.getElementById('lastClass').innerText=`🗓️ 上次上課：${last.date}（${getWeek(last.date)}）`;
-  }
+  const totalPage = Math.ceil(sorted.length / PER_PAGE);
+  const start = (coursePage-1)*PER_PAGE;
+  const end = start + PER_PAGE;
+  const show = sorted.slice(start, end);
 
-  // 續費提醒
-  if(left < 3){
-    document.getElementById('reminderBox').style.display = 'block';
-  }
-
-  // 渲染課程表格
   const tbody = document.getElementById('courseTableBody');
   tbody.innerHTML = '';
+  
   const statusMap = {
     pending: 'status-wait',
     completed: 'status-ok',
@@ -309,8 +362,7 @@ async function loadCourses(){
     pending:'未完成',completed:'已完成',leave:'請假',absent:'缺席',holiday:'假期'
   };
 
-  const sorted = [...arr].sort((a,b)=>new Date(b.date)-new Date(a.date));
-  sorted.forEach(c=>{
+  show.forEach(c=>{
     tbody.innerHTML += `
     <tr>
       <td>${c.date}（${getWeek(c.date)}）</td>
@@ -319,6 +371,51 @@ async function loadCourses(){
     </tr>
     `;
   });
+
+  const p = document.getElementById('coursePagination');
+  p.innerHTML = `
+    <button class="page-btn" onclick="changeCoursePage(${coursePage-1})" ${coursePage<=1?'disabled':''}>上一頁</button>
+    <span class="page-info">第 ${coursePage} / ${totalPage} 頁</span>
+    <button class="page-btn" onclick="changeCoursePage(${coursePage+1})" ${coursePage>=totalPage?'disabled':''}>下一頁</button>
+  `;
+}
+
+function changeCoursePage(p){
+  if(p<1) return;
+  const total = Math.ceil(allCourses.length/PER_PAGE);
+  if(p>total) return;
+  coursePage = p;
+  renderCoursePage();
+}
+
+async function loadCourses(){
+  const snap = await db.collection('courses').where('studentId','==',sid).get();
+  allCourses = [];
+  snap.forEach(d=>allCourses.push({id:d.id,...d.data()}));
+  
+  const valid = allCourses.filter(x=>!['leave','holiday'].includes(x.status));
+  const total = valid.length;
+  const done = valid.filter(x=>x.status==='completed'||x.status==='absent').length;
+  const left = total - done;
+  
+  document.getElementById('left').innerText = '剩餘堂數：'+left;
+  document.getElementById('totalCourse').innerText = total;
+  document.getElementById('leftCourse').innerText = left;
+
+  // 上次上課日期
+  const last = allCourses.filter(x=>x.status==='completed').sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
+  if(last){
+    document.getElementById('lastClass').style.display='block';
+    document.getElementById('lastClass').innerText=`🗓️ 上次上課：${last.date}（${getWeek(last.date)}）`;
+  }
+
+  // 續費提醒
+  if(left < 3){
+    document.getElementById('reminderBox').style.display = 'block';
+  }
+
+  coursePage = 1;
+  renderCoursePage();
 }
 
 async function loadArt(){
@@ -328,7 +425,6 @@ async function loadArt(){
   const arts = [];
   snap.forEach(d=>arts.push({id:d.id,...d.data()}));
   
-  // 依照日期排序 最新在前
   arts.sort((a,b)=>new Date(b.createDate)-new Date(a.createDate));
 
   for(let i=0;i<arts.length;i++){
@@ -343,6 +439,7 @@ async function loadArt(){
 }
 
 function showPreview(i){
+  currentArtIndex = i;
   const item = window.arts[i];
   document.getElementById('previewImg').src = item.imageUrl;
   document.getElementById('previewDate').innerText = item.createDate;
@@ -353,9 +450,17 @@ function closePreview(){
   document.getElementById('preview').style.display = 'none';
 }
 
-// 空函數相容
-function prevArt(){}
-function nextArt(){}
+function prevArt(){
+  if(currentArtIndex <= 0) return;
+  currentArtIndex--;
+  showPreview(currentArtIndex);
+}
+
+function nextArt(){
+  if(currentArtIndex >= window.arts.length-1) return;
+  currentArtIndex++;
+  showPreview(currentArtIndex);
+}
 
 async function init(){
   await loadStudent();
@@ -365,5 +470,7 @@ async function init(){
 
 init();
 </script>
+</body>
+</html>
 </body>
 </html>
