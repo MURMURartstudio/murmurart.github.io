@@ -1,69 +1,64 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MURMUR ART 學生專區</title>
-  <style>
-    *{margin:0;padding:0;box-sizing:border-box;font-family:微軟正黑體,"Noto Sans TC"}
-    body{background:linear-gradient(120deg,#fdfbf7,#f0e9ff);color:#444}
-    .container{width:92%;max-width:1000px;margin:0 auto}
-    .navbar{background:rgba(255,255,255,.95);backdrop-filter:blur(12px);padding:14px 0;position:sticky;top:0;z-index:99}
-    .nav{display:flex;justify-content:space-between;align-items:center}
-    .logo{font-size:24px;color:#879acb;font-weight:bold}
-    .menu a{color:#555;text-decoration:none;margin-left:16px;cursor:pointer}
-    .menu a:hover{color:#879acb}
-
-    .student-card{background:white;border-radius:20px;padding:20px;margin:20px 0;display:flex;align-items:center;gap:16px;box-shadow:0 6px 20px #00000010}
-    .student-card img{width:70px;height:70px;border-radius:50%;object-fit:cover;border:4px solid #879acb}
-    .student-info h2{color:#879acb;margin-bottom:4px}
-    .student-info p{margin:4px 0;color:#666}
-
-    .art-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin:20px 0}
-    .art-card{background:white;border-radius:16px;overflow:hidden;box-shadow:0 4px 12px #00000010;cursor:pointer}
-    .art-card img{width:100%;height:240px;object-fit:cover}
-    .art-info{padding:10px;font-size:12px;color:#666}
-
-    .preview{position:fixed;top:0;left:0;width:100%;height:100%;background:#000000dd;display:none;justify-content:center;align-items:center;padding:20px;z-index:9999}
-    .preview-box{background:#fff;border-radius:24px;padding:30px;max-width:900px;width:100%;display:flex;align-items:center;gap:30px;position:relative}
-    .preview-img{max-height:70vh;max-width:60%;border-radius:16px;object-fit:contain}
-    .preview-info{text-align:right;width:200px}
-    .preview-date{font-size:14px;color:#888;margin-top:10px}
-    .close-preview{position:absolute;top:20px;right:24px;font-size:26px;cursor:pointer;color:#777}
-    .prev-btn,.next-btn{position:absolute;top:50%;transform:translateY(-50%);background:#879acb;color:white;width:55px;height:55px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer}
-    .prev-btn{left:25px}
-    .next-btn{right:25px}
-
-    .calendar{background:white;border-radius:16px;padding:16px;margin:20px 0}
-    .calendar h3{color:#879acb;margin-bottom:10px}
-    .cal-row{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center;margin-bottom:6px}
-    .cal-head{font-weight:bold;color:#879acb;font-size:14px}
-    .cal-day{background:#f8f9ff;padding:8px 4px;border-radius:8px;font-size:12px}
-    .cal-day.active{background:#879acb;color:white}
-    .cal-day .dot{width:6px;height:6px;background:#ff9800;border-radius:50%;margin:4px auto 0}
-
-    .stats{background:white;padding:18px;border-radius:16px;display:flex;gap:15px;text-align:center;margin:15px 0}
-    .stat{flex:1}
-    .stat h3{font-size:14px;color:#879acb}
-    .stat h2{font-size:24px;color:#444}
-
-    .footer{text-align:center;padding:20px;color:#777;font-size:14px}
-  </style>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MURMUR ART 學生專區</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;font-family:微軟正黑體,"Noto Sans TC"}
+  body{background:linear-gradient(120deg,#fdfbf7,#f0e9ff);color:#444;padding-bottom:60px}
+  .container{width:90%;max-width:800px;margin:0 auto}
+  header{background:white;box-shadow:0 2px 10px #00000010;padding:16px 0;margin-bottom:20px;position:sticky;top:0;z-index:10}
+  .header-inner{display:flex;justify-content:space-between;align-items:center}
+  .logo{font-size:24px;color:#879acb;font-weight:bold}
+  .back{color:#879acb;text-decoration:none}
+  .student-card{background:white;border-radius:18px;padding:20px;display:flex;align-items:center;gap:16px;margin-bottom:20px;box-shadow:0 4px 12px #0000000a}
+  .student-card img{width:70px;height:70px;border-radius:50%;border:4px solid #879acb}
+  .student-info h2{color:#879acb;margin-bottom:4px}
+  .student-info p{color:#666;font-size:14px;margin:2px 0}
+  .stats{background:white;padding:16px 20px;border-radius:16px;display:flex;gap:10px;text-align:center;margin-bottom:20px}
+  .stat{flex:1}
+  .stat h3{font-size:14px;color:#888}
+  .stat .num{font-size:22px;font-weight:bold;color:#879acb;margin-top:4px}
+  .tabs{display:flex;background:white;border-radius:16px;overflow:hidden;margin-bottom:20px}
+  .tab{flex:1;padding:12px;text-align:center;cursor:pointer}
+  .tab.active{background:#879acb;color:white}
+  .page{display:none}
+  .page.active{display:block}
+  .art-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+  .art-item{background:white;border-radius:14px;overflow:hidden;box-shadow:0 4px 10px #0000000a}
+  .art-item img{width:100%;height:160px;object-fit:cover}
+  .art-info{padding:8px;font-size:12px;color:#666}
+  .schedule-list{background:white;border-radius:16px;overflow:hidden}
+  .schedule-item{padding:14px 16px;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center}
+  .schedule-left{display:flex;align-items:center;gap:10px}
+  .schedule-date{font-weight:bold;color:#879acb;min-width:70px}
+  .schedule-time{color:#555}
+  .badge{padding:4px 8px;border-radius:8px;font-size:12px;color:white}
+  .ok{background:#28a745}
+  .wait{background:#ffc107}
+  .leave{background:#dc3545}
+  .absent{background:#333}
+  .holiday{background:#17a2b8}
+  .preview{position:fixed;top:0;left:0;width:100%;height:100%;background:#000000dd;display:none;justify-content:center;align-items:center;padding:20px;z-index:999}
+  .preview-box{background:white;border-radius:20px;padding:20px;max-width:500px;width:100%}
+  .preview-box img{max-width:100%;border-radius:12px;margin-bottom:10px}
+  .close{text-align:right;font-size:20px;cursor:pointer;margin-bottom:8px}
+  .footer{text-align:center;margin-top:40px;padding:20px 0;color:#666;font-size:14px}
+  .social{display:flex;justify-content:center;gap:16px;margin-top:10px}
+  .social a{color:#879acb;text-decoration:none}
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
-<div class="navbar">
-  <div class="container nav">
+<header>
+  <div class="container header-inner">
     <div class="logo">🎨 MURMUR ART</div>
-    <div class="menu">
-      <a onclick="show('art')">作品</a>
-      <a onclick="show('calendar')">課表</a>
-      <a onclick="logout()">登出</a>
-    </div>
+    <a href="index.html" class="back">返回登入</a>
   </div>
-</div>
+</header>
 
 <div class="container">
   <div class="student-card" id="studentCard">
@@ -71,46 +66,57 @@
     <div class="student-info">
       <h2 id="name"></h2>
       <p id="phone"></p>
-      <p id="studentNo"></p>
+      <p id="courseType"></p>
     </div>
   </div>
 
-  <div id="courseStats" class="stats" style="display:none">
-    <div class="stat"><h3>總課程</h3><h2 id="total"></h2></div>
-    <div class="stat"><h3>已完成</h3><h2 id="done"></h2></div>
-    <div class="stat"><h3>剩餘</h3><h2 id="left"></h2></div>
+  <div class="stats" id="stats" style="display:none;">
+    <div class="stat">
+      <h3>總課程</h3>
+      <div class="num" id="total"></div>
+    </div>
+    <div class="stat">
+      <h3>已完成</h3>
+      <div class="num" id="done"></div>
+    </div>
+    <div class="stat">
+      <h3>剩餘</h3>
+      <div class="num" id="left"></div>
+    </div>
   </div>
 
-  <div id="artView">
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('art')">作品</div>
+    <div class="tab" onclick="switchTab('schedule')">課表</div>
+  </div>
+
+  <div id="art" class="page active">
     <div class="art-grid" id="artGrid"></div>
   </div>
 
-  <div id="calendarView" style="display:none">
-    <div class="calendar">
-      <h3>📅 上課課表</h3>
-      <div class="cal-row cal-head"><div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div></div>
-      <div id="calBody"></div>
-    </div>
+  <div id="schedule" class="page">
+    <div class="schedule-list" id="scheduleList"></div>
   </div>
 </div>
 
 <div class="preview" id="preview">
   <div class="preview-box">
-    <span class="close-preview" onclick="closePreview()">&times;</span>
-    <img class="preview-img" id="previewImg">
-    <div class="preview-info">
-      <p><strong>作品日期</strong></p>
-      <p class="preview-date" id="pDate"></p>
-      <p style="margin-top:8px"><strong>備註</strong></p>
-      <p id="pNote"></p>
+    <div class="close" onclick="closePreview()">&times;</div>
+    <img id="previewImg">
+    <div class="art-info">
+      <p><strong>日期：</strong><span id="pDate"></span></p>
+      <p><strong>備註：</strong><span id="pNote"></span></p>
     </div>
-    <div class="prev-btn" onclick="prevImg()">&lt;</div>
-    <div class="next-btn" onclick="nextImg()">&gt;</div>
   </div>
 </div>
 
 <div class="footer">
-  了解最新課程與活動消息
+  <p>© 2025 MURMUR ART. All rights reserved.</p>
+  <div class="social">
+    <a href="https://www.instagram.com/murmur_art/" target="_blank">Instagram</a>
+    <a href="https://www.facebook.com/murmurart" target="_blank">Facebook</a>
+    <a href="https://wa.me/85212345678" target="_blank">WhatsApp</a>
+  </div>
 </div>
 
 <script>
@@ -121,7 +127,6 @@ const firebaseConfig = {
   messagingSenderId:"205741159610",
   appId:"1:205741159610:web:624b7ca35c04e6e09a7e83"
 };
-
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
@@ -129,148 +134,102 @@ const params = new URLSearchParams(location.search);
 const sid = params.get('sid');
 let artList = [];
 let courseList = [];
-let currentImg = 0;
 
-if (!sid) location.href='index.html';
+if (!sid) location.href = 'index.html';
 
 async function getDirectImageUrl(url) {
   if (!url) return "https://via.placeholder.com/300";
   let imgbbMatch = url.match(/ibb\.co\/([a-zA-Z0-9]+)/);
   if (imgbbMatch) return `https://i.ibb.co/${imgbbMatch[1]}/image.jpg`;
-  if (url.includes("i.ibb.co") && (url.endsWith(".jpg")||url.endsWith(".png")||url.endsWith(".jpeg"))) return url;
+  if (url.includes("i.ibb.co")) return url;
   let driveMatch = url.match(/drive\.google\.com\/file\/d\/([^\/\?]+)/);
   if (driveMatch) return "https://drive.google.com/thumbnail?id="+driveMatch[1]+"&sz=w1000";
-  if (url.includes("photos.app.goo.gl")) {
-    try{const res=await fetch(url,{mode:"cors"});const t=await res.text();const f=t.match(/https:\/\/lh3\.googleusercontent\.com\/[^\s"]+/);if(f)return f[0]}catch(e){}
-  }
-  if (url.includes("lh3.googleusercontent.com")) return url;
-  if (url.endsWith(".jpg")||url.endsWith(".png")||url.endsWith(".jpeg")||url.endsWith(".gif")) return url;
-  return "https://via.placeholder.com/300";
+  return url;
 }
 
-async function loadStudent(){
+async function loadStudent() {
   const doc = await db.collection('students').doc(sid).get();
+  if (!doc.exists) location.href = 'index.html';
   const data = doc.data();
   document.getElementById('name').innerText = data.name || '';
-  document.getElementById('phone').innerText = data.parentPhone || '';
-  document.getElementById('studentNo').innerText = '學生編號：'+(data.studentNo || '未設定');
+  document.getElementById('phone').innerText = '家長電話：' + (data.parentPhone || '');
+  document.getElementById('courseType').innerText = '課程方案：' + (data.courseType || '');
   const avatar = await getDirectImageUrl(data.avatar);
   document.getElementById('avatar').src = avatar;
-  document.getElementById('avatar').onerror = e=>e.target.src="https://via.placeholder.com/70";
+  document.getElementById('avatar').onerror = e => e.target.src = "https://via.placeholder.com/70";
 }
 
-async function loadArt(){
-  const snap = await db.collection('artworks').where('studentId','==',sid).get();
+async function loadArt() {
+  const snap = await db.collection('artworks').where('studentId', '==', sid).get();
   artList = [];
-  snap.forEach(d=>artList.push({id:d.id,...d.data()}));
-  artList.sort((a,b)=>new Date(b.createDate)-new Date(a.createDate));
-  
+  snap.forEach(d => artList.push({ id: d.id, ...d.data() }));
+  artList.sort((a, b) => new Date(b.createDate) - new Date(a.createDate));
   const grid = document.getElementById('artGrid');
   grid.innerHTML = '';
-  for(let i=0;i<artList.length;i++){
-    const item = artList[i];
+  for (let item of artList) {
     const img = await getDirectImageUrl(item.imageUrl);
     grid.innerHTML += `
-    <div class="art-card" onclick="openPreview(${i})">
-      <img src="${img}" onerror="this.src='https://via.placeholder.com/180x240'">
+    <div class="art-item" onclick="showPreview('${img}','${item.createDate}','${item.note||''}')">
+      <img src="${img}" onerror="this.src='https://via.placeholder.com/150x160'">
+      <div class="art-info">${item.createDate}</div>
     </div>`;
   }
 }
 
-async function loadCourses(){
-  const snap = await db.collection('courses').where('studentId','==',sid).get();
+async function loadSchedule() {
+  const snap = await db.collection('courses').where('studentId', '==', sid).get();
   courseList = [];
-  snap.forEach(d=>courseList.push({id:d.id,...d.data()}));
-  
-  const valid = courseList.filter(c => !['leave','holiday'].includes(c.status));
-  const total = valid.length;
-  const done = valid.filter(c => c.status === 'completed' || c.status === 'absent').length;
-  const left = total - done;
-  
-  document.getElementById('total').innerText = total;
-  document.getElementById('done').innerText = done;
-  document.getElementById('left').innerText = left;
-  document.getElementById('courseStats').style.display = 'flex';
-  
-  renderCalendar();
-}
-
-function renderCalendar(){
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
-  const firstDay = new Date(year,month,1).getDay();
-  const daysInMonth = new Date(year,month+1,0).getDate();
-  
-  const body = document.getElementById('calBody');
-  body.innerHTML = '';
-  
-  let row = document.createElement('div');
-  row.className = 'cal-row';
-  
-  for(let i=0;i<firstDay;i++){
-    row.innerHTML += '<div class="cal-day"></div>';
-  }
-  
-  for(let d=1;d<=daysInMonth;d++){
-    const date = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const has = courseList.some(c=>c.date===date);
-    row.innerHTML += `
-    <div class="cal-day ${has?'active':''}">
-      ${d}
-      ${has?'<div class="dot"></div>':''}
+  snap.forEach(d => courseList.push({ id: d.id, ...d.data() }));
+  courseList.sort((a, b) => new Date(a.date) - new Date(b.date));
+  const list = document.getElementById('scheduleList');
+  list.innerHTML = '';
+  const map = {
+    pending: 'wait',
+    completed: 'ok',
+    leave: 'leave',
+    absent: 'absent',
+    holiday: 'holiday'
+  };
+  const txt = {
+    pending: '未完成',
+    completed: '已完成',
+    leave: '請假',
+    absent: '缺席',
+    holiday: '假期'
+  };
+  for (let c of courseList) {
+    list.innerHTML += `
+    <div class="schedule-item">
+      <div class="schedule-left">
+        <div class="schedule-date">${c.date}</div>
+        <div class="schedule-time">${c.time}</div>
+      </div>
+      <span class="badge ${map[c.status]}">${txt[c.status]}</span>
     </div>`;
-    
-    if((firstDay+d)%7===0){
-      body.appendChild(row);
-      row = document.createElement('div');
-      row.className = 'cal-row';
-    }
   }
-  body.appendChild(row);
 }
 
-function openPreview(i){
-  currentImg = i;
-  showImg();
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(tab).classList.add('active');
+}
+
+function showPreview(img, date, note) {
+  document.getElementById('previewImg').src = img;
+  document.getElementById('pDate').innerText = date;
+  document.getElementById('pNote').innerText = note || '無';
   document.getElementById('preview').style.display = 'flex';
 }
 
-function showImg(){
-  const item = artList[currentImg];
-  document.getElementById('previewImg').src = item.imageUrl;
-  document.getElementById('pDate').innerText = item.createDate;
-  document.getElementById('pNote').innerText = item.note || '無';
-}
-
-function closePreview(){
+function closePreview() {
   document.getElementById('preview').style.display = 'none';
 }
 
-function prevImg(){
-  currentImg = (currentImg - 1 + artList.length) % artList.length;
-  showImg();
-}
-
-function nextImg(){
-  currentImg = (currentImg + 1) % artList.length;
-  showImg();
-}
-
-function show(v){
-  document.getElementById('artView').style.display = v==='art'?'grid':'none';
-  document.getElementById('calendarView').style.display = v==='calendar'?'block':'none';
-}
-
-function logout(){
-  location.href = 'index.html';
-}
-
-window.onload = async ()=>{
-  await loadStudent();
-  await loadArt();
-  await loadCourses();
-}
+loadStudent();
+loadArt();
+loadSchedule();
 </script>
 </body>
 </html>
