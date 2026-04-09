@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="favicon.png">
-  <title>MURMUR ART 學生/家長區 - 版本2</title>
+  <title>MURMUR ART 學生/家長區</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;font-family:微軟正黑體,"Noto Sans TC"}
     body{background:linear-gradient(120deg,#fdfbf7,#f0e9ff);color:#444}
@@ -57,7 +57,10 @@
     .absent{background:#333;color:#fff}
     .holiday{background:#d1ecf1;color:#17a2b8}
     .course-package{display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap}
-    .package-btn{padding:10px 14px;background:#e8edff;border:none;border-radius:8px;cursor:pointer}
+    .package-btn{padding:10px 14px;border:none;border-radius:8px;cursor:pointer;font-weight:bold}
+    .package-btn:nth-child(1){background:#b3c5f0;color:#222}
+    .package-btn:nth-child(2){background:#c8b3f0;color:#222}
+    .package-btn:nth-child(3){background:#f0b3d8;color:#222}
     .preview{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:95%;max-width:1200px;background:white;border-radius:20px;padding:25px;display:none;z-index:9999}
     .preview img{max-width:100%;max-height:70vh;border-radius:12px;object-fit:contain}
     .prev,.next{position:absolute;top:50%;transform:translateY(-50%);font-size:24px;color:white;background:#879acb;padding:10px 18px;border-radius:10px;cursor:pointer}
@@ -67,124 +70,29 @@
     .stats{background:white;padding:20px;border-radius:16px;display:flex;gap:15px;text-align:center;margin:15px 0}
     .stat{flex:1}
 
-    /* 日曆 - 縮小版 手機友善 */
-    .calendar{
-      display:grid;
-      grid-template-columns:repeat(7,1fr);
-      gap:3px;
-      margin:10px 0;
-      font-size:11px;
-    }
-    .calendar-header{
-      background:#879acb;
-      color:white;
-      padding:4px;
-      text-align:center;
-      border-radius:4px;
-      font-weight:bold;
-      font-size:11px;
-    }
-    .calendar-day{
-      background:white;
-      border-radius:6px;
-      padding:4px;
-      min-height:45px;
-      border:1px solid #e8edff;
-      cursor:pointer;
-    }
-    .calendar-day.active{
-      background:#e8edff;
-      border-color:#879acb;
-    }
-    .calendar-day-num{
-      font-weight:bold;
-      margin-bottom:2px;
-      color:#879acb;
-      font-size:11px;
-    }
-    .calendar-item{
-      font-size:10px;
-      padding:2px 4px;
-      background:#f8f9ff;
-      border-radius:4px;
-      margin-bottom:3px;
-      white-space:nowrap;
-      overflow:hidden;
-    }
+    /* 日曆 */
+    .calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin:10px 0;font-size:11px}
+    .calendar-header{background:#879acb;color:white;padding:4px;text-align:center;border-radius:4px;font-weight:bold;font-size:11px}
+    .calendar-day{background:white;border-radius:6px;padding:4px;min-height:45px;border:1px solid #e8edff;cursor:pointer}
+    .calendar-day.active{background:#e8edff;border-color:#879acb}
+    .calendar-day-num{font-weight:bold;margin-bottom:2px;color:#879acb;font-size:11px}
+    .calendar-item{font-size:10px;padding:2px 4px;background:#f8f9ff;border-radius:4px;margin-bottom:3px;white-space:nowrap;overflow:hidden}
 
     /* 時間表 */
-    .day-schedule{
-      background:white;
-      padding:12px;
-      border-radius:12px;
-      margin-bottom:12px;
-      box-shadow:0 2px 8px #0000000a;
-    }
-    .schedule-item{
-      padding:8px 10px;
-      border-bottom:1px solid #e8edff;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      font-size:13px;
-    }
-    .schedule-left{
-      display:flex;
-      align-items:center;
-      gap:8px;
-    }
-    .schedule-time{
-      font-weight:bold;
-      color:#879acb;
-      min-width:60px;
-    }
-    .schedule-name{
-      font-weight:bold;
-    }
-    .schedule-no{
-      color:#777;
-      font-size:11px;
-    }
-    .schedule-btgs{
-      padding:4px 6px;
-      border-radius:6px;
-      font-size:11px;
-      color:white;
-    }
-    .schedule-btns button{
-      padding:5px 8px;
-      border:none;
-      border-radius:6px;
-      color:white;
-      font-size:11px;
-      margin-left:3px;
-    }
+    .day-schedule{background:white;padding:12px;border-radius:12px;margin-bottom:12px;box-shadow:0 2px 8px #0000000a}
+    .schedule-item{padding:8px 10px;border-bottom:1px solid #e8edff;display:flex;justify-content:space-between;align-items:center;font-size:13px}
+    .schedule-left{display:flex;align-items:center;gap:8px}
+    .schedule-time{font-weight:bold;color:#879acb;min-width:60px}
+    .schedule-name{font-weight:bold}
+    .schedule-no{color:#777;font-size:11px}
+    .schedule-btgs{padding:4px 6px;border-radius:6px;font-size:11px;color:white}
+    .schedule-btns button{padding:5px 8px;border:none;border-radius:6px;color:white;font-size:11px;margin-left:3px}
 
     /* 學生資訊卡片 */
-    .student-info-card{
-      background:white;
-      padding:16px;
-      border-radius:14px;
-      display:flex;
-      align-items:center;
-      gap:12px;
-      margin-bottom:12px;
-      box-shadow:0 4px 12px #0000000a;
-    }
-    .student-info-card img{
-      width:60px;height:60px;border-radius:50%;
-      border:4px solid #879acb;
-    }
-    .student-info-text h3{
-      color:#879acb;
-      margin-bottom:4px;
-      font-size:16px;
-    }
-    .student-info-text p{
-      color:#666;
-      font-size:13px;
-      margin:2px 0;
-    }
+    .student-info-card{background:white;padding:16px;border-radius:14px;display:flex;align-items:center;gap:12px;margin-bottom:12px;box-shadow:0 4px 12px #0000000a}
+    .student-info-card img{width:60px;height:60px;border-radius:50%;border:4px solid #879acb}
+    .student-info-text h3{color:#879acb;margin-bottom:4px;font-size:16px}
+    .student-info-text p{color:#666;font-size:13px;margin:2px 0}
 
     /* 批量按鈕 */
     .batch-bar{margin:10px 0;padding:10px;background:#f8f9ff;border-radius:12px}
@@ -204,176 +112,92 @@
     .warningItem{background:white;padding:12px;border-radius:10px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
     .imgbb-link{display:inline-block;margin-top:8px;color:#879acb;text-decoration:underline;font-size:14px}
 
-    /* 時間表狀態顏色 */
-    .status-completed{background:#28a745;color:white;padding:3px 6px;border-radius:4px;font-size:11px;}
-    .status-pending{background:#ffc107;color:#333;padding:3px 6px;border-radius:4px;font-size:11px;}
-    .status-leave{background:#dc3545;color:white;padding:3px 6px;border-radius:4px;font-size:11px;}
-    .status-absent{background:#000;color:white;padding:3px 6px;border-radius:4px;font-size:11px;}
-    .status-holiday{background:#17a2b8;color:white;padding:3px 6px;border-radius:4px;font-size:11px;}
+    /* 狀態顏色 */
+    .status-completed{background:#28a745;color:white;padding:3px 6px;border-radius:4px;font-size:11px}
+    .status-pending{background:#ffc107;color:#333;padding:3px 6px;border-radius:4px;font-size:11px}
+    .status-leave{background:#dc3545;color:white;padding:3px 6px;border-radius:4px;font-size:11px}
+    .status-absent{background:#000;color:white;padding:3px 6px;border-radius:4px;font-size:11px}
+    .status-holiday{background:#17a2b8;color:white;padding:3px 6px;border-radius:4px;font-size:11px}
 
-    /* 列印專用 */
-    @media print{
-      body * { visibility: hidden; }
-      #timeTableView, #timeTableView * { visibility: visible; }
-      #timeTableView { position: absolute; left: 0; top: 0; width: 100%; }
-    }
+    /* 列印 */
+    @media print{body * {visibility:hidden}#timeTableView,#timeTableView *{visibility:visible}#timeTableView{position:absolute;left:0;top:0;width:100%}}
 
-    /* 分頁樣式 */
-    .pagination{
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      gap:10px;
-      margin:20px 0;
-    }
-    .page-btn{
-      padding:8px 14px;
-      background:#e8edff;
-      color:#555;
-      border:none;
-      border-radius:10px;
-      cursor:pointer;
-    }
-    .page-btn:disabled{
-      opacity:0.5;
-      cursor:not-allowed;
-    }
-    .page-info{
-      font-size:14px;
-      color:#666;
-    }
+    /* 分頁 */
+    .pagination{display:flex;justify-content:center;align-items:center;gap:10px;margin:20px 0}
+    .page-btn{padding:8px 14px;background:#e8edff;color:#555;border:none;border-radius:10px;cursor:pointer}
+    .page-btn:disabled{opacity:0.5}
+    .page-info{font-size:14px;color:#666}
 
     /* 新月曆排版 */
-    .calendar-wrapper{
-      display:flex;
-      gap:15px;
-      margin-bottom:15px;
-      align-items:flex-start;
-    }
-    .calendar-left{
-      width:260px;
-      background:white;
-      padding:12px;
-      border-radius:10px;
-      box-shadow:0 2px 8px rgba(0,0,0,0.05);
-    }
-    .calendar-right{
-      flex:1;
-      background:white;
-      padding:12px;
-      border-radius:12px;
-      box-shadow:0 2px 8px rgba(0,0,0,0.05);
-      max-height:none;
-      overflow-y:visible;
-    }
-    .month-selector{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin-bottom:8px;
-    }
-    .month-selector select{
-      padding:6px 10px;
-      border-radius:8px;
-      border:1px solid #e8edff;
-    }
-    .time-row{
-      display:flex;
-      align-items:flex-start;
-      padding:6px 8px;
-      border-bottom:1px solid #f0f0f0;
-      min-height:38px;
-    }
-    .time-label{
-      width:60px;
-      font-weight:bold;
-      color:#879acb;
-      font-size:12px;
-      padding-top:4px;
-    }
-    .time-slots{
-      flex:1;
-      display:flex;
-      flex-direction:column;
-      gap:4px;
-      padding-bottom:2px;
-    }
-    .course-block{
-      padding:6px 8px;
-      background:#e8edff;
-      border-radius:6px;
-      font-size:11px;
-      border-left:3px solid #879acb;
-      white-space:nowrap;
-      min-width:130px;
-      cursor:pointer;
-      position:relative;
-      margin:0;
-    }
-    .course-block:hover{
-      background:#d7e0ff;
-    }
-    .course-status-menu{
-      position:absolute;
-      bottom:-38px;
-      left:0;
-      background:white;
-      border-radius:6px;
-      box-shadow:0 2px 8px #00000022;
-      padding:4px;
-      z-index:10;
-      display:flex;
-      gap:3px;
-    }
-    .course-status-menu button{
-      padding:3px 5px;
-      font-size:10px;
-      border:none;
-      border-radius:4px;
-      color:white;
-      cursor:pointer;
-    }
-    .quick-edit-panel{
-      position:fixed;
-      right:20px;
-      top:50%;
-      transform:translateY(-50%);
-      background:white;
-      padding:15px;
-      border-radius:12px;
-      box-shadow:0 5px 20px rgba(0,0,0,0.15);
-      z-index:999;
-      width:180px;
-      display:none;
-    }
-    .quick-edit-panel h4{
-      font-size:14px;
-      color:#879acb;
-      margin-bottom:10px;
-    }
-    .quick-btn{
-      width:100%;
-      padding:6px;
-      margin:3px 0;
-      border:none;
-      border-radius:6px;
-      color:white;
-      font-size:12px;
-      cursor:pointer;
-    }
+    .calendar-wrapper{display:flex;gap:15px;margin-bottom:15px;align-items:flex-start}
+    .calendar-left{width:260px;background:white;padding:12px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.05)}
+    .calendar-right{flex:1;background:white;padding:12px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.05);max-height:none;overflow-y:visible}
+    .month-selector{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .month-selector select{padding:6px 10px;border-radius:8px;border:1px solid #e8edff}
+    .time-row{display:flex;align-items:flex-start;padding:6px 8px;border-bottom:1px solid #f0f0f0;min-height:38px}
+    .time-label{width:60px;font-weight:bold;color:#879acb;font-size:12px;padding-top:4px}
+    .time-slots{flex:1;display:flex;flex-direction:column;gap:4px;padding-bottom:2px}
+    .course-block{padding:6px 8px;background:#e8edff;border-radius:6px;font-size:11px;border-left:3px solid #879acb;white-space:nowrap;min-width:130px;cursor:pointer;position:relative;margin:0}
+    .course-block:hover{background:#d7e0ff}
+    .course-status-menu{position:absolute;bottom:-38px;left:0;background:white;border-radius:6px;box-shadow:0 2px 8px #00000022;padding:4px;z-index:10;display:flex;gap:3px}
+    .course-status-menu button{padding:3px 5px;font-size:10px;border:none;border-radius:4px;color:white;cursor:pointer}
+    .quick-edit-panel{position:fixed;right:20px;top:50%;transform:translateY(-50%);background:white;padding:15px;border-radius:12px;box-shadow:0 5px 20px rgba(0,0,0,0.15);z-index:999;width:180px;display:none}
+    .quick-edit-panel h4{font-size:14px;color:#879acb;margin-bottom:10px}
+    .quick-btn{width:100%;padding:6px;margin:3px 0;border:none;border-radius:6px;color:white;font-size:12px;cursor:pointer}
 
     /* 老師界面：同一時間學生左右排列 */
-    .time-slots {
-      display: flex !important;
-      flex-direction: row !important;
-      flex-wrap: wrap !important;
-      gap: 6px !important;
+    .time-slots {display:flex !important;flex-direction:row !important;flex-wrap:wrap !important;gap:6px !important}
+    .course-block {margin:0 !important;flex:1 !important;min-width:140px !important;max-width:220px !important}
+
+    /* 課程狀態彈窗 */
+    #statusModal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 99999;
     }
-    .course-block {
-      margin: 0 !important;
-      flex: 1 !important;
-      min-width: 140px !important;
-      max-width: 220px !important;
+    .status-box {
+      background: white;
+      padding: 25px 30px;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 360px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    .status-box h3 {
+      margin-bottom: 20px;
+      color: #879acb;
+    }
+    .status-btn {
+      width: 100%;
+      padding: 12px;
+      margin: 6px 0;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-size: 15px;
+      cursor: pointer;
+    }
+    .status-btn.completed { background: #28a745; }
+    .status-btn.pending { background: #ffc107; color: #222; }
+    .status-btn.leave { background: #dc3545; }
+    .status-btn.absent { background: #333; }
+    .status-btn.holiday { background: #17a2b8; }
+    .status-close {
+      margin-top: 15px;
+      padding: 8px;
+      background: #eee;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
     }
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -388,244 +212,46 @@
       <div class="tab active" onclick="switchTab('parent')">家長</div>
       <div class="tab" onclick="switchTab('teacher')">老師</div>
     </div>
-
-    <div id="parentLogin">
-      <input class="input" id="pName" placeholder="學生姓名">
-      <input class="input" id="pPhone" placeholder="家長電話">
-      <button class="btn" onclick="parentLogin()">登入</button>
-    </div>
-
-    <div id="teacherLogin" style="display:none">
-      <input class="input" id="adminPwd" placeholder="請輸入老師密碼" type="password">
-      <button class="btn" onclick="teacherLogin()">登入後台</button>
-    </div>
+    <div id="parentLogin"><input class="input" id="pName" placeholder="學生姓名"><input class="input" id="pPhone" placeholder="家長電話"><button class="btn" onclick="parentLogin()">登入</button></div>
+    <div id="teacherLogin" style="display:none"><input class="input" id="adminPwd" placeholder="請輸入老師密碼" type="password"><button class="btn" onclick="teacherLogin()">登入後台</button></div>
   </div>
 </div>
 
 <div id="main" style="display:none">
-  <div class="navbar">
-    <div class="container nav">
-      <div class="logo">MURMUR ART 後台</div>
-      <div class="menu">
-        <a onclick="show(1)">學生管理</a>
-        <a onclick="show(2)">作品管理</a>
-        <a onclick="show(3)">課程管理</a>
-        <a onclick="logout()">登出</a>
-      </div>
-    </div>
-  </div>
-
+  <div class="navbar"><div class="container nav"><div class="logo">MURMUR ART 後台</div><div class="menu"><a onclick="show(1)">學生管理</a><a onclick="show(2)">作品管理</a><a onclick="show(3)">課程管理</a><a onclick="logout()">登出</a></div></div></div>
   <div class="container">
-    <div id="page1">
-      <h2 style="margin-bottom:10px">學生管理</h2>
-      <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
-        <input class="search" id="searchStudent" placeholder="搜尋姓名/電話/編號" oninput="searchStudent()" style="margin:0;flex:1">
-        <button class="btn" style="width:auto;padding:8px 15px" onclick="addStu()">+ 新增學生</button>
-        <button class="export-btn" onclick="exportCSV()">匯出 CSV</button>
-        <button class="btn" style="width:auto;padding:8px 15px;background:#6c757d" onclick="sortStudentAZ()">A→Z 排序</button>
-      </div>
-      <div class="grid" id="stuList"></div>
-      <div id="stuPagination" class="pagination"></div>
-    </div>
-
-    <div id="page2" style="display:none">
-      <h2 style="margin-bottom:10px">作品管理</h2>
-      <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
-        <input class="search" id="searchArt" placeholder="搜尋姓名/電話/編號" oninput="searchArt()" style="margin:0;flex:1">
-        <select class="input" id="selectStudentForArt" onchange="switchArtStudent()" style="flex:1"></select>
-      </div>
-      <div class="gallery">
-        <div class="student-header" id="artStudentHeader" style="display:none">
-          <img id="artAvatar" src="">
-          <div>
-            <h3 id="artStudentName"></h3>
-          </div>
-        </div>
-        <div class="art-grid" id="artGrid"></div>
-      </div>
-      <div id="artPagination" class="pagination"></div>
-      <div class="add" onclick="openArt()">+</div>
-    </div>
-
-    <div id="page3" style="display:none">
-      <h2 style="margin-bottom:10px">課程管理</h2>
-
-      <div id="studentInfoCard" class="student-info-card" style="display:none;">
-        <img id="cardAvatar">
-        <div class="student-info-text">
-          <h3 id="cardName"></h3>
-          <p id="cardNo"></p>
-          <p id="cardCourseType"></p>
-          <p id="cardLeft"></p>
-        </div>
-      </div>
-
-      <select class="input" id="selectStudentForCourse" onchange="switchCourseStudent()"></select>
-      <input class="search" id="searchCourse" placeholder="搜尋姓名/電話/編號" oninput="searchCourse()" style="margin:0;flex:1">
-      <div id="studentInfoDisplay" class="student-info-bar"></div>
-      <button class="btn" style="width:auto;padding:8px 15px" onclick="addCourse()">+ 新增課程</button>
-      <button class="export-btn" onclick="printSchedule()">下載／列印時間表</button>
-
-      <div class="calendar-wrapper">
-        <div class="calendar-left">
-          <div class="month-selector">
-            <span>📅 選擇月份</span>
-            <select id="monthSelect" onchange="onMonthChange()"></select>
-          </div>
-          <div id="smallCalendar" class="calendar"></div>
-        </div>
-        <div class="calendar-right">
-          <h4 style="margin-bottom:8px;color:#879acb;font-size:14px">⏰ 當日課程時間表</h4>
-          <div id="timeTableView"></div>
-        </div>
-      </div>
-
-      <div class="stats" id="courseStats"></div>
-      <div class="batch-bar">
-        <small>批量操作：</small>
-        <button class="batch-btn btn-wait" onclick="batchSet('pending')">未完成</button>
-        <button class="batch-btn btn-ok" onclick="batchSet('completed')">已完成</button>
-        <button class="batch-btn btn-leave" onclick="batchSet('leave')">請假</button>
-        <button class="batch-btn btn-absent" onclick="batchSet('absent')">缺席</button>
-        <button class="batch-btn btn-holiday" onclick="batchSet('holiday')">假期</button>
-        <button class="batch-btn btn-del" onclick="batchDeleteCourses()">批量刪除</button>
-      </div>
-      <table>
-        <thead>
-          <tr>
-            <th><input type="checkbox" id="checkAll" onclick="toggleAllCheck()"></th>
-            <th>日期</th>
-            <th>時間</th>
-            <th>狀態</th>
-            <th>課程類型</th>
-            <th>備註</th>
-            <th>操作</th>
-          </tr>
-        </thead>
-        <tbody id="courseList"></tbody>
-      </table>
-      <div id="coursePagination" class="pagination"></div>
+    <div id="page1"><h2 style="margin-bottom:10px">學生管理</h2><div style="display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap"><input class="search" id="searchStudent" placeholder="搜尋姓名/電話/編號" oninput="searchStudent()" style="margin:0;flex:1"><button class="btn" style="width:auto;padding:8px 15px" onclick="addStu()">+ 新增學生</button><button class="export-btn" onclick="exportCSV()">匯出 CSV</button><button class="btn" style="width:auto;padding:8px 15px;background:#6c757d" onclick="sortStudentAZ()">A→Z 排序</button></div><div class="grid" id="stuList"></div><div id="stuPagination" class="pagination"></div></div>
+    <div id="page2" style="display:none"><h2 style="margin-bottom:10px">作品管理</h2><div style="display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap"><input class="search" id="searchArt" placeholder="搜尋姓名/電話/編號" oninput="searchArt()" style="margin:0;flex:1"><select class="input" id="selectStudentForArt" onchange="switchArtStudent()" style="flex:1"></select></div><div class="gallery"><div class="student-header" id="artStudentHeader" style="display:none"><img id="artAvatar" src=""><div><h3 id="artStudentName"></h3></div></div><div class="art-grid" id="artGrid"></div></div><div id="artPagination" class="pagination"></div><div class="add" onclick="openArt()">+</div></div>
+    <div id="page3" style="display:none"><h2 style="margin-bottom:10px">課程管理</h2><div id="studentInfoCard" class="student-info-card" style="display:none;"><img id="cardAvatar"><div class="student-info-text"><h3 id="cardName"></h3><p id="cardNo"></p><p id="cardCourseType"></p><p id="cardLeft"></p></div></div><select class="input" id="selectStudentForCourse" onchange="switchCourseStudent()"></select><input class="search" id="searchCourse" placeholder="搜尋姓名/電話/編號" oninput="searchCourse()" style="margin:0;flex:1"><div id="studentInfoDisplay" class="student-info-bar"></div><button class="btn" style="width:auto;padding:8px 15px" onclick="addCourse()">+ 新增課程</button><button class="export-btn" onclick="printSchedule()">下載／列印時間表</button>
+      <div class="calendar-wrapper"><div class="calendar-left"><div class="month-selector"><span>📅 選擇月份</span><select id="monthSelect" onchange="onMonthChange()"></select></div><div id="smallCalendar" class="calendar"></div></div><div class="calendar-right"><h4 style="margin-bottom:8px;color:#879acb;font-size:14px">⏰ 當日課程時間表</h4><div id="timeTableView"></div></div></div>
+      <div class="stats" id="courseStats"></div><div class="batch-bar"><small>批量操作：</small><button class="batch-btn btn-wait" onclick="batchSet('pending')">未完成</button><button class="batch-btn btn-ok" onclick="batchSet('completed')">已完成</button><button class="batch-btn btn-leave" onclick="batchSet('leave')">請假</button><button class="batch-btn btn-absent" onclick="batchSet('absent')">缺席</button><button class="batch-btn btn-holiday" onclick="batchSet('holiday')">假期</button><button class="batch-btn btn-del" onclick="batchDeleteCourses()">批量刪除</button></div>
+      <table><thead><tr><th><input type="checkbox" id="checkAll" onclick="toggleAllCheck()"></th><th>日期</th><th>時間</th><th>狀態</th><th>課程類型</th><th>備註</th><th>操作</th></tr></thead><tbody id="courseList"></tbody></table><div id="coursePagination" class="pagination"></div>
     </div>
   </div>
 </div>
 
-<div class="quick-edit-panel" id="quickEditPanel">
-  <h4 id="quickEditTitle">快速編輯</h4>
-  <button class="quick-btn" style="background:#28a745" onclick="saveQuickStatus('completed')">已完成</button>
-  <button class="quick-btn" style="background:#ffc107" onclick="saveQuickStatus('pending')">未完成</button>
-  <button class="quick-btn" style="background:#dc3545" onclick="saveQuickStatus('leave')">請假</button>
-  <button class="quick-btn" style="background:#333" onclick="saveQuickStatus('absent')">缺席</button>
-  <button class="quick-btn" style="background:#17a2b8" onclick="saveQuickStatus('holiday')">假期</button>
-</div>
-
-<div class="modal" id="stuModal">
-  <div class="box">
-    <span class="close" onclick="closeAll()">&times;</span>
-    <h3>學生資料</h3>
-    <input class="input" id="sname" placeholder="姓名">
-    <input class="input" id="sno" placeholder="學生編號">
-    <input class="input" id="sphone" placeholder="家長電話">
-    <input class="input" id="savatar" placeholder="貼上圖片連結（ImgBB/Google 相簿都可）">
-    <select class="input" id="courseType">
-      <option value="">課程方案</option>
-      <option value="常規班">常規班</option>
-      <option value="暑期班">暑期班</option>
-      <option value="4堂">4堂</option>
-      <option value="12堂">12堂</option>
-      <option value="24堂">24堂</option>
-    </select>
-    <div class="section-title">基本資料</div>
-    <input class="input" id="school" placeholder="學校">
-    <input class="input" id="birthYear" placeholder="出生年份">
-    <input class="input" id="gender" placeholder="性別">
-    <textarea class="input" id="note" placeholder="備註" style="height:80px"></textarea>
-    <button class="btn" onclick="saveStu()">儲存</button>
+<!-- 課程狀態彈窗 -->
+<div id="statusModal">
+  <div class="status-box">
+    <h3>修改課程狀態</h3>
+    <button class="status-btn completed" onclick="setCourseStatus('completed')">已完成 ✅</button>
+    <button class="status-btn pending" onclick="setCourseStatus('pending')">未完成 ⏳</button>
+    <button class="status-btn leave" onclick="setCourseStatus('leave')">請假 ❌</button>
+    <button class="status-btn absent" onclick="setCourseStatus('absent')">缺席 ⚫</button>
+    <button class="status-btn holiday" onclick="setCourseStatus('holiday')">假期 🔵</button>
+    <button class="status-close" onclick="closeStatusModal()">關閉</button>
   </div>
 </div>
 
-<div class="modal" id="artModal">
-  <div class="box">
-    <span class="close" onclick="closeAll()">&times;</span>
-    <h3>上傳作品</h3>
-    <select class="input" id="artStudentSelect"></select>
-    <input class="input" id="img" placeholder="貼上圖片連結（ImgBB/Google 相簿都可）">
-    <a href="https://imgbb.com/" target="_blank" class="imgbb-link">→ 開啟 ImgBB 上傳圖片</a>
-    <input class="input" id="cdate" type="date">
-    <input class="input" id="artNote" placeholder="備註">
-    <button class="btn" onclick="saveArt()">儲存</button>
-  </div>
-</div>
-
-<div class="modal" id="courseModal">
-  <div class="box">
-    <span class="close" onclick="closeAll()">&times;</span>
-    <h3>課程資料</h3>
-    <select class="input" id="courseStudentSelect" disabled></select>
-    <input class="input" type="date" id="cday">
-    
-    <div style="display:flex;gap:10px;">
-      <input class="input" type="number" id="chour" placeholder="小時" style="flex:1;" oninput="calcEndTime()">
-      <input class="input" type="number" id="cmin" placeholder="分鐘" style="flex:1;" oninput="calcEndTime()">
-    </div>
-
-    <div id="endTimeShow" style="margin:0 0 15px;color:#879acb"></div>
-    <select class="input" id="courseCategory">
-      <option value="恆常班">恆常班</option>
-      <option value="工作坊">工作坊</option>
-      <option value="暑期班">暑期班</option>
-      <option value="其他">其他</option>
-    </select>
-    <textarea class="input" id="cnote" placeholder="備註"></textarea>
-    <select class="input" id="cstatus">
-      <option value="pending">未完成</option>
-      <option value="completed">已完成</option>
-      <option value="leave">請假</option>
-      <option value="absent">缺席</option>
-      <option value="holiday">公眾假期</option>
-    </select>
-    <div style="margin-top:10px">
-      <small>一鍵產生課程：</small>
-      <div class="course-package">
-        <div class="package-btn" onclick="quickPackage(4)">4堂</div>
-        <div class="package-btn" onclick="quickPackage(12)">12堂</div>
-        <div class="package-btn" onclick="quickPackage(24)">24堂</div>
-      </div>
-    </div>
-    <button class="btn" onclick="saveCourse()">儲存</button>
-  </div>
-</div>
-
-<div class="modal" id="makeupModal">
-  <div class="box">
-    <span class="close" onclick="closeAll()">&times;</span>
-    <h3>📅 安排補課日期</h3>
-    <p style="margin-bottom:15px">此課程為請假 / 公眾假期，可安排補課</p>
-    <input class="input" type="date" id="makeupDate">
-    <input class="input" type="time" step="300" id="makeupTime">
-    <button class="btn" onclick="saveMakeup()">儲存補課</button>
-  </div>
-</div>
-
-<div class="preview" id="preview">
-  <span class="close" onclick="closeAll()">&times;</span>
-  <img id="previewImg">
-  <div class="art-info" style="margin-top:10px">
-    <p><strong>日期：</strong><span id="pDate"></span></p>
-    <p><strong>備註：</strong><span id="pNote"></span></p>
-    <button class="btn" style="background:#879acb" onclick="openEditArtFromPreview()">修改作品</button>
-    <button class="btn" style="background:#dc3545" onclick="deleteCurrentArt()">刪除作品</button>
-  </div>
-</div>
+<div class="quick-edit-panel" id="quickEditPanel"><h4 id="quickEditTitle">快速編輯</h4><button class="quick-btn" style="background:#28a745" onclick="saveQuickStatus('completed')">已完成</button><button class="quick-btn" style="background:#ffc107" onclick="saveQuickStatus('pending')">未完成</button><button class="quick-btn" style="background:#dc3545" onclick="saveQuickStatus('leave')">請假</button><button class="quick-btn" style="background:#333" onclick="saveQuickStatus('absent')">缺席</button><button class="quick-btn" style="background:#17a2b8" onclick="saveQuickStatus('holiday')">假期</button></div>
+<div class="modal" id="stuModal"><div class="box"><span class="close" onclick="closeAll()">&times;</span><h3>學生資料</h3><input class="input" id="sname" placeholder="姓名"><input class="input" id="sno" placeholder="學生編號"><input class="input" id="sphone" placeholder="家長電話"><input class="input" id="savatar" placeholder="貼上圖片連結"><select class="input" id="courseType"><option value="">課程方案</option><option value="常規班">常規班</option><option value="暑期班">暑期班</option><option value="4堂">4堂</option><option value="12堂">12堂</option><option value="24堂">24堂</option></select><div class="section-title">基本資料</div><input class="input" id="school" placeholder="學校"><input class="input" id="birthYear" placeholder="出生年份"><input class="input" id="gender" placeholder="性別"><textarea class="input" id="note" placeholder="備註" style="height:80px"></textarea><button class="btn" onclick="saveStu()">儲存</button></div></div>
+<div class="modal" id="artModal"><div class="box"><span class="close" onclick="closeAll()">&times;</span><h3>上傳作品</h3><select class="input" id="artStudentSelect"></select><input class="input" id="img" placeholder="貼上圖片連結"><a href="https://imgbb.com/" target="_blank" class="imgbb-link">→ 開啟 ImgBB 上傳圖片</a><input class="input" id="cdate" type="date"><input class="input" id="artNote" placeholder="備註"><button class="btn" onclick="saveArt()">儲存</button></div></div>
+<div class="modal" id="courseModal"><div class="box"><span class="close" onclick="closeAll()">&times;</span><h3>課程資料</h3><select class="input" id="courseStudentSelect" disabled></select><input class="input" type="date" id="cday"><div style="display:flex;gap:10px;"><input class="input" type="number" id="chour" placeholder="小時" style="flex:1;" oninput="calcEndTime()"><input class="input" type="number" id="cmin" placeholder="分鐘" style="flex:1;" oninput="calcEndTime()"></div><div id="endTimeShow" style="margin:0 0 15px;color:#879acb"></div><select class="input" id="courseCategory"><option value="恆常班">恆常班</option><option value="工作坊">工作坊</option><option value="暑期班">暑期班</option><option value="其他">其他</option></select><textarea class="input" id="cnote" placeholder="備註"></textarea><select class="input" id="cstatus"><option value="pending">未完成</option><option value="completed">已完成</option><option value="leave">請假</option><option value="absent">缺席</option><option value="holiday">公眾假期</option></select><div style="margin-top:10px"><small>一鍵產生課程：</small><div class="course-package"><div class="package-btn" onclick="quickPackage(4)">4堂</div><div class="package-btn" onclick="quickPackage(12)">12堂</div><div class="package-btn" onclick="quickPackage(24)">24堂</div></div></div><button class="btn" onclick="saveCourse()">儲存</button></div></div>
+<div class="modal" id="makeupModal"><div class="box"><span class="close" onclick="closeAll()">&times;</span><h3>📅 安排補課日期</h3><p style="margin-bottom:15px">此課程為請假 / 公眾假期，可安排補課</p><input class="input" type="date" id="makeupDate"><input class="input" type="time" step="300" id="makeupTime"><button class="btn" onclick="saveMakeup()">儲存補課</button></div></div>
+<div class="preview" id="preview"><span class="close" onclick="closeAll()">&times;</span><img id="previewImg"><div class="art-info" style="margin-top:10px"><p><strong>日期：</strong><span id="pDate"></span></p><p><strong>備註：</strong><span id="pNote"></span></p><button class="btn" style="background:#879acb" onclick="openEditArtFromPreview()">修改作品</button><button class="btn" style="background:#dc3545" onclick="deleteCurrentArt()">刪除作品</button></div></div>
 
 <script>
-const firebaseConfig = {
-  apiKey:"AIzaSyBqUEh-MjMZ5Gj2gaFJpKffrDmvP9l7Slo",
-  authDomain:"murmurart-8f6cc.firebaseapp.com",
-  projectId:"murmurart-8f6cc",
-  messagingSenderId:"205741159610",
-  appId:"1:205741159610:web:624b7ca35c04e6e09a7e83"
-};
-
+const firebaseConfig = {apiKey:"AIzaSyBqUEh-MjMZ5Gj2gaFJpKffrDmvP9l7Slo",authDomain:"murmurart-8f6cc.firebaseapp.com",projectId:"murmurart-8f6cc",messagingSenderId:"205741159610",appId:"1:205741159610:web:624b7ca35c04e6e09a7e83"};
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const ADMIN_PWD = "teacher123";
@@ -639,17 +265,14 @@ let artList = [];
 let courseRaw = [];
 let currentImg = 0;
 let allCourses = [];
-
-// 分頁設定
 const PER_PAGE = 20;
 let stuPage = 1;
 let artPage = 1;
 let coursePage = 1;
-
-// 新月曆
 let selectedYear = new Date().getFullYear();
 let selectedMonth = new Date().getMonth();
 let selectedDate = new Date().toISOString().split('T')[0];
+let activeCourseId = null;
 
 async function getDirectImageUrl(url) {
   if (!url) return "https://via.placeholder.com/300";
@@ -658,780 +281,157 @@ async function getDirectImageUrl(url) {
   if (url.includes("i.ibb.co") && (url.endsWith(".jpg")||url.endsWith(".png")||url.endsWith(".jpeg"))) return url;
   let driveMatch = url.match(/drive\.google\.com\/file\/d\/([^\/\?]+)/);
   if (driveMatch) return "https://drive.google.com/thumbnail?id="+driveMatch[1]+"&sz=w1000";
-  if (url.includes("photos.app.goo.gl")) {
-    try{const res=await fetch(url,{mode:"cors"});const t=await res.text();const f=t.match(/https:\/\/lh3\.googleusercontent\.com\/[^\s"]+/);if(f)return f[0]}catch(e){}
-  }
+  if (url.includes("photos.app.goo.gl")) {try{const res=await fetch(url,{mode:"cors"});const t=await res.text();const f=t.match(/https:\/\/lh3\.googleusercontent\.com\/[^\s"]+/);if(f)return f[0]}catch(e){}}
   if (url.includes("lh3.googleusercontent.com")) return url;
   if (url.endsWith(".jpg")||url.endsWith(".png")||url.endsWith(".jpeg")||url.endsWith(".gif")) return url;
   return "https://via.placeholder.com/300";
 }
 
 function switchTab(role) {
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  event.target.classList.add('active');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));event.target.classList.add('active');
   document.getElementById('parentLogin').style.display = role === 'parent' ? 'block' : 'none';
   document.getElementById('teacherLogin').style.display = role === 'teacher' ? 'block' : 'none';
 }
 
 function teacherLogin() {
   const p = document.getElementById('adminPwd').value.trim();
-  if (p === ADMIN_PWD) {
-    isTeacher = true;
-    document.getElementById('loginPage').style.display = 'none';
-    document.getElementById('main').style.display = 'block';
-    loadAllStudents();
-    loadAllCoursesForCalendar();
-    initMonthSelector();
-    renderSmallCalendar();
-    renderTimeTable();
-  } else alert('密碼錯誤');
+  if (p === ADMIN_PWD) {isTeacher = true;document.getElementById('loginPage').style.display = 'none';document.getElementById('main').style.display = 'block';loadAllStudents();loadAllCoursesForCalendar();initMonthSelector();renderSmallCalendar();renderTimeTable();} else alert('密碼錯誤');
 }
 
 async function parentLogin() {
-  const name = document.getElementById('pName').value.trim();
-  const phone = document.getElementById('pPhone').value.trim().replace(/\s/g, '');
-  if (!name || !phone) { alert('請填寫完整'); return; }
-  try {
-    const snap = await db.collection('students').where('name', '==', name).get();
-    let found = null;
-    snap.forEach(doc => {
-      const p = (doc.data().parentPhone || '').replace(/\s/g, '');
-      if (p === phone) found = doc.id;
-    });
-    if (found) location.href = `class.html?sid=${found}`;
-    else alert('找不到學生資料');
-  } catch (e) { alert('登入失敗'); }
+  const name = document.getElementById('pName').value.trim();const phone = document.getElementById('pPhone').value.trim().replace(/\s/g, '');
+  if (!name || !phone) {alert('請填寫完整');return;}
+  try{const snap=await db.collection('students').where('name','==',name).get();let found=null;snap.forEach(doc=>{const p=(doc.data().parentPhone||'').replace(/\s/g,'');if(p===phone)found=doc.id;});if(found)location.href=`class.html?sid=${found}`;else alert('找不到學生資料');}catch(e){alert('登入失敗');}
 }
 
 function show(n) {
-  document.getElementById('page1').style.display=n==1?'block':'none';
-  document.getElementById('page2').style.display=n==2?'block':'none';
-  document.getElementById('page3').style.display=n==3?'block':'none';
-  if(n==2) { artPage=1; loadArtList(); }
-  if(n==3) { coursePage=1; loadCourseList(); renderSmallCalendar(); renderTimeTable(); }
+  document.getElementById('page1').style.display=n==1?'block':'none';document.getElementById('page2').style.display=n==2?'block':'none';document.getElementById('page3').style.display=n==3?'block':'none';
+  if(n==2){artPage=1;loadArtList();}if(n==3){coursePage=1;loadCourseList();renderSmallCalendar();renderTimeTable();}
 }
 
-async function getLeftCount(sid){
-  const courses = await db.collection('courses').where('studentId','==',sid).get();
-  const valid = courses.docs.filter(x => !['leave','holiday'].includes(x.data().status));
-  const total = valid.length;
-  const done = valid.filter(x => x.data().status === 'completed' || x.data().status === 'absent').length;
-  return total - done;
-}
+async function getLeftCount(sid){const courses=await db.collection('courses').where('studentId','==',sid).get();const valid=courses.docs.filter(x=>!['leave','holiday'].includes(x.data().status));const total=valid.length;const done=valid.filter(x=>x.data().status==='completed'||x.data().status==='absent').length;return total-done;}
+function sortStudentAZ(){studentList.sort((a,b)=>{const nameA=a.name||'';const nameB=b.name||'';const isLetterA=/^[A-Za-z]/.test(nameA);const isLetterB=/^[A-Za-z]/.test(nameB);if(isLetterA&&!isLetterB)return-1;if(!isLetterA&&isLetterB)return 1;return nameA.localeCompare(nameB,'zh');});stuPage=1;renderStudentPage();}
+async function loadAllStudents(){const snap=await db.collection('students').get();studentList=[];for(let doc of snap.docs){const s={id:doc.id,...doc.data()};const left=await getLeftCount(s.id);s.left=left;s.warning=left<3;studentList.push(s);}sortStudentAZ();fillStudentSelects();}
+function renderStudentPage(){const totalPage=Math.ceil(studentList.length/PER_PAGE);const start=(stuPage-1)*PER_PAGE;const end=start+PER_PAGE;const show=studentList.slice(start,end);const list=document.getElementById('stuList');list.innerHTML='';for(let s of show){renderStudentItem(s);}const p=document.getElementById('stuPagination');p.innerHTML=`<button class="page-btn" onclick="changeStuPage(${stuPage-1})" ${stuPage<=1?'disabled':''}>上一頁</button><span class="page-info">第 ${stuPage} / ${totalPage} 頁</span><button class="page-btn" onclick="changeStuPage(${stuPage+1})" ${stuPage>=totalPage?'disabled':''}>下一頁</button>`;}
+function changeStuPage(p){if(p<1)return;const total=Math.ceil(studentList.length/PER_PAGE);if(p>total)return;stuPage=p;renderStudentPage();}
+async function renderStudentItem(s){const img=await getDirectImageUrl(s.avatar);const list=document.getElementById('stuList');list.innerHTML+=`<div class="stu ${s.warning?'warning':''}"><img src="${img}" onerror="this.src='https://via.placeholder.com/85'" alt="${s.name}"><h3>${s.name}</h3><p>編號：${s.studentNo||'-'}</p><p>家長：${s.parentPhone||'-'}</p><p>方案：${s.courseType||'-'}</p><span class="leftTag">剩餘 ${s.left} 堂</span>${s.warning?'<p style="color:red;font-weight:bold;margin-top:6px">即將續課</p>':''}<div class="action"><button onclick="selectStudent('${s.id}')">選取</button>${isTeacher?`<button onclick="editStu('${s.id}')">編輯</button><button onclick="delStu('${s.id}')">刪除</button>`:''}</div></div>`;}
+function fillStudentSelects(){const selArt=document.getElementById('selectStudentForArt');const selCourse=document.getElementById('selectStudentForCourse');const selArtModal=document.getElementById('artStudentSelect');const selCourseModal=document.getElementById('courseStudentSelect');[selArt,selCourse,selArtModal,selCourseModal].forEach(sel=>{sel.innerHTML='<option value="">選擇學生</option>';studentList.forEach(s=>sel.innerHTML+=`<option value="${s.id}">${s.name} (${s.studentNo||'無編號'})</option>`);});}
+function updateStats(){const valid=courseRaw.filter(c=>!['leave','holiday'].includes(c.status));const total=valid.length;const ok=valid.filter(c=>c.status==='completed'||c.status==='absent').length;const left=total-ok;const rate=total?Math.round(ok/total*100):0;document.getElementById('courseStats').innerHTML=`<div class="stat"><h3>總課程</h3><h2>${total}</h2></div><div class="stat"><h3>已完成</h3><h2>${ok}</h2></div><div class="stat"><h3>剩餘</h2><h2>${left}</h3></div><div class="stat"><h3>完成率</h3><h2>${rate}%</h2></div>`;}
+async function renderCourseList(arr){const sorted=[...arr].sort((a,b)=>{if(a.status==='pending'&&b.status!=='pending')return-1;if(a.status!=='pending'&&b.status==='pending')return 1;return new Date(a.date)-new Date(b.date);});const totalPage=Math.ceil(sorted.length/PER_PAGE);const start=(coursePage-1)*PER_PAGE;const end=start+PER_PAGE;const show=sorted.slice(start,end);const b=document.getElementById('courseList');b.innerHTML='';const map={pending:'wait',completed:'ok',leave:'leave',absent:'absent',holiday:'holiday'};const txt={pending:'未完成',completed:'已完成',leave:'請假',absent:'缺席',holiday:'公眾假期'};for(let c of show){b.innerHTML+=`<tr><td><input type="checkbox" class="courseCheck" data-id="${c.id}"></td><td>${c.date}（${getWeek(c.date)}）</td><td>${formatTime(c.time)}</td><td><span class="badge ${map[c.status]}">${txt[c.status]}</span></td><td>${c.courseCategory||'-'}</td><td>${c.note||'-'}</td><td>${isTeacher?`<button onclick="editCourse('${c.id}')" style="background:#ffc107;padding:6px 10px;border:none;border-radius:6px;color:white">修改</button><button onclick="openMakeup('${c.id}')" style="background:#17a2b8;padding:6px 10px;border:none;border-radius:6px;color:white">補課</button><button onclick="delCourse('${c.id}')" style="background:#dc3545;padding:6px 10px;border:none;border-radius:6px;color:white">刪除</button>`:''}</td></tr>`;}const p=document.getElementById('coursePagination');p.innerHTML=`<button class="page-btn" onclick="changeCoursePage(${coursePage-1})" ${coursePage<=1?'disabled':''}>上一頁</button><span class="page-info">第 ${coursePage} / ${totalPage} 頁</span><button class="page-btn" onclick="changeCoursePage(${coursePage+1})" ${coursePage>=totalPage?'disabled':''}>下一頁</button>`;}
+function changeCoursePage(p){if(p<1)return;const total=Math.ceil(courseRaw.length/PER_PAGE);if(p>total)return;coursePage=p;renderCourseList(courseRaw);}
+function openMakeup(cid){currentMakeupId=cid;document.getElementById('makeupModal').style.display='flex';}
+async function saveMakeup(){const d=document.getElementById('makeupDate').value;const t=document.getElementById('makeupTime').value;if(!d||!t)return alert('請填寫完整');await db.collection('courses').add({studentId:currentStudentId,date:d,time:t,note:'補課',status:'pending'});closeAll();loadCourseList();loadAllStudents();loadAllCoursesForCalendar();renderSmallCalendar();renderTimeTable();alert('補課已新增');}
+async function loadCourseList(){if(!currentStudentId){document.getElementById('studentInfoCard').style.display='none';courseRaw=[];renderCourseList([]);updateStats();return;}const courses=await db.collection('courses').where('studentId','==',currentStudentId).get();courseRaw=[];courses.forEach(d=>courseRaw.push({id:d.id,...d.data()}));renderCourseList(courseRaw);updateStats();showStudentInfoCard(currentStudentId);}
+async function showStudentInfoCard(sid){const s=studentList.find(x=>x.id===sid);if(!s)return;document.getElementById('cardName').innerText=s.name;document.getElementById('cardNo').innerText='學生編號：'+(s.studentNo||'未設定');document.getElementById('cardCourseType').innerText='課程方案：'+(s.courseType||'未設定');document.getElementById('cardLeft').innerText='剩餘堂數：'+s.left;const avatar=await getDirectImageUrl(s.avatar);document.getElementById('cardAvatar').src=avatar;document.getElementById('cardAvatar').onerror=e=>e.target.src="https://via.placeholder.com/70";document.getElementById('studentInfoCard').style.display='flex';}
+function toggleAllCheck(){const ck=document.getElementById('checkAll').checked;document.querySelectorAll('.courseCheck').forEach(c=>c.checked=ck);}
+async function loadAllCoursesForCalendar(){const snap=await db.collection('courses').get();allCourses=[];snap.forEach(d=>allCourses.push({id:d.id,...d.data()}));}
 
-// 學生排序 A→Z 英文優先
-function sortStudentAZ(){
-  studentList.sort((a,b)=>{
-    const nameA = a.name || '';
-    const nameB = b.name || '';
-    const isLetterA = /^[A-Za-z]/.test(nameA);
-    const isLetterB = /^[A-Za-z]/.test(nameB);
-    if(isLetterA && !isLetterB) return -1;
-    if(!isLetterA && isLetterB) return 1;
-    return nameA.localeCompare(nameB, 'zh');
-  });
-  stuPage=1;
-  renderStudentPage();
-}
+// 自動今年年份
+function initMonthSelector(){const sel=document.getElementById('monthSelect');sel.innerHTML='';const cy=new Date().getFullYear();for(let m=0;m<12;m++){sel.innerHTML+=`<option value="${cy}-${m}">${cy}年 ${m+1}月</option>`;}selectedYear=cy;selectedMonth=new Date().getMonth();sel.value=`${cy}-${selectedMonth}`;}
 
-// 學生分頁
-async function loadAllStudents() {
-  const snap = await db.collection('students').get();
-  studentList=[];
-  for(let doc of snap.docs){
-    const s={id:doc.id,...doc.data()};
-    const left = await getLeftCount(s.id);
-    s.left = left;
-    s.warning = left < 3;
-    studentList.push(s);
-  }
-  sortStudentAZ();
-  fillStudentSelects();
-}
+function onMonthChange(){const val=document.getElementById('monthSelect').value;const[y,m]=val.split('-');selectedYear=parseInt(y);selectedMonth=parseInt(m);renderSmallCalendar();renderTimeTable();}
+function renderSmallCalendar(){const year=selectedYear;const month=selectedMonth;const firstDay=new Date(year,month,1).getDay();const daysInMonth=new Date(year,month+1,0).getDate();const cal=document.getElementById('smallCalendar');cal.innerHTML='';const week=['日','一','二','三','四','五','六'];week.forEach(w=>{cal.innerHTML+=`<div class="calendar-header">${w}</div>`;});for(let i=0;i<firstDay;i++)cal.innerHTML+=`<div class="calendar-day"></div>`;for(let d=1;d<=daysInMonth;d++){const date=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;const hasCourse=allCourses.some(x=>x.date===date);const isToday=date===selectedDate;cal.innerHTML+=`<div class="calendar-day ${hasCourse?'active':''} ${isToday?'style="background:#e8edff"':''}" onclick="selectCalendarDate('${date}')"><div class="calendar-day-num">${d}</div></div>`;}}
+function selectCalendarDate(date){selectedDate=date;renderSmallCalendar();renderTimeTable();}
 
-function renderStudentPage(){
-  const totalPage = Math.ceil(studentList.length / PER_PAGE);
-  const start = (stuPage-1)*PER_PAGE;
-  const end = start + PER_PAGE;
-  const show = studentList.slice(start, end);
-
-  const list=document.getElementById('stuList');
-  list.innerHTML='';
-
-  for(let s of show){
-    renderStudentItem(s);
-  }
-
-  const p = document.getElementById('stuPagination');
-  p.innerHTML = `
-    <button class="page-btn" onclick="changeStuPage(${stuPage-1})" ${stuPage<=1?'disabled':''}>上一頁</button>
-    <span class="page-info">第 ${stuPage} / ${totalPage} 頁</span>
-    <button class="page-btn" onclick="changeStuPage(${stuPage+1})" ${stuPage>=totalPage?'disabled':''}>下一頁</button>
-  `;
-}
-
-function changeStuPage(p){
-  if(p<1) return;
-  const total = Math.ceil(studentList.length/PER_PAGE);
-  if(p>total) return;
-  stuPage = p;
-  renderStudentPage();
-}
-
-async function renderStudentItem(s){
-  const img = await getDirectImageUrl(s.avatar);
-  const list=document.getElementById('stuList');
-  list.innerHTML+=`
-  <div class="stu ${s.warning?'warning':''}">
-    <img src="${img}" onerror="this.src='https://via.placeholder.com/85'" alt="${s.name}">
-    <h3>${s.name}</h3>
-    <p>編號：${s.studentNo||'-'}</p>
-    <p>家長：${s.parentPhone||'-'}</p>
-    <p>方案：${s.courseType||'-'}</p>
-    <span class="leftTag">剩餘 ${s.left} 堂</span>
-    ${s.warning?'<p style="color:red;font-weight:bold;margin-top:6px">即將續課</p>':''}
-    <div class="action">
-      <button onclick="selectStudent('${s.id}')">選取</button>
-      ${isTeacher ? `<button onclick="editStu('${s.id}')">編輯</button><button onclick="delStu('${s.id}')">刪除</button>` : ''}
-    </div>
-  </div>`;
-}
-
-function fillStudentSelects() {
-  const selArt = document.getElementById('selectStudentForArt');
-  const selCourse = document.getElementById('selectStudentForCourse');
-  const selArtModal = document.getElementById('artStudentSelect');
-  const selCourseModal = document.getElementById('courseStudentSelect');
-  [selArt,selCourse,selArtModal,selCourseModal].forEach(sel=>{
-    sel.innerHTML='<option value="">選擇學生</option>';
-    studentList.forEach(s=>sel.innerHTML+=`<option value="${s.id}">${s.name} (${s.studentNo || '無編號'})</option>`);
-  });
-}
-
-function updateStats(){
-  const valid = courseRaw.filter(c => !['leave','holiday'].includes(c.status));
-  const total = valid.length;
-  const ok = valid.filter(c => c.status === 'completed' || c.status === 'absent').length;
-  const left = total - ok;
-  const rate = total ? Math.round(ok/total*100) : 0;
-  document.getElementById('courseStats').innerHTML=`
-<div class="stat"><h3>總課程</h3><h2>${total}</h2></div>
-<div class="stat"><h3>已完成</h3><h2>${ok}</h2></div>
-<div class="stat"><h3>剩餘</h2><h2>${left}</h3></div>
-<div class="stat"><h3>完成率</h3><h2>${rate}%</h2></div>`;
-}
-
-async function renderCourseList(arr){
-  const sorted = [...arr].sort((a,b)=>{
-    if(a.status === 'pending' && b.status !== 'pending') return -1;
-    if(a.status !== 'pending' && b.status === 'pending') return 1;
-    return new Date(a.date) - new Date(b.date);
-  });
-
-  const totalPage = Math.ceil(sorted.length / PER_PAGE);
-  const start = (coursePage-1)*PER_PAGE;
-  const end = start + PER_PAGE;
-  const show = sorted.slice(start, end);
-
-  const b=document.getElementById('courseList');b.innerHTML='';
-  const map={pending:'wait',completed:'ok',leave:'leave',absent:'absent',holiday:'holiday'};
-  const txt={pending:'未完成',completed:'已完成',leave:'請假',absent:'缺席',holiday:'公眾假期'};
-
-  for(let c of show){
-    b.innerHTML+=`<tr>
-<td><input type="checkbox" class="courseCheck" data-id="${c.id}"></td>
-<td>${c.date}（${getWeek(c.date)}）</td>
-<td>${formatTime(c.time)}</td>
-<td><span class="badge ${map[c.status]}">${txt[c.status]}</span></td>
-<td>${c.courseCategory || '-'}</td>
-<td>${c.note||'-'}</td>
-<td>
-  ${isTeacher ? `
-  <button onclick="editCourse('${c.id}')" style="background:#ffc107;padding:6px 10px;border:none;border-radius:6px;color:white">修改</button>
-  <button onclick="openMakeup('${c.id}')" style="background:#17a2b8;padding:6px 10px;border:none;border-radius:6px;color:white">補課</button>
-  <button onclick="delCourse('${c.id}')" style="background:#dc3545;padding:6px 10px;border:none;border-radius:6px;color:white">刪除</button>
-  ` : ''}
-</td>
-</tr>`;
-  }
-
-  const p = document.getElementById('coursePagination');
-  p.innerHTML = `
-    <button class="page-btn" onclick="changeCoursePage(${coursePage-1})" ${coursePage<=1?'disabled':''}>上一頁</button>
-    <span class="page-info">第 ${coursePage} / ${totalPage} 頁</span>
-    <button class="page-btn" onclick="changeCoursePage(${coursePage+1})" ${coursePage>=totalPage?'disabled':''}>下一頁</button>
-  `;
-}
-
-function changeCoursePage(p){
-  if(p<1) return;
-  const total = Math.ceil(courseRaw.length/PER_PAGE);
-  if(p>total) return;
-  coursePage = p;
-  renderCourseList(courseRaw);
-}
-
-function openMakeup(cid){
-  currentMakeupId = cid;
-  document.getElementById('makeupModal').style.display = 'flex';
-}
-
-async function saveMakeup(){
-  const d = document.getElementById('makeupDate').value;
-  const t = document.getElementById('makeupTime').value;
-  if(!d || !t) return alert('請填寫完整');
-  await db.collection('courses').add({
-    studentId:currentStudentId, date:d, time:t, note:'補課', status:'pending'
-  });
-  closeAll();
-  loadCourseList();
-  loadAllStudents();
-  loadAllCoursesForCalendar();
-  renderSmallCalendar();
-  renderTimeTable();
-  alert('補課已新增');
-}
-
-async function loadCourseList(){
-  if(!currentStudentId){
-    document.getElementById('studentInfoCard').style.display = 'none';
-    courseRaw=[];
-    renderCourseList([]);
-    updateStats();
-    return;
-  }
-  const courses=await db.collection('courses').where('studentId','==',currentStudentId).get();
-  courseRaw=[];courses.forEach(d=>courseRaw.push({id:d.id,...d.data()}));
-  renderCourseList(courseRaw);
-  updateStats();
-  showStudentInfoCard(currentStudentId);
-}
-
-async function showStudentInfoCard(sid){
-  const s = studentList.find(x=>x.id===sid);
-  if(!s) return;
-  document.getElementById('cardName').innerText = s.name;
-  document.getElementById('cardNo').innerText = '學生編號：'+(s.studentNo||'未設定');
-  document.getElementById('cardCourseType').innerText = '課程方案：'+(s.courseType||'未設定');
-  document.getElementById('cardLeft').innerText = '剩餘堂數：'+s.left;
-  
-  const avatar = await getDirectImageUrl(s.avatar);
-  document.getElementById('cardAvatar').src = avatar;
-  document.getElementById('cardAvatar').onerror = e=>e.target.src="https://via.placeholder.com/70";
-  document.getElementById('studentInfoCard').style.display = 'flex';
-}
-
-function toggleAllCheck(){
-  const ck=document.getElementById('checkAll').checked;
-  document.querySelectorAll('.courseCheck').forEach(c=>c.checked=ck);
-}
-
-async function loadAllCoursesForCalendar(){
-  const snap=await db.collection('courses').get();
-  allCourses=[];
-  snap.forEach(d=>allCourses.push({id:d.id,...d.data()}));
-}
-
-// 月份選擇
-function initMonthSelector(){
-  const sel = document.getElementById('monthSelect');
-  sel.innerHTML='';
-  for(let m=0;m<12;m++){
-    sel.innerHTML+=`<option value="${m}">${selectedYear}年 ${m+1}月</option>`;
-  }
-  sel.value = selectedMonth;
-}
-
-function onMonthChange(){
-  selectedMonth = parseInt(document.getElementById('monthSelect').value);
-  renderSmallCalendar();
-  renderTimeTable();
-}
-
-// 小月曆
-function renderSmallCalendar(){
-  const year = selectedYear;
-  const month = selectedMonth;
-  const firstDay = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month+1, 0).getDate();
-
-  const cal = document.getElementById('smallCalendar');
-  cal.innerHTML = '';
-
-  const week = ['日','一','二','三','四','五','六'];
-  week.forEach(w=>{
-    cal.innerHTML += `<div class="calendar-header">${w}</div>`;
-  });
-
-  for(let i=0;i<firstDay;i++) cal.innerHTML += `<div class="calendar-day"></div>`;
-
-  for(let d=1;d<=daysInMonth;d++){
-    const date = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const hasCourse = allCourses.some(x=>x.date===date);
-    const isToday = date === selectedDate;
-    cal.innerHTML += `
-    <div class="calendar-day ${hasCourse?'active':''} ${isToday?'style="background:#e8edff"':''}" onclick="selectCalendarDate('${date}')">
-      <div class="calendar-day-num">${d}</div>
-    </div>`;
-  }
-}
-
-function selectCalendarDate(date){
-  selectedDate = date;
-  renderSmallCalendar();
-  renderTimeTable();
-}
-
-// Google 風格時間表 → 整點排版（你要求的新版本）
+// 時間表：精準高度 + 名字編號同一行 + 點擊彈窗修改狀態
 function renderTimeTable(){
-  const container = document.getElementById('timeTableView');
-  container.innerHTML = '';
+  const container=document.getElementById('timeTableView');container.innerHTML='';const targetDate=selectedDate;const todayCourses=allCourses.filter(x=>x.date===targetDate);
+  const timeSlots=[];for(let h=8;h<=22;h++){timeSlots.push(`${String(h).padStart(2,'0')}:00`);}
+  const grouped={};timeSlots.forEach(time=>{grouped[time]=todayCourses.filter(c=>{const courseHour=parseInt(c.time.split(':')[0]);const slotHour=parseInt(time.split(':')[0]);return courseHour===slotHour;});});
+  const ROW_HEIGHT = 38;
 
-  const targetDate = selectedDate;
-  const todayCourses = allCourses.filter(x=>x.date===targetDate);
-  
-  // 建立 09:00 ~ 21:00 整點時段
-  const timeSlots = [];
-  for (let h = 9; h <= 21; h++) {
-    timeSlots.push(`${String(h).padStart(2, '0')}:00`);
-  }
-
-  // 把課程依照「整點」分組
-  const grouped = {};
-  timeSlots.forEach(time => {
-    grouped[time] = todayCourses.filter(c => {
-      return c.time.startsWith(time.slice(0, 2)); // 比對小時（9:xx 歸 9:00）
-    });
-  });
-
-  // 逐行輸出：每整點一行
-  timeSlots.forEach(time => {
-    const courses = grouped[time];
-    if (courses.length === 0) {
-      // 空時段仍保留行高，保持排版整齊
-      container.innerHTML += `
-        <div class="time-row">
-          <div class="time-label">${time}</div>
-          <div class="time-slots"></div>
-        </div>
-      `;
-      return;
-    }
-
-    // 有課程就垂直排列
-    let html = `<div class="time-row">`;
-    html += `<div class="time-label">${time}</div>`;
-    html += `<div class="time-slots">`;
+  timeSlots.forEach(time=>{
+    const courses=grouped[time];let html=`<div class="time-row"><div class="time-label">${time}</div><div class="time-slots">`;
     courses.forEach(c=>{
-      const stu = studentList.find(s=>s.id===c.studentId);
-      const name = stu?.name || '未知名';
-      const no = stu?.studentNo || '';
-      const timeRange = formatTime(c.time);
-      const [h, m] = c.time.split(':');
-      const minute = parseInt(h)*60 + parseInt(m);
-      const baseMinute = parseInt(time.split(':')[0])*60;
-      const offset = minute - baseMinute;
-      const marginTop = (offset / 60) * 30 + 'px';
-      const duration = 75;
-      const width = Math.min(100, (duration / 60) * 100) + '%';
-      const height = (duration / 60) * 30 + 'px';
-      
-      const statusMap = {
-        pending: '#ffc107',
-        completed: '#28a745',
-        leave: '#dc3545',
-        absent: '#333',
-        holiday: '#17a2b8'
-      };
-      const color = statusMap[c.status] || '#879acb';
-      html += `
-      <div class="course-block" onclick="openQuickEdit('${c.id}','${name}')" style="border-left-color:${color};margin-top:${marginTop};width:${width};height:${height};">
-        <div>${name} ${no}</div>
-        <div style="font-size:10px;margin-top:2px;">${timeRange}</div>
+      const stu=studentList.find(s=>s.id===c.studentId);const name=stu?.name||'未知名';const no=stu?.studentNo||'';
+      const [h,m]=c.time.split(':').map(Number);const startMin=h*60+m;const duration=75;const endMin=startMin+duration;
+      const slotStartMin=parseInt(time.split(':')[0])*60;
+      const topOffset = Math.round(((startMin - slotStartMin) / 60) * ROW_HEIGHT);
+      const totalHeight = Math.round((duration / 60) * ROW_HEIGHT);
+      const endHour=Math.floor(endMin/60);const endMinStr=String(endMin%60).padStart(2,'0');const timeRange=`${c.time}-${endHour}:${endMinStr}`;
+      const statusMap={pending:'#ffc107',completed:'#28a745',leave:'#dc3545',absent:'#333',holiday:'#17a2b8'};
+      const color=statusMap[c.status]||'#879acb';
+
+      html+=`
+      <div class="course-block" onclick="openStatusModal('${c.id}')"
+        style="border-left-color:${color}; margin-top:${topOffset}px; height:${totalHeight}px;
+        display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
+        <div style="font-weight:bold; font-size:12px;">${name} ${no}</div>
+        <div style="font-size:10px; margin-top:2px;">${timeRange}</div>
       </div>`;
     });
-    html += `</div></div>`;
-    container.innerHTML += html;
+    html+=`</div></div>`;container.innerHTML+=html;
   });
 }
 
-function openQuickEdit(cid, name){
-  if(!isTeacher) return;
-  currentQuickCourseId = cid;
-  document.getElementById('quickEditTitle').innerText = name;
-  document.getElementById('quickEditPanel').style.display = 'block';
+// 狀態彈窗
+function openStatusModal(cid) {
+  if (!isTeacher) return;
+  activeCourseId = cid;
+  document.getElementById('statusModal').style.display = 'flex';
 }
-
-async function saveQuickStatus(status){
-  if(!currentQuickCourseId) return;
-  await db.collection('courses').doc(currentQuickCourseId).update({status});
+function closeStatusModal() {
+  document.getElementById('statusModal').style.display = 'none';
+  activeCourseId = null;
+}
+async function setCourseStatus(status) {
+  if (!activeCourseId) return;
+  await db.collection('courses').doc(activeCourseId).update({ status });
   await loadAllCoursesForCalendar();
   renderTimeTable();
   loadCourseList();
   loadAllStudents();
-  document.getElementById('quickEditPanel').style.display = 'none';
+  closeStatusModal();
 }
 
-function toggleCourseMenu(cid, el){
-  if(!isTeacher) return;
-  const menu = document.getElementById(`menu-${cid}`);
-  document.querySelectorAll('.course-status-menu').forEach(m=>{
-    if(m.id !== `menu-${cid}`) m.style.display = 'none';
-  });
-  menu.style.display = menu.style.display === 'none' ? 'flex' : 'none';
+// 點擊彈窗查看學生課程
+function openStudentQuickInfo(sid){
+  const stu=studentList.find(x=>x.id===sid);if(!stu)return;
+  const done=studentList.find(x=>x.id===sid)?.left?Math.abs((studentList.find(x=>x.id===sid)?.left||0)-getTotal(sid)):0;
+  const total=getTotal(sid);const left=stu.left;
+  alert(`【學生資訊】\n姓名：${stu.name}\n編號：${stu.studentNo||'-'}\n方案：${stu.courseType||'-'}\n\n總課程：${total}\n已完成：${done}\n剩餘：${left}`);
+  currentStudentId=sid;document.getElementById('selectStudentForCourse').value=sid;loadCourseList();
 }
+function getTotal(sid){const c=allCourses.filter(x=>x.studentId===sid&&!['leave','holiday'].includes(x.status));return c.length;}
 
-async function quickStatus(cid, status){
-  await db.collection('courses').doc(cid).update({status});
-  await loadAllCoursesForCalendar();
-  renderTimeTable();
-  loadCourseList();
-  loadAllStudents();
-}
-
+function openQuickEdit(cid,name){if(!isTeacher)return;currentQuickCourseId=cid;document.getElementById('quickEditTitle').innerText=name;document.getElementById('quickEditPanel').style.display='block';}
+async function saveQuickStatus(status){if(!currentQuickCourseId)return;await db.collection('courses').doc(currentQuickCourseId).update({status});await loadAllCoursesForCalendar();renderTimeTable();loadCourseList();loadAllStudents();document.getElementById('quickEditPanel').style.display='none';}
+function toggleCourseMenu(cid,el){if(!isTeacher)return;const menu=document.getElementById(`menu-${cid}`);document.querySelectorAll('.course-status-menu').forEach(m=>{if(m.id!==`menu-${cid}`)m.style.display='none';});menu.style.display=menu.style.display==='none'?'flex':'none';}
+async function quickStatus(cid,status){await db.collection('courses').doc(cid).update({status});await loadAllCoursesForCalendar();renderTimeTable();loadCourseList();loadAllStudents();}
 function clickDay(date){}
 function buildMonthCalendar(){}
-
-async function quickSet(cid,status){
-  await db.collection('courses').doc(cid).update({status});
-  await loadAllCoursesForCalendar();
-  renderSmallCalendar();
-  renderTimeTable();
-  loadCourseList();
-  loadAllStudents();
-}
-
+async function quickSet(cid,status){await db.collection('courses').doc(cid).update({status});await loadAllCoursesForCalendar();await renderSmallCalendar();await renderTimeTable();loadCourseList();loadAllStudents();}
 function getWeek(d){const w=['日','一','二','三','四','五','六'];return w[new Date(d).getDay()]}
-function formatTime(t){const [h,m]=t.split(':');const min=h*60+parseInt(m)+75;const eh=Math.floor(min/60),em=min%60;return `${t} - ${String(eh).padStart(2,0)}:${String(em).padStart(2,0)}`;}
-function calcEndTime(){
-  const h=parseInt(document.getElementById('chour').value||0);
-  const m=parseInt(document.getElementById('cmin').value||0);
-  if(isNaN(h)||isNaN(m))return;
-  const total=h*60+m+75;
-  const eh=Math.floor(total/60);
-  const em=total%60;
-  document.getElementById('endTimeShow').textContent=`預計下课：${String(eh).padStart(2,0)}:${String(em).padStart(2,0)}`;
-}
-
-function searchCourse(){
-  const kw=document.getElementById('searchCourse').value.toLowerCase().trim();
-  const filtered = studentList.filter(s=>
-    s.name.toLowerCase().includes(kw)||
-    (s.parentPhone||'').includes(kw)||
-    (s.studentNo||'').toLowerCase().includes(kw)
-  );
-  const sel = document.getElementById('selectStudentForCourse');
-  sel.innerHTML = '<option value="">選擇學生</option>';
-  filtered.forEach(s => {
-    sel.innerHTML += `<option value="${s.id}">${s.name} (${s.studentNo || '無編號'})</option>`;
-  });
-}
-
+function formatTime(t){const[h,m]=t.split(':');const min=h*60+parseInt(m)+75;const eh=Math.floor(min/60),em=min%60;return `${t} - ${String(eh).padStart(2,0)}:${String(em).padStart(2,0)}`;}
+function calcEndTime(){const h=parseInt(document.getElementById('chour').value||0);const m=parseInt(document.getElementById('cmin').value||0);if(isNaN(h)||isNaN(m))return;const total=h*60+m+75;const eh=Math.floor(total/60);const em=total%60;document.getElementById('endTimeShow').textContent=`預計下课：${String(eh).padStart(2,0)}:${String(em).padStart(2,0)}`;}
+function searchCourse(){const kw=document.getElementById('searchCourse').value.toLowerCase().trim();const filtered=studentList.filter(s=>s.name.toLowerCase().includes(kw)||(s.parentPhone||'').includes(kw)||(s.studentNo||'').toLowerCase().includes(kw));const sel=document.getElementById('selectStudentForCourse');sel.innerHTML='<option value="">選擇學生</option>';filtered.forEach(s=>{sel.innerHTML+=`<option value="${s.id}">${s.name} (${s.studentNo||'無編號'})</option>`;});}
 function switchCourseStudentById(id){currentStudentId=id;coursePage=1;loadCourseList();}
 function switchCourseStudent(){currentStudentId=document.getElementById('selectStudentForCourse').value;coursePage=1;loadCourseList();}
-function selectStudent(id) { currentStudentId=id; show(2); artPage=1; loadArtList(); }
-function closeAll(){ 
-  document.querySelectorAll('.modal').forEach(m=>m.style.display='none'); 
-  document.getElementById('preview').style.display='none'; 
-  document.querySelectorAll('.course-status-menu').forEach(m=>m.style.display='none'); 
-  document.getElementById('quickEditPanel').style.display = 'none';
-}
-function addStu(){ if(!isTeacher)return; currentStudentId=null; document.getElementById('sname').value='';document.getElementById('sno').value='';document.getElementById('sphone').value='';document.getElementById('savatar').value='';document.getElementById('courseType').value='';document.getElementById('school').value='';document.getElementById('birthYear').value='';document.getElementById('gender').value='';document.getElementById('note').value='';document.getElementById('stuModal').style.display='flex'; }
-
-async function saveStu(){
-  if(!isTeacher)return;
-  const n=document.getElementById('sname').value;
-  const no=document.getElementById('sno').value;
-  const p=document.getElementById('sphone').value;
-  const a=document.getElementById('savatar').value;
-  const ct=document.getElementById('courseType').value;
-  const school=document.getElementById('school').value;
-  const birthYear=document.getElementById('birthYear').value;
-  const gender=document.getElementById('gender').value;
-  const note=document.getElementById('note').value;
-  if(!n||!p)return;
-  const data={name:n,studentNo:no,parentPhone:p,avatar:a,courseType:ct,school,birthYear,gender,note};
-  if(currentStudentId) await db.collection('students').doc(currentStudentId).update(data);
-  else await db.collection('students').add({...data,createdAt:new Date()});
-  closeAll();loadAllStudents();
-}
-
-async function delStu(id){
-  if(!isTeacher)return;
-  if(!confirm('確定刪除？'))return;
-  await db.collection('students').doc(id).delete();
-  await db.collection('artworks').where('studentId','==',id).get().then(s=>s.forEach(d=>d.ref.delete()));
-  await db.collection('courses').where('studentId','==',id).get().then(s=>s.forEach(d=>d.ref.delete()));
-  loadAllStudents();
-}
-
-function editStu(id){
-  if(!isTeacher)return;
-  currentStudentId=id;
-  db.collection('students').doc(id).get().then(d=>{
-    const s=d.data();
-    document.getElementById('sname').value=s.name||'';
-    document.getElementById('sno').value=s.studentNo||'';
-    document.getElementById('sphone').value=s.parentPhone||'';
-    document.getElementById('savatar').value=s.avatar||'';
-    document.getElementById('courseType').value=s.courseType||'';
-    document.getElementById('school').value=s.school||'';
-    document.getElementById('birthYear').value=s.birthYear||'';
-    document.getElementById('gender').value=s.gender||'';
-    document.getElementById('note').value=s.note||'';
-    document.getElementById('stuModal').style.display='flex';
-  })
-}
-
-function switchArtStudent(){
-  currentStudentId=document.getElementById('selectStudentForArt').value;
-  artPage=1;
-  loadArtList();
-}
-
-function searchArt(){
-  const kw = document.getElementById('searchArt').value.toLowerCase().trim();
-  const filtered = studentList.filter(s => 
-    s.name.toLowerCase().includes(kw) || 
-    (s.parentPhone && s.parentPhone.includes(kw)) ||
-    (s.studentNo && s.studentNo.toLowerCase().includes(kw))
-  );
-  const sel = document.getElementById('selectStudentForArt');
-  sel.innerHTML = '<option value="">選擇學生</option>';
-  filtered.forEach(s => {
-    sel.innerHTML += `<option value="${s.id}">${s.name} (${s.studentNo || '無編號'})</option>`;
-  });
-}
-
-async function loadArtList(){
-  if(!currentStudentId){
-    document.getElementById('artStudentHeader').style.display='none';
-    document.getElementById('artGrid').innerHTML='';
-    document.getElementById('artPagination').innerHTML='';
-    return;
-  }
-  const s=await db.collection('students').doc(currentStudentId).get();
-  const stuData=s.data();
-  document.getElementById('artStudentName').innerText=stuData.name;
-  const avatarUrl=await getDirectImageUrl(stuData.avatar);
-  document.getElementById('artAvatar').src=avatarUrl;
-  document.getElementById('artAvatar').onerror=()=>document.getElementById('artAvatar').src='https://via.placeholder.com/100';
-  document.getElementById('artStudentHeader').style.display='flex';
-
-  const arts=await db.collection('artworks').where('studentId','==',currentStudentId).get();
-  artList=[];arts.forEach(d=>artList.push({id:d.id,...d.data()}));
-  
-  artList.sort((a,b)=>new Date(b.createDate)-new Date(a.createDate));
-  
-  const totalPage = Math.ceil(artList.length / PER_PAGE);
-  const start = (artPage-1)*PER_PAGE;
-  const end = start + PER_PAGE;
-  const show = artList.slice(start, end);
-
-  const grid=document.getElementById('artGrid');
-  grid.innerHTML='';
-
-  for(let i=0;i<show.length;i++){
-    const item=show[i];
-    const img=await getDirectImageUrl(item.imageUrl);
-    grid.innerHTML+=`
-    <div class="art-card" onclick="showPreview(${i})">
-      <img src="${img}" onerror="this.src='https://via.placeholder.com/160x180'">
-    </div>`;
-  }
-
-  const p = document.getElementById('artPagination');
-  p.innerHTML = `
-    <button class="page-btn" onclick="changeArtPage(${artPage-1})" ${artPage<=1?'disabled':''}>上一頁</button>
-    <span class="page-info">第 ${artPage} / ${totalPage} 頁</span>
-    <button class="page-btn" onclick="changeArtPage(${artPage+1})" ${artPage>=totalPage?'disabled':''}>下一頁</button>
-  `;
-}
-
-function changeArtPage(p){
-  if(p<1) return;
-  const total = Math.ceil(artList.length/PER_PAGE);
-  if(p>total) return;
-  artPage = p;
-  loadArtList();
-}
-
-function openArt(){ if(!isTeacher)return; document.getElementById('artModal').style.display='flex'; }
-async function saveArt(){
-  if(!isTeacher)return;
-  const sid=document.getElementById('artStudentSelect').value;
-  const url=document.getElementById('img').value;
-  const d=document.getElementById('cdate').value;
-  const n=document.getElementById('artNote').value;
-  if(!sid||!url||!d)return;
-  await db.collection('artworks').add({studentId:sid,imageUrl:url,createDate:d,note:n,time:new Date()});
-  closeAll();loadArtList();
-}
-async function showPreview(i){
-  currentImg = i;
-  const item = artList[i];
-  const highResUrl = await getDirectImageUrl(item.imageUrl);
-  document.getElementById('previewImg').src = highResUrl;
-  document.getElementById('previewImg').style.display='block';
-  document.getElementById('previewImg').style.margin='0 auto';
-  document.getElementById('previewImg').onerror=()=>document.getElementById('previewImg').src='https://via.placeholder.com/1200x800';
-  document.getElementById('pDate').textContent=item.createDate;
-  document.getElementById('pNote').textContent=item.note||'無';
-  document.getElementById('preview').style.display='flex';
-}
-function openEditArtFromPreview(){
-  const item = artList[currentImg];
-  document.getElementById('artStudentSelect').value = item.studentId;
-  document.getElementById('img').value = item.imageUrl;
-  document.getElementById('cdate').value = item.createDate;
-  document.getElementById('artNote').value = item.note || '';
-  closeAll();
-  document.getElementById('artModal').style.display = 'flex';
-  setTimeout(()=>{
-    const saveBtn = document.querySelector('#artModal .btn');
-    saveBtn.onclick = async ()=>{
-      const sid = document.getElementById('artStudentSelect').value;
-      const url = document.getElementById('img').value;
-      const d = document.getElementById('cdate').value;
-      const n = document.getElementById('artNote').value;
-      await db.collection('artworks').doc(item.id).update({
-        studentId:sid, imageUrl:url, createDate:d, note:n
-      });
-      closeAll();
-      loadArtList();
-    }
-  }, 100);
-}
-async function deleteCurrentArt(){
-  if(!isTeacher)return;
-  if(!confirm('確定刪除？'))return;
-  const id=artList[currentImg].id;
-  await db.collection('artworks').doc(id).delete();
-  closeAll();loadArtList();
-}
-
-async function batchSet(status){
-  if(!isTeacher)return;
-  const checks=document.querySelectorAll('.courseCheck:checked');
-  if(checks.length===0)return alert('請選擇');
-  if(!confirm('確定修改？'))return;
-  for(let cb of checks) await db.collection('courses').doc(cb.dataset.id).update({status});
-  loadCourseList();
-  loadAllStudents();
-  await loadAllCoursesForCalendar();
-  renderSmallCalendar();
-  renderTimeTable();
-}
-async function batchDeleteCourses(){
-  if(!isTeacher)return;
-  const checks=document.querySelectorAll('.courseCheck:checked');
-  if(checks.length===0)return alert('請選擇');
-  if(!confirm('確定刪除？'))return;
-  for(let cb of checks) await db.collection('courses').doc(cb.dataset.id).delete();
-  loadCourseList();
-  await loadAllCoursesForCalendar();
-  renderSmallCalendar();
-  renderTimeTable();
-}
-function addCourse(){ 
-  if(!isTeacher)return; 
-  if(!currentStudentId){ alert("請先選擇學生"); return; }
-  currentCourseId=null; 
-  document.getElementById('cday').valueAsDate=new Date(); 
-  document.getElementById('chour').value='';
-  document.getElementById('cmin').value='';
-  document.getElementById('endTimeShow').textContent=''; 
-  document.getElementById('cnote').value=''; 
-  document.getElementById('cstatus').value='pending'; 
-  document.getElementById('courseCategory').value='恆常班'; 
-  document.getElementById('courseStudentSelect').value = currentStudentId;
-  document.getElementById('courseModal').style.display='flex'; 
-}
-
-async function saveCourse(){
-  if(!isTeacher)return;
-  const sid = currentStudentId;
-  const d=document.getElementById('cday').value;
-  const h=document.getElementById('chour').value.padStart(2,'0');
-  const m=document.getElementById('cmin').value.padStart(2,'0');
-  const t=`${h}:${m}`;
-  const nt=document.getElementById('cnote').value;
-  const s=document.getElementById('cstatus').value;
-  const category=document.getElementById('courseCategory').value;
-  if(!sid||!d||!h||!m)return;
-  const data={studentId:sid,date:d,time:t,note:nt,status:s,courseCategory:category};
-  if(currentCourseId) await db.collection('courses').doc(currentCourseId).update(data);
-  else await db.collection('courses').add(data);
-  closeAll();loadCourseList();loadAllStudents();await loadAllCoursesForCalendar();renderSmallCalendar();renderTimeTable();
-}
-
-function editCourse(id){
-  if(!isTeacher)return;
-  currentCourseId=id;
-  db.collection('courses').doc(id).get().then(d=>{
-    const c=d.data();
-    document.getElementById('courseStudentSelect').value=c.studentId;
-    document.getElementById('cday').value=c.date;
-    const [h,m] = c.time.split(':');
-    document.getElementById('chour').value = h;
-    document.getElementById('cmin').value = m;
-    calcEndTime();
-    document.getElementById('cnote').value=c.note||'';
-    document.getElementById('cstatus').value=c.status;
-    document.getElementById('courseCategory').value = c.courseCategory || '恆常班';
-    document.getElementById('courseModal').style.display='flex';
-  })
-}
-
-async function delCourse(id){
-  if(!isTeacher)return;
-  if(!confirm('確定刪除？'))return;
-  await db.collection('courses').doc(id).delete();
-  loadCourseList();
-  await loadAllCoursesForCalendar();
-  renderSmallCalendar();
-  renderTimeTable();
-}
-async function quickPackage(count){
-  if(!isTeacher)return;
-  const sid=currentStudentId;
-  const startDate=document.getElementById('cday').value;
-  const h=document.getElementById('chour').value.padStart(2,'0');
-  const m=document.getElementById('cmin').value.padStart(2,'0');
-  const startTime=`${h}:${m}`;
-  const category=document.getElementById('courseCategory').value;
-  if(!sid||!startDate||!h||!m)return;
-  if(!confirm('產生'+count+'堂？'))return;
-  const start=new Date(startDate);
-  for(let i=0;i<count;i++){
-    const dd=new Date(start);
-    dd.setDate(start.getDate()+i*7);
-    const date=dd.toISOString().split('T')[0];
-    await db.collection('courses').add({studentId:sid,date,time:startTime,note:'課程',status:'pending',courseCategory:category});
-  }
-  alert('完成');
-  closeAll();loadCourseList();await loadAllCoursesForCalendar();renderSmallCalendar();renderTimeTable();
-}
-
-async function searchStudent(){
-  const kw=document.getElementById('searchStudent').value.toLowerCase().trim();
-  const filtered = studentList.filter(s=>
-    s.name.toLowerCase().includes(kw)||
-    (s.parentPhone||'').includes(kw)||
-    (s.studentNo||'').toLowerCase().includes(kw)
-  );
-  studentList = filtered;
-  stuPage=1;
-  renderStudentPage();
-  if(kw==='') loadAllStudents();
-}
-function exportCSV(){if(!isTeacher)return;let csv = "姓名,學生編號,家長電話,課程方案,剩餘堂數,學校,出生年份,性別,備註\n";studentList.forEach(s=>{csv += `"${s.name}","${s.studentNo||''}","${s.parentPhone||''}","${s.courseType||''}","${s.left||0}","${s.school||''}","${s.birthYear||''}","${s.gender||''}","${s.note||''}"\n`;});const blob = new Blob([csv],{type:"text/csv"});const url = URL.createObjectURL(blob);const a = document.createElement("a");a.href = url;a.download = "學生資料.csv";a.click();URL.revokeObjectURL(url);}
-
-// 列印時間表
-function printSchedule(){
-  window.print();
-}
-
+function selectStudent(id){currentStudentId=id;show(2);artPage=1;loadArtList();}
+function closeAll(){document.querySelectorAll('.modal').forEach(m=>m.style.display='none');document.getElementById('preview').style.display='none';document.querySelectorAll('.course-status-menu').forEach(m=>m.style.display='none');document.getElementById('quickEditPanel').style.display='none';closeStatusModal();}
+function addStu(){if(!isTeacher)return;currentStudentId=null;document.getElementById('sname').value='';document.getElementById('sno').value='';document.getElementById('sphone').value='';document.getElementById('savatar').value='';document.getElementById('courseType').value='';document.getElementById('school').value='';document.getElementById('birthYear').value='';document.getElementById('gender').value='';document.getElementById('note').value='';document.getElementById('stuModal').style.display='flex';}
+async function saveStu(){if(!isTeacher)return;const n=document.getElementById('sname').value;const no=document.getElementById('sno').value;const p=document.getElementById('sphone').value;const a=document.getElementById('savatar').value;const ct=document.getElementById('courseType').value;const school=document.getElementById('school').value;const birthYear=document.getElementById('birthYear').value;const gender=document.getElementById('gender').value;const note=document.getElementById('note').value;if(!n||!p)return;const data={name:n,studentNo:no,parentPhone:p,avatar:a,courseType:ct,school,birthYear,gender,note};if(currentStudentId)await db.collection('students').doc(currentStudentId).update(data);else await db.collection('students').add({...data,createdAt:new Date()});closeAll();loadAllStudents();}
+async function delStu(id){if(!isTeacher)return;if(!confirm('確定刪除？'))return;await db.collection('students').doc(id).delete();await db.collection('artworks').where('studentId','==',id).get().then(s=>s.forEach(d=>d.ref.delete()));await db.collection('courses').where('studentId','==',id).get().then(s=>s.forEach(d=>d.ref.delete()));loadAllStudents();}
+function editStu(id){if(!isTeacher)return;currentStudentId=id;db.collection('students').doc(id).get().then(d=>{const s=d.data();document.getElementById('sname').value=s.name||'';document.getElementById('sno').value=s.studentNo||'';document.getElementById('sphone').value=s.parentPhone||'';document.getElementById('savatar').value=s.avatar||'';document.getElementById('courseType').value=s.courseType||'';document.getElementById('school').value=s.school||'';document.getElementById('birthYear').value=s.birthYear||'';document.getElementById('gender').value=s.gender||'';document.getElementById('note').value=s.note||'';document.getElementById('stuModal').style.display='flex';})}
+function switchArtStudent(){currentStudentId=document.getElementById('selectStudentForArt').value;artPage=1;loadArtList();}
+function searchArt(){const kw=document.getElementById('searchArt').value.toLowerCase().trim();const filtered=studentList.filter(s=>s.name.toLowerCase().includes(kw)||(s.parentPhone&&s.parentPhone.includes(kw))||(s.studentNo&&s.studentNo.toLowerCase().includes(kw)));const sel=document.getElementById('selectStudentForArt');sel.innerHTML='<option value="">選擇學生</option>';filtered.forEach(s=>{sel.innerHTML+=`<option value="${s.id}">${s.name} (${s.studentNo||'無編號'})</option>`;});}
+async function loadArtList(){if(!currentStudentId){document.getElementById('artStudentHeader').style.display='none';document.getElementById('artGrid').innerHTML='';document.getElementById('artPagination').innerHTML='';return;}const s=await db.collection('students').doc(currentStudentId).get();const stuData=s.data();document.getElementById('artStudentName').innerText=stuData.name;const avatarUrl=await getDirectImageUrl(stuData.avatar);document.getElementById('artAvatar').src=avatarUrl;document.getElementById('artAvatar').onerror=()=>document.getElementById('artAvatar').src='https://via.placeholder.com/100';document.getElementById('artStudentHeader').style.display='flex';const arts=await db.collection('artworks').where('studentId','==',currentStudentId).get();artList=[];arts.forEach(d=>artList.push({id:d.id,...d.data()}));artList.sort((a,b)=>new Date(b.createDate)-new Date(a.createDate));const totalPage=Math.ceil(artList.length/PER_PAGE);const start=(artPage-1)*PER_PAGE;const end=start+PER_PAGE;const show=artList.slice(start,end);const grid=document.getElementById('artGrid');grid.innerHTML='';for(let i=0;i<show.length;i++){const item=show[i];const img=await getDirectImageUrl(item.imageUrl);grid.innerHTML+=`<div class="art-card" onclick="showPreview(${i})"><img src="${img}" onerror="this.src='https://via.placeholder.com/160x180'"></div>`;}const p=document.getElementById('artPagination');p.innerHTML=`<button class="page-btn" onclick="changeArtPage(${artPage-1})" ${artPage<=1?'disabled':''}>上一頁</button><span class="page-info">第 ${artPage} / ${totalPage} 頁</span><button class="page-btn" onclick="changeArtPage(${artPage+1})" ${artPage>=totalPage?'disabled':''}>下一頁</button>`;}
+function changeArtPage(p){if(p<1)return;const total=Math.ceil(artList.length/PER_PAGE);if(p>total)return;artPage=p;loadArtList();}
+function openArt(){if(!isTeacher)return;document.getElementById('artModal').style.display='flex';}
+async function saveArt(){if(!isTeacher)return;const sid=document.getElementById('artStudentSelect').value;const url=document.getElementById('img').value;const d=document.getElementById('cdate').value;const n=document.getElementById('artNote').value;if(!sid||!url||!d)return;await db.collection('artworks').add({studentId:sid,imageUrl:url,createDate:d,note:n,time:new Date()});closeAll();loadArtList();}
+async function showPreview(i){currentImg=i;const item=artList[i];const highResUrl=await getDirectImageUrl(item.imageUrl);document.getElementById('previewImg').src=highResUrl;document.getElementById('previewImg').style.display='block';document.getElementById('previewImg').style.margin='0 auto';document.getElementById('previewImg').onerror=()=>document.getElementById('previewImg').src='https://via.placeholder.com/1200x800';document.getElementById('pDate').textContent=item.createDate;document.getElementById('pNote').textContent=item.note||'無';document.getElementById('preview').style.display='flex';}
+function openEditArtFromPreview(){const item=artList[currentImg];document.getElementById('artStudentSelect').value=item.studentId;document.getElementById('img').value=item.imageUrl;document.getElementById('cdate').value=item.createDate;document.getElementById('artNote').value=item.note||'';closeAll();document.getElementById('artModal').style.display='flex';setTimeout(()=>{const saveBtn=document.querySelector('#artModal .btn');saveBtn.onclick=async()=>{const sid=document.getElementById('artStudentSelect').value;const url=document.getElementById('img').value;const d=document.getElementById('cdate').value;const n=document.getElementById('artNote').value;await db.collection('artworks').doc(item.id).update({studentId:sid,imageUrl:url,createDate:d,note:n});closeAll();loadArtList();}},100);}
+async function deleteCurrentArt(){if(!isTeacher)return;if(!confirm('確定刪除？'))return;const id=artList[currentImg].id;await db.collection('artworks').doc(id).delete();closeAll();loadArtList();}
+async function batchSet(status){if(!isTeacher)return;const checks=document.querySelectorAll('.courseCheck:checked');if(checks.length===0)return alert('請選擇');if(!confirm('確定修改？'))return;for(let cb of checks)await db.collection('courses').doc(cb.dataset.id).update({status});loadCourseList();loadAllStudents();await loadAllCoursesForCalendar();renderSmallCalendar();renderTimeTable();}
+async function batchDeleteCourses(){if(!isTeacher)return;const checks=document.querySelectorAll('.courseCheck:checked');if(checks.length===0)return alert('請選擇');if(!confirm('確定刪除？'))return;for(let cb of checks)await db.collection('courses').doc(cb.dataset.id).delete();loadCourseList();await loadAllCoursesForCalendar();renderSmallCalendar();renderTimeTable();}
+function addCourse(){if(!isTeacher)return;if(!currentStudentId){alert("請先選擇學生");return;}currentCourseId=null;document.getElementById('cday').valueAsDate=new Date();document.getElementById('chour').value='';document.getElementById('cmin').value='';document.getElementById('endTimeShow').textContent='';document.getElementById('cnote').value='';document.getElementById('cstatus').value='pending';document.getElementById('courseCategory').value='恆常班';document.getElementById('courseStudentSelect').value=currentStudentId;document.getElementById('courseModal').style.display='flex';}
+async function saveCourse(){if(!isTeacher)return;const sid=currentStudentId;const d=document.getElementById('cday').value;const h=document.getElementById('chour').value.padStart(2,'0');const m=document.getElementById('cmin').value.padStart(2,'0');const t=`${h}:${m}`;const nt=document.getElementById('cnote').value;const s=document.getElementById('cstatus').value;const category=document.getElementById('courseCategory').value;if(!sid||!d||!h||!m)return;const data={studentId:sid,date:d,time:t,note:nt,status:s,courseCategory:category};if(currentCourseId)await db.collection('courses').doc(currentCourseId).update(data);else await db.collection('courses').add(data);closeAll();loadCourseList();loadAllStudents();await loadAllCoursesForCalendar();renderSmallCalendar();renderTimeTable();}
+function editCourse(id){if(!isTeacher)return;currentCourseId=id;db.collection('courses').doc(id).get().then(d=>{const c=d.data();document.getElementById('courseStudentSelect').value=c.studentId;document.getElementById('cday').value=c.date;const[h,m]=c.time.split(':');document.getElementById('chour').value=h;document.getElementById('cmin').value=m;calcEndTime();document.getElementById('cnote').value=c.note||'';document.getElementById('cstatus').value=c.status;document.getElementById('courseCategory').value=c.courseCategory||'恆常班';document.getElementById('courseModal').style.display='flex';})}
+async function delCourse(id){if(!isTeacher)return;if(!confirm('確定刪除？'))return;await db.collection('courses').doc(id).delete();loadCourseList();await loadAllCoursesForCalendar();renderSmallCalendar();renderTimeTable();}
+async function quickPackage(count){if(!isTeacher)return;const sid=currentStudentId;const startDate=document.getElementById('cday').value;const h=document.getElementById('chour').value.padStart(2,'0');const m=document.getElementById('cmin').value.padStart(2,'0');const startTime=`${h}:${m}`;const category=document.getElementById('courseCategory').value;if(!sid||!startDate||!h||!m)return;if(!confirm('產生'+count+'堂？'))return;const start=new Date(startDate);for(let i=0;i<count;i++){const dd=new Date(start);dd.setDate(start.getDate()+i*7);const date=dd.toISOString().split('T')[0];await db.collection('courses').add({studentId:sid,date,time:startTime,note:'課程',status:'pending',courseCategory:category});}alert('完成');closeAll();loadCourseList();await loadAllCoursesForCalendar();renderSmallCalendar();renderTimeTable();}
+async function searchStudent(){const kw=document.getElementById('searchStudent').value.toLowerCase().trim();const filtered=studentList.filter(s=>s.name.toLowerCase().includes(kw)||(s.parentPhone||'').includes(kw)||(s.studentNo||'').toLowerCase().includes(kw));studentList=filtered;stuPage=1;renderStudentPage();if(kw==='')loadAllStudents();}
+function exportCSV(){if(!isTeacher)return;let csv="姓名,學生編號,家長電話,課程方案,剩餘堂數,學校,出生年份,性別,備註\n";studentList.forEach(s=>{csv+=`"${s.name}","${s.studentNo||''}","${s.parentPhone||''}","${s.courseType||''}","${s.left||0}","${s.school||''}","${s.birthYear||''}","${s.gender||''}","${s.note||''}"\n`;});const blob=new Blob([csv],{type:"text/csv"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="學生資料.csv";a.click();URL.revokeObjectURL(url);}
+function printSchedule(){window.print();}
 function logout(){location.reload();}
 </script>
 </body>
