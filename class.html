@@ -6,200 +6,111 @@
   <title>MURMUR ART 學生專區</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;font-family:微軟正黑體,"Noto Sans TC"}
-    body{background:linear-gradient(120deg,#fdfbf7,#f0e9ff);color:#444;padding-bottom:120px}
-    .container{width:90%;max-width:800px;margin:0 auto}
-    .header{text-align:center;padding:30px 0}
-    .logo{font-size:32px;color:#879acb;font-weight:bold}
-    
-    /* 導覽分頁 */
-    .tab-bar{
-      display:flex;
-      background:white;
-      border-radius:16px;
-      overflow:hidden;
-      margin-bottom:20px;
-    }
-    .tab-item{
-      flex:1;
-      text-align:center;
-      padding:14px;
-      font-weight:bold;
-      color:#666;
-      cursor:pointer;
-    }
-    .tab-item.active{
-      background:#879acb;
-      color:white;
-    }
-    
-    .student-card{background:white;border-radius:20px;padding:25px;text-align:center;margin-bottom:20px;box-shadow:0 8px 20px #879acb20}
-    .student-card img{width:100px;height:100px;border-radius:50%;border:5px solid #879acb;margin-bottom:15px}
-    .student-name{font-size:24px;color:#879acb;margin-bottom:8px}
-    .info{color:#666;margin:5px 0}
-    .art-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:20px}
-    .art-item{background:white;border-radius:14px;overflow:hidden;box-shadow:0 4px 10px #00000010}
-    .art-item img{width:100%;height:160px;object-fit:cover}
-    .section{margin:30px 0}
-    .title{font-size:20px;color:#879acb;margin-bottom:15px}
-    
-    /* 課程表格 */
-    .course-table{
-      width:100%;
-      background:white;
-      border-radius:16px;
-      overflow:hidden;
-      margin-top:15px;
-    }
-    .course-table th{
-      background:#879acb;
-      color:white;
-      padding:12px;
-      text-align:left;
-      font-size:14px;
-    }
-    .course-table td{
-      padding:12px;
-      border-bottom:1px solid #eee;
-      font-size:14px;
-    }
-    .status-badge{
-      padding:5px 10px;
-      border-radius:20px;
-      font-size:12px;
-      color:white;
-    }
-    .status-ok{background:#28a745;}
-    .status-wait{background:#ffc107;}
-    .status-leave{background:#dc3545;}
-    .status-absent{background:#333;}
-    .status-holiday{background:#17a2b8;}
+    body{background:linear-gradient(120deg,#fdfbf7,#f0e9ff);color:#444}
+    .container{width:92%;max-width:1000px;margin:0 auto}
+    .navbar{background:rgba(255,255,255,.95);backdrop-filter:blur(12px);padding:14px 0;position:sticky;top:0;z-index:99}
+    .nav{display:flex;justify-content:space-between;align-items:center}
+    .logo{font-size:24px;color:#879acb;font-weight:bold}
+    .menu a{color:#555;text-decoration:none;margin-left:16px;cursor:pointer}
+    .menu a:hover{color:#879acb}
 
-    .preview{position:fixed;top:0;left:0;width:100%;height:100%;background:#000000dd;display:none;justify-content:center;align-items:center;padding:20px;z-index:999}
-    .preview img{max-width:90%;max-height:80vh;border-radius:12px;object-fit:contain;margin:0 auto;display:block}
-    .close{position:absolute;top:20px;right:20px;font-size:30px;color:white;cursor:pointer}
-    .p-text{color:white;text-align:center;margin-top:10px}
+    .student-card{background:white;border-radius:20px;padding:20px;margin:20px 0;display:flex;align-items:center;gap:16px;box-shadow:0 6px 20px #00000010}
+    .student-card img{width:70px;height:70px;border-radius:50%;object-fit:cover;border:4px solid #879acb}
+    .student-info h2{color:#879acb;margin-bottom:4px}
+    .student-info p{margin:4px 0;color:#666}
 
-    /* 續費提醒 */
-    .reminder{
-      background:#fff3cd;
-      color:#ff9800;
-      padding:10px 15px;
-      border-radius:12px;
-      text-align:center;
-      margin:15px 0;
-      font-size:14px;
-    }
+    .art-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin:20px 0}
+    .art-card{background:white;border-radius:16px;overflow:hidden;box-shadow:0 4px 12px #00000010;cursor:pointer}
+    .art-card img{width:100%;height:240px;object-fit:cover}
+    .art-info{padding:10px;font-size:12px;color:#666}
 
-    /* 頁尾 */
-    .footer{
-      background:white;
-      padding:25px 20px;
-      border-radius:16px;
-      text-align:center;
-      margin-top:40px;
-    }
-    .footer h3{
-      color:#879acb;
-      margin-bottom:15px;
-    }
-    .social{
-      display:flex;
-      justify-content:center;
-      gap:15px;
-      margin-bottom:15px;
-    }
-    .social a{
-      width:44px;
-      height:44px;
-      border-radius:50%;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      color:white;
-      text-decoration:none;
-      font-weight:bold;
-      background:#879acb;
-    }
-    .rule{
-      font-size:13px;
-      color:#666;
-      line-height:1.5;
-    }
+    .preview{position:fixed;top:0;left:0;width:100%;height:100%;background:#000000dd;display:none;justify-content:center;align-items:center;padding:20px;z-index:9999}
+    .preview-box{background:#fff;border-radius:24px;padding:30px;max-width:900px;width:100%;display:flex;align-items:center;gap:30px;position:relative}
+    .preview-img{max-height:70vh;max-width:60%;border-radius:16px;object-fit:contain}
+    .preview-info{text-align:right;width:200px}
+    .preview-date{font-size:14px;color:#888;margin-top:10px}
+    .close-preview{position:absolute;top:20px;right:24px;font-size:26px;cursor:pointer;color:#777}
+    .prev-btn,.next-btn{position:absolute;top:50%;transform:translateY(-50%);background:#879acb;color:white;width:55px;height:55px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer}
+    .prev-btn{left:25px}
+    .next-btn{right:25px}
+
+    .calendar{background:white;border-radius:16px;padding:16px;margin:20px 0}
+    .calendar h3{color:#879acb;margin-bottom:10px}
+    .cal-row{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center;margin-bottom:6px}
+    .cal-head{font-weight:bold;color:#879acb;font-size:14px}
+    .cal-day{background:#f8f9ff;padding:8px 4px;border-radius:8px;font-size:12px}
+    .cal-day.active{background:#879acb;color:white}
+    .cal-day .dot{width:6px;height:6px;background:#ff9800;border-radius:50%;margin:4px auto 0}
+
+    .stats{background:white;padding:18px;border-radius:16px;display:flex;gap:15px;text-align:center;margin:15px 0}
+    .stat{flex:1}
+    .stat h3{font-size:14px;color:#879acb}
+    .stat h2{font-size:24px;color:#444}
+
+    .footer{text-align:center;padding:20px;color:#777;font-size:14px}
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
-<div class="container">
-  <div class="header">
+<div class="navbar">
+  <div class="container nav">
     <div class="logo">🎨 MURMUR ART</div>
-  </div>
-
-  <!-- 導覽分頁 -->
-  <div class="tab-bar">
-    <div class="tab-item active" onclick="switchTab(1)">🎨 作品與資料</div>
-    <div class="tab-item" onclick="switchTab(2)">📅 課程進度</div>
-  </div>
-
-  <!-- 續費提醒 -->
-  <div id="reminderBox" style="display:none;" class="reminder">課程即將用罄，記得續課哦！</div>
-
-  <!-- 頁面1：作品與資料 -->
-  <div id="page1">
-    <div class="student-card" id="studentCard">
-      <img id="avatar" src="">
-      <div class="student-name" id="name"></div>
-      <div class="info" id="studentNo"></div>
-      <div class="info" id="courseType"></div>
-      <div class="info" id="left"></div>
-      <div class="info" id="lastClass" style="display:none;margin-top:10px;color:#879acb"></div>
+    <div class="menu">
+      <a onclick="show('art')">作品</a>
+      <a onclick="show('calendar')">課表</a>
+      <a onclick="logout()">登出</a>
     </div>
+  </div>
+</div>
 
-    <div class="section">
-      <div class="title">🖼️ 學生作品</div>
-      <div class="art-grid" id="artGrid"></div>
+<div class="container">
+  <div class="student-card" id="studentCard">
+    <img id="avatar">
+    <div class="student-info">
+      <h2 id="name"></h2>
+      <p id="phone"></p>
+      <p id="studentNo"></p>
     </div>
   </div>
 
-  <!-- 頁面2：課程進度 -->
-  <div id="page2" style="display:none;">
-    <div class="section">
-      <div class="title">📅 課程進度一覽</div>
-      <table class="course-table">
-        <thead>
-          <tr>
-            <th>日期</th>
-            <th>時間</th>
-            <th>狀態</th>
-          </tr>
-        </thead>
-        <tbody id="courseTableBody"></tbody>
-      </table>
-    </div>
+  <div id="courseStats" class="stats" style="display:none">
+    <div class="stat"><h3>總課程</h3><h2 id="total"></h2></div>
+    <div class="stat"><h3>已完成</h3><h2 id="done"></h2></div>
+    <div class="stat"><h3>剩餘</h3><h2 id="left"></h2></div>
   </div>
 
-  <!-- 頁尾 -->
- <div class="footer">
-    <h3>🎨 歡迎追蹤我們</h3>
-    <div class="social">
-      <a href="https://www.instagram.com/murmur_artstudio/" target="_blank">IG</a>
-      <a href="https://www.facebook.com/share/1DMkDrhF65/?mibextid=wwXIfr" target="_blank">FB</a>
-      <a href="https://wa.me/67480066" target="_blank">WA</a>
-    </div>
-    <div class="rule">
-      請假請提前一天聯絡老師，缺席將不予補課<br>
-      謝謝配合 😊
+  <div id="artView">
+    <div class="art-grid" id="artGrid"></div>
+  </div>
+
+  <div id="calendarView" style="display:none">
+    <div class="calendar">
+      <h3>📅 上課課表</h3>
+      <div class="cal-row cal-head"><div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div></div>
+      <div id="calBody"></div>
     </div>
   </div>
 </div>
 
 <div class="preview" id="preview">
-  <span class="close" onclick="closePreview()">&times;</span>
-  <button class="prev" onclick="prevArt()">&lt;</button>
-  <img id="previewImg">
-  <button class="next" onclick="nextArt()">&gt;</button>
-  <div class="p-text" id="previewDate"></div>
+  <div class="preview-box">
+    <span class="close-preview" onclick="closePreview()">&times;</span>
+    <img class="preview-img" id="previewImg">
+    <div class="preview-info">
+      <p><strong>作品日期</strong></p>
+      <p class="preview-date" id="pDate"></p>
+      <p style="margin-top:8px"><strong>備註</strong></p>
+      <p id="pNote"></p>
+    </div>
+    <div class="prev-btn" onclick="prevImg()">&lt;</div>
+    <div class="next-btn" onclick="nextImg()">&gt;</div>
+  </div>
+</div>
+
+<div class="footer">
+  了解最新課程與活動消息
 </div>
 
 <script>
@@ -214,21 +125,13 @@ const firebaseConfig = {
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-const params = new URLSearchParams(window.location.search);
+const params = new URLSearchParams(location.search);
 const sid = params.get('sid');
+let artList = [];
+let courseList = [];
+let currentImg = 0;
 
-if(!sid){
-  alert('無學生資訊');
-  window.close();
-}
-
-// 分頁切換
-function switchTab(num){
-  document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.tab-item')[num-1].classList.add('active');
-  document.getElementById('page1').style.display = num===1 ? 'block' : 'none';
-  document.getElementById('page2').style.display = num===2 ? 'block' : 'none';
-}
+if (!sid) location.href='index.html';
 
 async function getDirectImageUrl(url) {
   if (!url) return "https://via.placeholder.com/300";
@@ -245,125 +148,129 @@ async function getDirectImageUrl(url) {
   return "https://via.placeholder.com/300";
 }
 
-function getWeek(d){
-  const w=['日','一','二','三','四','五','六'];
-  return w[new Date(d).getDay()];
-}
-
-function formatTime(t){
-  if(!t) return '';
-  const [h,m]=t.split(':');
-  const min=h*60+parseInt(m)+75;
-  const eh=Math.floor(min/60),em=min%60;
-  return `${t} - ${String(eh).padStart(2,0)}:${String(em).padStart(2,0)}`;
-}
-
 async function loadStudent(){
   const doc = await db.collection('students').doc(sid).get();
-  if(!doc.exists) return;
   const data = doc.data();
-  document.getElementById('name').innerText = data.name;
-  document.getElementById('studentNo').innerText = '學生編號：'+(data.studentNo||'-');
-  document.getElementById('courseType').innerText = '課程方案：'+(data.courseType||'-');
-  
+  document.getElementById('name').innerText = data.name || '';
+  document.getElementById('phone').innerText = data.parentPhone || '';
+  document.getElementById('studentNo').innerText = '學生編號：'+(data.studentNo || '未設定');
   const avatar = await getDirectImageUrl(data.avatar);
   document.getElementById('avatar').src = avatar;
-  document.getElementById('avatar').onerror = e=>e.target.src="https://via.placeholder.com/100";
-}
-
-async function loadCourses(){
-  const snap = await db.collection('courses').where('studentId','==',sid).get();
-  const arr = [];
-  snap.forEach(d=>arr.push({id:d.id,...d.data()}));
-  
-  const valid = arr.filter(x=>!['leave','holiday'].includes(x.status));
-  const total = valid.length;
-  const done = valid.filter(x=>x.status==='completed'||x.status==='absent').length;
-  const left = total - done;
-  
-  document.getElementById('left').innerText = '剩餘堂數：'+left;
-
-  // 上次上課日期
-  const last = arr.filter(x=>x.status==='completed').sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
-  if(last){
-    document.getElementById('lastClass').style.display='block';
-    document.getElementById('lastClass').innerText=`🗓️ 上次上課：${last.date}（${getWeek(last.date)}）`;
-  }
-
-  // 續費提醒
-  if(left < 3){
-    document.getElementById('reminderBox').style.display = 'block';
-  }
-
-  // 渲染課程表格
-  const tbody = document.getElementById('courseTableBody');
-  tbody.innerHTML = '';
-  const statusMap = {
-    pending: 'status-wait',
-    completed: 'status-ok',
-    leave: 'status-leave',
-    absent: 'status-absent',
-    holiday: 'status-holiday'
-  };
-  const statusText = {
-    pending:'未完成',completed:'已完成',leave:'請假',absent:'缺席',holiday:'假期'
-  };
-
-  const sorted = [...arr].sort((a,b)=>new Date(b.date)-new Date(a.date));
-  sorted.forEach(c=>{
-    tbody.innerHTML += `
-    <tr>
-      <td>${c.date}（${getWeek(c.date)}）</td>
-      <td>${formatTime(c.time)}</td>
-      <td><span class="status-badge ${statusMap[c.status]}">${statusText[c.status]}</span></td>
-    </tr>
-    `;
-  });
+  document.getElementById('avatar').onerror = e=>e.target.src="https://via.placeholder.com/70";
 }
 
 async function loadArt(){
   const snap = await db.collection('artworks').where('studentId','==',sid).get();
-  const list = document.getElementById('artGrid');
-  list.innerHTML = '';
-  const arts = [];
-  snap.forEach(d=>arts.push({id:d.id,...d.data()}));
+  artList = [];
+  snap.forEach(d=>artList.push({id:d.id,...d.data()}));
+  artList.sort((a,b)=>new Date(b.createDate)-new Date(a.createDate));
   
-  // 依照日期排序 最新在前
-  arts.sort((a,b)=>new Date(b.createDate)-new Date(a.createDate));
-
-  for(let i=0;i<arts.length;i++){
-    const item = arts[i];
+  const grid = document.getElementById('artGrid');
+  grid.innerHTML = '';
+  for(let i=0;i<artList.length;i++){
+    const item = artList[i];
     const img = await getDirectImageUrl(item.imageUrl);
-    list.innerHTML += `
-    <div class="art-item" onclick="showPreview(${i})">
-      <img src="${img}" onerror="this.src='https://via.placeholder.com/150x160'">
+    grid.innerHTML += `
+    <div class="art-card" onclick="openPreview(${i})">
+      <img src="${img}" onerror="this.src='https://via.placeholder.com/180x240'">
     </div>`;
   }
-  window.arts = arts;
 }
 
-function showPreview(i){
-  const item = window.arts[i];
-  document.getElementById('previewImg').src = item.imageUrl;
-  document.getElementById('previewDate').innerText = item.createDate;
+async function loadCourses(){
+  const snap = await db.collection('courses').where('studentId','==',sid).get();
+  courseList = [];
+  snap.forEach(d=>courseList.push({id:d.id,...d.data()}));
+  
+  const valid = courseList.filter(c => !['leave','holiday'].includes(c.status));
+  const total = valid.length;
+  const done = valid.filter(c => c.status === 'completed' || c.status === 'absent').length;
+  const left = total - done;
+  
+  document.getElementById('total').innerText = total;
+  document.getElementById('done').innerText = done;
+  document.getElementById('left').innerText = left;
+  document.getElementById('courseStats').style.display = 'flex';
+  
+  renderCalendar();
+}
+
+function renderCalendar(){
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const firstDay = new Date(year,month,1).getDay();
+  const daysInMonth = new Date(year,month+1,0).getDate();
+  
+  const body = document.getElementById('calBody');
+  body.innerHTML = '';
+  
+  let row = document.createElement('div');
+  row.className = 'cal-row';
+  
+  for(let i=0;i<firstDay;i++){
+    row.innerHTML += '<div class="cal-day"></div>';
+  }
+  
+  for(let d=1;d<=daysInMonth;d++){
+    const date = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const has = courseList.some(c=>c.date===date);
+    row.innerHTML += `
+    <div class="cal-day ${has?'active':''}">
+      ${d}
+      ${has?'<div class="dot"></div>':''}
+    </div>`;
+    
+    if((firstDay+d)%7===0){
+      body.appendChild(row);
+      row = document.createElement('div');
+      row.className = 'cal-row';
+    }
+  }
+  body.appendChild(row);
+}
+
+function openPreview(i){
+  currentImg = i;
+  showImg();
   document.getElementById('preview').style.display = 'flex';
+}
+
+function showImg(){
+  const item = artList[currentImg];
+  document.getElementById('previewImg').src = item.imageUrl;
+  document.getElementById('pDate').innerText = item.createDate;
+  document.getElementById('pNote').innerText = item.note || '無';
 }
 
 function closePreview(){
   document.getElementById('preview').style.display = 'none';
 }
 
-// 空函數相容
-function prevArt(){}
-function nextArt(){}
-
-async function init(){
-  await loadStudent();
-  await loadCourses();
-  await loadArt();
+function prevImg(){
+  currentImg = (currentImg - 1 + artList.length) % artList.length;
+  showImg();
 }
 
-init();
+function nextImg(){
+  currentImg = (currentImg + 1) % artList.length;
+  showImg();
+}
+
+function show(v){
+  document.getElementById('artView').style.display = v==='art'?'grid':'none';
+  document.getElementById('calendarView').style.display = v==='calendar'?'block':'none';
+}
+
+function logout(){
+  location.href = 'index.html';
+}
+
+window.onload = async ()=>{
+  await loadStudent();
+  await loadArt();
+  await loadCourses();
+}
 </script>
 </body>
 </html>
