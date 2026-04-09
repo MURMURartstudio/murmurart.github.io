@@ -279,7 +279,7 @@
     }
     .time-row{
       display:flex;
-      align-items:center;
+      align-items:flex-start;
       padding:6px 8px;
       border-bottom:1px solid #f0f0f0;
       min-height:38px;
@@ -289,16 +289,17 @@
       font-weight:bold;
       color:#879acb;
       font-size:12px;
+      padding-top:4px;
     }
     .time-slots{
       flex:1;
       display:flex;
-      gap:5px;
-      flex-wrap:wrap;
+      flex-direction:column;
+      gap:4px;
       padding-bottom:2px;
     }
     .course-block{
-      padding:5px 8px;
+      padding:6px 8px;
       background:#e8edff;
       border-radius:6px;
       font-size:11px;
@@ -307,7 +308,7 @@
       min-width:130px;
       cursor:pointer;
       position:relative;
-      margin:3px 0;
+      margin:0;
     }
     .course-block:hover{
       background:#d7e0ff;
@@ -359,6 +360,20 @@
       color:white;
       font-size:12px;
       cursor:pointer;
+    }
+
+    /* 老師界面：同一時間學生左右排列 */
+    .time-slots {
+      display: flex !important;
+      flex-direction: row !important;
+      flex-wrap: wrap !important;
+      gap: 6px !important;
+    }
+    .course-block {
+      margin: 0 !important;
+      flex: 1 !important;
+      min-width: 140px !important;
+      max-width: 220px !important;
     }
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -472,7 +487,7 @@
         <button class="batch-btn btn-ok" onclick="batchSet('completed')">已完成</button>
         <button class="batch-btn btn-leave" onclick="batchSet('leave')">請假</button>
         <button class="batch-btn btn-absent" onclick="batchSet('absent')">缺席</button>
-        <button class="batch-btn btn-holiday" onclick="batchSet('holiday')">公眾假期</button>
+        <button class="batch-btn btn-holiday" onclick="batchSet('holiday')">假期</button>
         <button class="batch-btn btn-del" onclick="batchDeleteCourses()">批量刪除</button>
       </div>
       <table>
@@ -549,8 +564,8 @@
     <input class="input" type="date" id="cday">
     
     <div style="display:flex;gap:10px;">
-      <input class="input" type="number" id="chour" placeholder="小時" style="flex:1;">
-      <input class="input" type="number" id="cmin" placeholder="分鐘" style="flex:1;">
+      <input class="input" type="number" id="chour" placeholder="小時" style="flex:1;" oninput="calcEndTime()">
+      <input class="input" type="number" id="cmin" placeholder="分鐘" style="flex:1;" oninput="calcEndTime()">
     </div>
 
     <div id="endTimeShow" style="margin:0 0 15px;color:#879acb"></div>
@@ -634,6 +649,7 @@ let coursePage = 1;
 // 新月曆
 let selectedYear = new Date().getFullYear();
 let selectedMonth = new Date().getMonth();
+let selectedDate = new Date().toISOString().split('T')[0];
 
 async function getDirectImageUrl(url) {
   if (!url) return "https://via.placeholder.com/300";
@@ -666,6 +682,8 @@ function teacherLogin() {
     loadAllStudents();
     loadAllCoursesForCalendar();
     initMonthSelector();
+    renderSmallCalendar();
+    renderTimeTable();
   } else alert('密碼錯誤');
 }
 
@@ -950,14 +968,14 @@ function renderSmallCalendar(){
   for(let d=1;d<=daysInMonth;d++){
     const date = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const hasCourse = allCourses.some(x=>x.date===date);
+    const isToday = date === selectedDate;
     cal.innerHTML += `
-    <div class="calendar-day ${hasCourse?'active':''}" onclick="selectCalendarDate('${date}')">
+    <div class="calendar-day ${hasCourse?'active':''} ${isToday?'style="background:#e8edff"':''}" onclick="selectCalendarDate('${date}')">
       <div class="calendar-day-num">${d}</div>
     </div>`;
   }
 }
 
-let selectedDate = new Date().toISOString().split('T')[0];
 function selectCalendarDate(date){
   selectedDate = date;
   renderSmallCalendar();
@@ -1000,7 +1018,7 @@ function renderTimeTable(){
       return;
     }
 
-    // 有課程就左右並排
+    // 有課程就垂直排列
     let html = `<div class="time-row">`;
     html += `<div class="time-label">${time}</div>`;
     html += `<div class="time-slots">`;
@@ -1008,6 +1026,16 @@ function renderTimeTable(){
       const stu = studentList.find(s=>s.id===c.studentId);
       const name = stu?.name || '未知名';
       const no = stu?.studentNo || '';
+      const timeRange = formatTime(c.time);
+      const [h, m] = c.time.split(':');
+      const minute = parseInt(h)*60 + parseInt(m);
+      const baseMinute = parseInt(time.split(':')[0])*60;
+      const offset = minute - baseMinute;
+      const marginTop = (offset / 60) * 30 + 'px';
+      const duration = 75;
+      const width = Math.min(100, (duration / 60) * 100) + '%';
+      const height = (duration / 60) * 30 + 'px';
+      
       const statusMap = {
         pending: '#ffc107',
         completed: '#28a745',
@@ -1017,8 +1045,9 @@ function renderTimeTable(){
       };
       const color = statusMap[c.status] || '#879acb';
       html += `
-      <div class="course-block" onclick="openQuickEdit('${c.id}','${name}')" style="border-left-color:${color}">
-        ${name} ${no}
+      <div class="course-block" onclick="openQuickEdit('${c.id}','${name}')" style="border-left-color:${color};margin-top:${marginTop};width:${width};height:${height};">
+        <div>${name} ${no}</div>
+        <div style="font-size:10px;margin-top:2px;">${timeRange}</div>
       </div>`;
     });
     html += `</div></div>`;
@@ -1074,7 +1103,15 @@ async function quickSet(cid,status){
 
 function getWeek(d){const w=['日','一','二','三','四','五','六'];return w[new Date(d).getDay()]}
 function formatTime(t){const [h,m]=t.split(':');const min=h*60+parseInt(m)+75;const eh=Math.floor(min/60),em=min%60;return `${t} - ${String(eh).padStart(2,0)}:${String(em).padStart(2,0)}`;}
-function calcEndTime(){}
+function calcEndTime(){
+  const h=parseInt(document.getElementById('chour').value||0);
+  const m=parseInt(document.getElementById('cmin').value||0);
+  if(isNaN(h)||isNaN(m))return;
+  const total=h*60+m+75;
+  const eh=Math.floor(total/60);
+  const em=total%60;
+  document.getElementById('endTimeShow').textContent=`預計下课：${String(eh).padStart(2,0)}:${String(em).padStart(2,0)}`;
+}
 
 function searchCourse(){
   const kw=document.getElementById('searchCourse').value.toLowerCase().trim();
@@ -1338,6 +1375,7 @@ function editCourse(id){
     const [h,m] = c.time.split(':');
     document.getElementById('chour').value = h;
     document.getElementById('cmin').value = m;
+    calcEndTime();
     document.getElementById('cnote').value=c.note||'';
     document.getElementById('cstatus').value=c.status;
     document.getElementById('courseCategory').value = c.courseCategory || '恆常班';
