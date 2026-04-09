@@ -8,21 +8,20 @@
     *{margin:0;padding:0;box-sizing:border-box;font-family:微軟正黑體,"Noto Sans TC"}
     body{background:linear-gradient(120deg,#fdfbf7,#f0e9ff);color:#444;padding-bottom:120px}
     .container{width:90%;max-width:800px;margin:0 auto}
-    .header{text-align:center;padding:30px 0}
-    .logo{font-size:32px;color:#879acb;font-weight:bold}
+    .header{text-align:center;padding:20px 0}
+    .logo{font-size:28px;color:#879acb;font-weight:bold}
     
-    /* 導覽分頁 */
     .tab-bar{
       display:flex;
       background:white;
       border-radius:16px;
       overflow:hidden;
-      margin-bottom:20px;
+      margin-bottom:15px;
     }
     .tab-item{
       flex:1;
       text-align:center;
-      padding:14px;
+      padding:12px;
       font-weight:bold;
       color:#666;
       cursor:pointer;
@@ -32,17 +31,55 @@
       color:white;
     }
     
-    .student-card{background:white;border-radius:20px;padding:25px;text-align:center;margin-bottom:20px;box-shadow:0 8px 20px #879acb20}
-    .student-card img{width:100px;height:100px;border-radius:50%;border:5px solid #879acb;margin-bottom:15px}
-    .student-name{font-size:24px;color:#879acb;margin-bottom:8px}
-    .info{color:#666;margin:5px 0}
-    .art-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:20px}
-    .art-item{background:white;border-radius:14px;overflow:hidden;box-shadow:0 4px 10px #00000010}
-    .art-item img{width:100%;height:160px;object-fit:cover}
-    .section{margin:30px 0}
-    .title{font-size:20px;color:#879acb;margin-bottom:15px}
+    /* 學生卡片縮小 */
+    .student-card{
+      background:white;
+      border-radius:16px;
+      padding:18px;
+      text-align:center;
+      margin-bottom:15px;
+      box-shadow:0 4px 12px #879acb15;
+      max-width:420px;
+      margin-left:auto;
+      margin-right:auto;
+    }
+    .student-card img{
+      width:70px;height:70px;
+      border-radius:50%;
+      border:3px solid #879acb;
+      margin-bottom:10px;
+    }
+    .student-name{font-size:20px;color:#879acb;margin-bottom:6px}
+    .info{color:#666;margin:4px 0;font-size:14px}
     
-    /* 課程表格 */
+    /* 作品放大 */
+    .art-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+      gap:16px;
+      margin-top:15px;
+    }
+    .art-item{
+      background:white;
+      border-radius:14px;
+      overflow:hidden;
+      box-shadow:0 4px 10px #00000010;
+    }
+    .art-item img{
+      width:100%;
+      height:220px;
+      object-fit:cover;
+    }
+    
+    /* 標題置中 */
+    .section{margin:25px 0}
+    .title{
+      font-size:20px;
+      color:#879acb;
+      margin-bottom:15px;
+      text-align:center;
+    }
+    
     .course-table{
       width:100%;
       background:white;
@@ -74,59 +111,120 @@
     .status-absent{background:#333;}
     .status-holiday{background:#17a2b8;}
 
-    .preview{position:fixed;top:0;left:0;width:100%;height:100%;background:#000000dd;display:none;justify-content:center;align-items:center;padding:20px;z-index:999}
-    .preview img{max-width:90%;max-height:80vh;border-radius:12px;object-fit:contain;margin:0 auto;display:block}
-    .close{position:absolute;top:20px;right:20px;font-size:30px;color:white;cursor:pointer}
-    .p-text{color:white;text-align:center;margin-top:10px}
+    .preview{
+      position:fixed;top:0;left:0;
+      width:100%;height:100%;
+      background:#000000dd;
+      display:none;
+      justify-content:center;
+      align-items:center;
+      padding:20px;
+      z-index:999;
+    }
+    .preview img{
+      max-width:95%;
+      max-height:80vh;
+      border-radius:12px;
+      object-fit:contain;
+      display:block;
+      margin:0 auto;
+    }
+    .close{
+      position:absolute;
+      top:20px;right:20px;
+      font-size:28px;
+      color:white;
+      cursor:pointer;
+    }
+    .prev,.next{
+      position:absolute;
+      top:50%;transform:translateY(-50%);
+      font-size:26px;
+      color:white;
+      background:rgba(255,255,255,0.25);
+      padding:12px 16px;
+      border-radius:8px;
+      cursor:pointer;
+      border:none;
+    }
+    .prev{left:15px}
+    .next{right:15px}
+    .img-date{
+      position:absolute;
+      bottom:20px;right:20px;
+      color:white;
+      background:rgba(0,0,0,0.5);
+      padding:6px 10px;
+      border-radius:8px;
+      font-size:14px;
+    }
 
-    /* 續費提醒 */
     .reminder{
       background:#fff3cd;
       color:#ff9800;
       padding:10px 15px;
       border-radius:12px;
       text-align:center;
-      margin:15px 0;
+      margin:12px 0;
       font-size:14px;
     }
 
-    /* 頁尾 */
+    /* 底部按鈕多彩 */
+    .bottom-bar{
+      display:flex;
+      gap:12px;
+      justify-content:center;
+      margin:25px 0;
+      flex-wrap:wrap;
+    }
+    .bottom-btn{
+      padding:11px 18px;
+      border:none;
+      border-radius:12px;
+      color:white;
+      font-size:15px;
+      font-weight:bold;
+      cursor:pointer;
+    }
+    .btn-blue{background:#879acb;}
+    .btn-green{background:#74b774;}
+    .btn-orange{background:#f9a826;}
+    .btn-red{background:#ff7272;}
+
     .footer{
       background:white;
-      padding:25px 20px;
+      padding:20px;
       border-radius:16px;
       text-align:center;
-      margin-top:40px;
+      margin-top:30px;
     }
     .footer h3{
       color:#879acb;
-      margin-bottom:15px;
+      margin-bottom:12px;
+      font-size:18px;
     }
     .social{
       display:flex;
       justify-content:center;
-      gap:15px;
-      margin-bottom:15px;
+      gap:12px;
+      margin-bottom:12px;
     }
     .social a{
-      width:44px;
-      height:44px;
+      width:40px;height:40px;
       border-radius:50%;
       display:flex;
       align-items:center;
       justify-content:center;
       color:white;
       text-decoration:none;
-      font-weight:bold;
       background:#879acb;
     }
     .rule{
       font-size:13px;
       color:#666;
-      line-height:1.5;
+      line-height:1.4;
     }
 
-    /* 新增：分頁樣式 */
     .pagination{
       display:flex;
       justify-content:center;
@@ -142,42 +240,8 @@
       border-radius:10px;
       cursor:pointer;
     }
-    .page-btn:disabled{
-      opacity:0.5;
-      cursor:not-allowed;
-    }
-    .page-info{
-      font-size:14px;
-      color:#666;
-    }
-
-    /* 新增：作品預覽按鈕 */
-    .prev,.next{
-      position:absolute;
-      top:50%;
-      transform:translateY(-50%);
-      font-size:30px;
-      color:white;
-      background:rgba(255,255,255,0.3);
-      padding:15px 20px;
-      border-radius:10px;
-      cursor:pointer;
-      border:none;
-    }
-    .prev{left:20px}
-    .next{right:20px}
-
-    /* 新增：圖片下方日期 */
-    .img-date{
-      position:absolute;
-      bottom:20px;
-      right:20px;
-      color:white;
-      background:rgba(0,0,0,0.5);
-      padding:5px 10px;
-      border-radius:8px;
-      font-size:14px;
-    }
+    .page-btn:disabled{opacity:0.5}
+    .page-info{font-size:14px;color:#666}
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -189,16 +253,14 @@
     <div class="logo">🎨 MURMUR ART</div>
   </div>
 
-  <!-- 導覽分頁 -->
   <div class="tab-bar">
     <div class="tab-item active" onclick="switchTab(1)">🎨 作品與資料</div>
     <div class="tab-item" onclick="switchTab(2)">📅 課程進度</div>
   </div>
 
-  <!-- 續費提醒 -->
   <div id="reminderBox" style="display:none;" class="reminder">課程即將用罄，記得續課哦！</div>
 
-  <!-- 頁面1：作品與資料 -->
+  <!-- 頁面1 -->
   <div id="page1">
     <div class="student-card" id="studentCard">
       <img id="avatar" src="">
@@ -206,7 +268,7 @@
       <div class="info" id="studentNo"></div>
       <div class="info" id="courseType"></div>
       <div class="info" id="left"></div>
-      <div class="info" id="lastClass" style="display:none;margin-top:10px;color:#879acb"></div>
+      <div class="info" id="lastClass" style="display:none;margin-top:8px;color:#879acb"></div>
     </div>
 
     <div class="section">
@@ -215,12 +277,13 @@
     </div>
   </div>
 
-  <!-- 頁面2：課程進度 -->
+  <!-- 頁面2 -->
   <div id="page2" style="display:none;">
     <div class="section">
       <div class="title">📅 課程進度一覽</div>
       <div id="courseStats" style="background:white;padding:15px;border-radius:12px;margin-bottom:15px;display:flex;gap:15px;text-align:center;">
         <div style="flex:1"><h4 style="color:#879acb">總課程</h4><h3 id="totalCourse">0</h3></div>
+        <div style="flex:1"><h4 style="color:#879acb">已完成</h4><h3 id="doneCourse">0</h3></div>
         <div style="flex:1"><h4 style="color:#879acb">剩餘</h4><h3 id="leftCourse">0</h3></div>
       </div>
       <table class="course-table">
@@ -237,17 +300,23 @@
     </div>
   </div>
 
-  <!-- 頁尾 -->
- <div class="footer">
-    <h3>🎨 歡迎追蹤我們</h3>
+  <!-- 底部多彩按鈕 -->
+  <div class="bottom-bar">
+    <button class="bottom-btn btn-blue" onclick="switchTab(1)">作品</button>
+    <button class="bottom-btn btn-green" onclick="switchTab(2)">課程</button>
+    <button class="bottom-btn btn-orange" onclick="window.open('https://wa.me/67480066','_blank')">聯絡老師</button>
+    <button class="bottom-btn btn-red" onclick="logout()">登出</button>
+  </div>
+
+  <div class="footer">
+    <h3>🎨 追蹤我們</h3>
     <div class="social">
       <a href="https://www.instagram.com/murmur_artstudio/" target="_blank">IG</a>
       <a href="https://www.facebook.com/share/1DMkDrhF65/?mibextid=wwXIfr" target="_blank">FB</a>
       <a href="https://wa.me/67480066" target="_blank">WA</a>
     </div>
     <div class="rule">
-      請假請提前一天聯絡老師，缺席將不予補課<br>
-      謝謝配合 😊
+      請假請提前一天聯絡老師，缺席將不予補課<br>謝謝配合 😊
     </div>
   </div>
 </div>
@@ -268,25 +337,17 @@ const firebaseConfig = {
   messagingSenderId:"205741159610",
   appId:"1:205741159610:web:624b7ca35c04e6e09a7e83"
 };
-
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-
 const params = new URLSearchParams(window.location.search);
 const sid = params.get('sid');
+if(!sid){alert('無學生資訊');window.close();}
 
-if(!sid){
-  alert('無學生資訊');
-  window.close();
-}
-
-// 分頁設定
 const PER_PAGE = 20;
 let coursePage = 1;
 let allCourses = [];
 let currentArtIndex = 0;
 
-// 分頁切換
 function switchTab(num){
   document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.tab-item')[num-1].classList.add('active');
@@ -301,26 +362,14 @@ async function getDirectImageUrl(url) {
   if (url.includes("i.ibb.co") && (url.endsWith(".jpg")||url.endsWith(".png")||url.endsWith(".jpeg"))) return url;
   let driveMatch = url.match(/drive\.google\.com\/file\/d\/([^\/\?]+)/);
   if (driveMatch) return "https://drive.google.com/thumbnail?id="+driveMatch[1]+"&sz=w1000";
-  if (url.includes("photos.app.goo.gl")) {
-    try{const res=await fetch(url,{mode:"cors"});const t=await res.text();const f=t.match(/https:\/\/lh3\.googleusercontent\.com\/[^\s"]+/);if(f)return f[0]}catch(e){}
-  }
+  if (url.includes("photos.app.goo.gl")) {try{const res=await fetch(url,{mode:"cors"});const t=await res.text();const f=t.match(/https:\/\/lh3\.googleusercontent\.com\/[^\s"]+/);if(f)return f[0]}catch(e){}}
   if (url.includes("lh3.googleusercontent.com")) return url;
   if (url.endsWith(".jpg")||url.endsWith(".png")||url.endsWith(".jpeg")||url.endsWith(".gif")) return url;
   return "https://via.placeholder.com/300";
 }
 
-function getWeek(d){
-  const w=['日','一','二','三','四','五','六'];
-  return w[new Date(d).getDay()];
-}
-
-function formatTime(t){
-  if(!t) return '';
-  const [h,m]=t.split(':');
-  const min=h*60+parseInt(m)+75;
-  const eh=Math.floor(min/60),em=min%60;
-  return `${t} - ${String(eh).padStart(2,0)}:${String(em).padStart(2,0)}`;
-}
+function getWeek(d){const w=['日','一','二','三','四','五','六'];return w[new Date(d).getDay()]}
+function formatTime(t){if(!t) return '';const [h,m]=t.split(':');const min=h*60+parseInt(m)+75;const eh=Math.floor(min/60),em=min%60;return `${t} - ${String(eh).padStart(2,0)}:${String(em).padStart(2,0)}`;}
 
 async function loadStudent(){
   const doc = await db.collection('students').doc(sid).get();
@@ -329,148 +378,69 @@ async function loadStudent(){
   document.getElementById('name').innerText = data.name;
   document.getElementById('studentNo').innerText = '學生編號：'+(data.studentNo||'-');
   document.getElementById('courseType').innerText = '課程方案：'+(data.courseType||'-');
-  
   const avatar = await getDirectImageUrl(data.avatar);
   document.getElementById('avatar').src = avatar;
-  document.getElementById('avatar').onerror = e=>e.target.src="https://via.placeholder.com/100";
+  document.getElementById('avatar').onerror = e=>e.target.src="https://via.placeholder.com/70";
 }
 
-// 課程分頁渲染
 function renderCoursePage(){
   const sorted = [...allCourses].sort((a,b)=>{
     if(a.status === 'pending' && b.status !== 'pending') return -1;
     if(a.status !== 'pending' && b.status === 'pending') return 1;
     return new Date(a.date) - new Date(b.date);
   });
-
   const totalPage = Math.ceil(sorted.length / PER_PAGE);
   const start = (coursePage-1)*PER_PAGE;
   const end = start + PER_PAGE;
   const show = sorted.slice(start, end);
-
   const tbody = document.getElementById('courseTableBody');
   tbody.innerHTML = '';
-  
-  const statusMap = {
-    pending: 'status-wait',
-    completed: 'status-ok',
-    leave: 'status-leave',
-    absent: 'status-absent',
-    holiday: 'status-holiday'
-  };
-  const statusText = {
-    pending:'未完成',completed:'已完成',leave:'請假',absent:'缺席',holiday:'假期'
-  };
-
+  const statusMap = {pending:'status-wait',completed:'status-ok',leave:'status-leave',absent:'status-absent',holiday:'status-holiday'};
+  const statusText = {pending:'未完成',completed:'已完成',leave:'請假',absent:'缺席',holiday:'假期'};
   show.forEach(c=>{
-    tbody.innerHTML += `
-    <tr>
-      <td>${c.date}（${getWeek(c.date)}）</td>
-      <td>${formatTime(c.time)}</td>
-      <td><span class="status-badge ${statusMap[c.status]}">${statusText[c.status]}</span></td>
-    </tr>
-    `;
+    tbody.innerHTML += `<tr><td>${c.date}（${getWeek(c.date)}）</td><td>${formatTime(c.time)}</td><td><span class="status-badge ${statusMap[c.status]}">${statusText[c.status]}</span></td></tr>`;
   });
-
   const p = document.getElementById('coursePagination');
-  p.innerHTML = `
-    <button class="page-btn" onclick="changeCoursePage(${coursePage-1})" ${coursePage<=1?'disabled':''}>上一頁</button>
-    <span class="page-info">第 ${coursePage} / ${totalPage} 頁</span>
-    <button class="page-btn" onclick="changeCoursePage(${coursePage+1})" ${coursePage>=totalPage?'disabled':''}>下一頁</button>
-  `;
+  p.innerHTML = `<button class="page-btn" onclick="changeCoursePage(${coursePage-1})" ${coursePage<=1?'disabled':''}>上一頁</button><span class="page-info">第 ${coursePage} / ${totalPage} 頁</span><button class="page-btn" onclick="changeCoursePage(${coursePage+1})" ${coursePage>=totalPage?'disabled':''}>下一頁</button>`;
 }
-
-function changeCoursePage(p){
-  if(p<1) return;
-  const total = Math.ceil(allCourses.length/PER_PAGE);
-  if(p>total) return;
-  coursePage = p;
-  renderCoursePage();
-}
+function changeCoursePage(p){if(p<1) return;const total=Math.ceil(allCourses.length/PER_PAGE);if(p>total) return;coursePage=p;renderCoursePage();}
 
 async function loadCourses(){
   const snap = await db.collection('courses').where('studentId','==',sid).get();
-  allCourses = [];
-  snap.forEach(d=>allCourses.push({id:d.id,...d.data()}));
-  
+  allCourses=[];snap.forEach(d=>allCourses.push({id:d.id,...d.data()}));
   const valid = allCourses.filter(x=>!['leave','holiday'].includes(x.status));
   const total = valid.length;
   const done = valid.filter(x=>x.status==='completed'||x.status==='absent').length;
   const left = total - done;
-  
-  document.getElementById('left').innerText = '剩餘堂數：'+left;
-  document.getElementById('totalCourse').innerText = total;
-  document.getElementById('leftCourse').innerText = left;
-
-  // 上次上課日期
-  const last = allCourses.filter(x=>x.status==='completed').sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
-  if(last){
-    document.getElementById('lastClass').style.display='block';
-    document.getElementById('lastClass').innerText=`🗓️ 上次上課：${last.date}（${getWeek(last.date)}）`;
-  }
-
-  // 續費提醒
-  if(left < 3){
-    document.getElementById('reminderBox').style.display = 'block';
-  }
-
-  coursePage = 1;
-  renderCoursePage();
+  document.getElementById('left').innerText='剩餘堂數：'+left;
+  document.getElementById('totalCourse').innerText=total;
+  document.getElementById('doneCourse').innerText=done;
+  document.getElementById('leftCourse').innerText=left;
+  const last=allCourses.filter(x=>x.status==='completed').sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
+  if(last){document.getElementById('lastClass').style.display='block';document.getElementById('lastClass').innerText=`🗓️ 上次上課：${last.date}（${getWeek(last.date)}）`;}
+  if(left<3){document.getElementById('reminderBox').style.display='block';}
+  coursePage=1;renderCoursePage();
 }
 
 async function loadArt(){
-  const snap = await db.collection('artworks').where('studentId','==',sid).get();
-  const list = document.getElementById('artGrid');
-  list.innerHTML = '';
-  const arts = [];
-  snap.forEach(d=>arts.push({id:d.id,...d.data()}));
-  
+  const snap=await db.collection('artworks').where('studentId','==',sid).get();
+  const list=document.getElementById('artGrid');list.innerHTML='';const arts=[];snap.forEach(d=>arts.push({id:d.id,...d.data()}));
   arts.sort((a,b)=>new Date(b.createDate)-new Date(a.createDate));
-
   for(let i=0;i<arts.length;i++){
-    const item = arts[i];
-    const img = await getDirectImageUrl(item.imageUrl);
-    list.innerHTML += `
-    <div class="art-item" onclick="showPreview(${i})">
-      <img src="${img}" onerror="this.src='https://via.placeholder.com/150x160'">
-    </div>`;
+    const item=arts[i];const img=await getDirectImageUrl(item.imageUrl);
+    list.innerHTML+=`<div class="art-item" onclick="showPreview(${i})"><img src="${img}" onerror="this.src='https://via.placeholder.com/180x220'"></div>`;
   }
-  window.arts = arts;
+  window.arts=arts;
 }
 
-function showPreview(i){
-  currentArtIndex = i;
-  const item = window.arts[i];
-  document.getElementById('previewImg').src = item.imageUrl;
-  document.getElementById('previewDate').innerText = item.createDate;
-  document.getElementById('preview').style.display = 'flex';
-}
+function showPreview(i){currentArtIndex=i;const item=window.arts[i];document.getElementById('previewImg').src=item.imageUrl;document.getElementById('previewDate').innerText=item.createDate;document.getElementById('preview').style.display='flex';}
+function closePreview(){document.getElementById('preview').style.display='none';}
+function prevArt(){if(currentArtIndex<=0) return;currentArtIndex--;showPreview(currentArtIndex);}
+function nextArt(){if(currentArtIndex>=window.arts.length-1) return;currentArtIndex++;showPreview(currentArtIndex);}
+function logout(){window.location.href="index.html";}
 
-function closePreview(){
-  document.getElementById('preview').style.display = 'none';
-}
-
-function prevArt(){
-  if(currentArtIndex <= 0) return;
-  currentArtIndex--;
-  showPreview(currentArtIndex);
-}
-
-function nextArt(){
-  if(currentArtIndex >= window.arts.length-1) return;
-  currentArtIndex++;
-  showPreview(currentArtIndex);
-}
-
-async function init(){
-  await loadStudent();
-  await loadCourses();
-  await loadArt();
-}
-
+async function init(){await loadStudent();await loadCourses();await loadArt();}
 init();
 </script>
-</body>
-</html>
 </body>
 </html>
